@@ -23,7 +23,6 @@ class TableView(QTableView):
         """
         super().__init__()
 
-
     def setModel(self, model: QAbstractItemModel) -> None:
         QTableView.setModel(self, model)
         self.selectRow(0)
