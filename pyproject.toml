@@ -1,0 +1,42 @@
+[tool.poetry]
+name = "Tomography Archival Management Systen"
+version = "0.1.0"
+description = ""
+license = "MIT"
+authors = [
+    "Tom Kusonsuphanimit <tom.kusonsuphanimit@manchester.ac.uk>"
+]
+readme = "README.md"
+repository = "https://github.com/tjkuson/"
+
+[tool.poetry.urls]
+"NXCT homepage" = "https://nxct.ac.uk/"
+"The University of Manchester homepage" = "https://www.manchester.ac.uk/"
+
+[tool.poetry.dependencies]
+python = "<3.11,>=3.7.4,"
+PySide6 = "^6.4.0"
+tqdm = "^4.64.1"
+tomli = "^2.0.1"
+psycopg = {extras = ["binary"], version = "^3.1.3"}
+tomli-w = "^1.0.0"
+pylint = "^2.15.5"
+
+[tool.poetry.group.dev.dependencies]
+black = {extras = ["d"], version = "^22.10.0"}
+pylint = "^2.15.5"
+pytest = "^7.1.3"
+isort = "^5.10.1"
+mypy = "^0.982"
+coverage = "^6.5.0"
+
+[tool.black]
+line-length = 88
+target-version = ["py37", "py38", "py39", "py310"]
+
+[tool.isort]
+profile = "black"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
