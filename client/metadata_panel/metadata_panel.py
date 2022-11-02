@@ -42,10 +42,12 @@ class MetadataPanel(QWidget):
                 # TODO: there has to be a nicer way of doing this!
                 if isinstance(values, str):
                     child = QTreeWidgetItem([values])
+                    child.setToolTip(0, values)
                     item.addChild(child)
                 else:
                     for value in values:
                         child = QTreeWidgetItem([value])
+                        child.setToolTip(0, value)
                         item.addChild(child)
 
                 items.append(item)
