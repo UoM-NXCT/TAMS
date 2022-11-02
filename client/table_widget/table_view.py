@@ -28,7 +28,7 @@ class TableView(QTableView):
         """Update the selected row variable to equal the row currently selected."""
         try:
             self.selected_row = self.selectedIndexes()[0].row()
-        except IndexError as exc:
+        except IndexError:
             # This exception is raised when no row is selected.
             logging.exception("No row selected.")
         logging.info("Selected row: %s", self.selected_row)

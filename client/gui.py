@@ -88,6 +88,8 @@ class MainWindow(QMainWindow):
         )
 
     def update_table_with_projects(self):
+        """Update table to display projects."""
+
         self.current_table_query = [
             "project_id, title, start_date, end_date",
             "project",
@@ -96,11 +98,19 @@ class MainWindow(QMainWindow):
         self.update_table()
 
     def update_table_with_users(self):
+        """Update the table widget to display users."""
+
         self.current_table_query = [
             "user_id, first_name, last_name, email_address",
             '"user"',
             None,
         ]
+        self.update_table()
+
+    def update_table_with_scans(self):
+        """Update the table widget to display scans."""
+
+        self.current_table_query = ["scan_id, project_id", "scan", None]
         self.update_table()
 
     def set_up_main_window(self):
@@ -118,6 +128,7 @@ class MainWindow(QMainWindow):
         self.toolbox = ToolBox()
         self.toolbox.projects_button.clicked.connect(self.update_table_with_projects)
         self.toolbox.create_project_button.clicked.connect(self.open_create_project)
+        self.toolbox.scans_button.clicked.connect(self.update_table_with_scans)
         self.toolbox.users_button.clicked.connect(self.update_table_with_users)
 
         # Metadata panel

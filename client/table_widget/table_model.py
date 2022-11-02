@@ -67,7 +67,7 @@ class TableModel(QAbstractTableModel):
             if orientation == Qt.Horizontal:
                 header: str = str(self._column_headers[section])
                 return header
-        return "Error"
+        return QAbstractTableModel.headerData(self, section, orientation, role)
 
     def get_row_data(self, row_index: int) -> tuple[Any, ...]:
         """Return the row from a given row index."""
