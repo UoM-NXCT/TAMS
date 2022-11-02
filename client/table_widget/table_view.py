@@ -22,19 +22,9 @@ class TableView(QTableView):
         custom variables.
         """
         super().__init__()
-        self.selected_row: int = 0
 
-    def update_selected_row(self) -> None:
-        """Update the selected row variable to equal the row currently selected."""
-        try:
-            self.selected_row = self.selectedIndexes()[0].row()
-        except IndexError:
-            # This exception is raised when no row is selected.
-            logging.exception("No row selected.")
-        logging.info("Selected row: %s", self.selected_row)
 
     def setModel(self, model: QAbstractItemModel) -> None:
-
         QTableView.setModel(self, model)
         self.selectRow(0)
 
@@ -44,4 +34,3 @@ class TableView(QTableView):
         deselected: QItemSelection,
     ) -> None:
         QTableView.selectionChanged(self, selected, deselected)
-        self.update_selected_row()

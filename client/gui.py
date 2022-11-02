@@ -284,11 +284,14 @@ class MainWindow(QMainWindow):
         return current_table
 
     def on_selection_changed(self):
-        # Get row.
+        """Update the metadata when a new row is selected."""
+
+        # Because the rows can be sorted, the Nth item in the visible table may not be the Nth item in data
+        # Hence, we have to translate the visible index to the source index
         proxy_index = self.table_view.currentIndex()
         source_index = self.proxy_model.mapToSource(proxy_index)
+        # We care about the row, so get the row from the current index
         row_index = source_index.row()
-        print(row_index)
         row = self.table_model.get_row_data(row_index)
         key: int = row[0]
         if self.current_table() == "project":
