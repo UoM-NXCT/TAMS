@@ -2,8 +2,10 @@
 Custom widget class that inherits the Qt built-in QWidget. Contains the metadata on the current entry; displayed on
 the left panel.
 """
+from datetime import date
 from typing import Any
 
+from PySide6.QtCore import QDate
 from PySide6.QtWidgets import (
     QLayout,
     QTreeWidget,
@@ -42,6 +44,10 @@ class MetadataPanel(QWidget):
                 if isinstance(values, str) or isinstance(values, int):
                     child = QTreeWidgetItem([str(values)])
                     child.setToolTip(0, str(values))
+                    item.addChild(child)
+                elif isinstance(values, date):
+                    child = QTreeWidgetItem([str(values)])
+                    child.setToolTip(0, f"{values} (YYYY-MM-DD)")
                     item.addChild(child)
                 elif isinstance(values, tuple):
                     for value in values:

@@ -81,7 +81,7 @@ class DatabaseView:
     def get_project_metadata(self, project_id: int) -> tuple[tuple[Any], list[str]]:
         """Get project title, type, summary, keywords, dates, and directory."""
         data, column_headers = self.view_select_from_where(
-            "project_id, title, project_type, summary, keyword",
+            "project_id, title, project_type, summary, keyword, start_date, end_date, directory_path",
             "project",
             f"project_id={project_id}",
         )
