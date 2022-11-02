@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-""" Database views
-
+"""
 This files classes to represent data from the database to the user.
 """
 
@@ -15,24 +14,24 @@ class DatabaseView:
     """Represent data from the database."""
 
     def __init__(self, connection_string: str) -> None:
-        """Initialise database view and connect to database."""
+        """Initialize database view and connect to database."""
 
-        self.connection_string = connection_string
+        self.connection_string: str = connection_string
         with Database(self.connection_string) as database:
             if database.conn.closed:
                 raise ConnectionError("Unable to connect to database")
             logging.info("Connection to database in DatabaseView successful.")
 
     def get_tables(self) -> list[tuple]:
-        """Get list of tables in database."""
+        """Get list of tables in the database."""
 
-        query = "select table_name from information_schema.tables where table_schema='public' and table_type='BASE TABLE';"
+        query: str = "select table_name from information_schema.tables where table_schema='public' and table_type='BASE TABLE';"
         with Database(self.connection_string) as database:
             database.exec(query)
             return database.cur.fetchall()
 
     def validate_tables(self) -> None:
-        """Validate tables in database; raises an exception if they are not valid."""
+        """Validate tables in the database; raises an exception if they are not valid."""
 
         # Check the required tables exist
         tables_needed: set[tuple] = {
@@ -45,7 +44,7 @@ class DatabaseView:
 
     def view_select_from_where(
         self, select_value: str, from_value: str, *where_value: tuple[str] | str
-    ) -> tuple[list[tuple], list[str]]:
+    ) -> tuple[list[tuple], tuple[str, ...]]:
         """Return selection."""
 
         # Construct SQL query
@@ -59,60 +58,83 @@ class DatabaseView:
         # Get data
         with Database(self.connection_string) as database:
             database.exec(query)
-            data = database.cur.fetchall()
+            data: list[tuple] = database.cur.fetchall()
         if select_value == "*":
             # TODO: Deal with wildcard select.
-            column_headers = ["TBD"]
-        else:
-            column_headers = list(select_value.replace(" ", "").split(","))
-            print(column_headers)
+            raise Exception("Wildcard selects not supported yet!")
+        column_headers: tuple[str, ...] = tuple(
+            select_value.replace(" ", "").split(",")
+        )
 
         return data, column_headers
 
     def get_version(self) -> str:
         """Get database version."""
 
-        query = "select version();"
+        query: str = "select version();"
         with Database(self.connection_string) as database:
             database.exec(query)
-            version = str(database.cur.fetchone())
+            version: str = str(database.cur.fetchone())
         return version
 
-    def get_project_metadata(self, project_id: int) -> tuple[tuple[Any], list[str]]:
-        """Get project title, type, summary, keywords, dates, and directory."""
+    def get_project_metadata(
+        self, project_id: int
+    ) -> tuple[tuple[Any, ...], tuple[str, ...]]:
+        """Get project metadata."""
+
         data, column_headers = self.view_select_from_where(
             "project_id, title, project_type, summary, keyword, start_date, end_date, directory_path",
             "project",
             f"project_id={project_id}",
         )
-        return data[0], column_headers
 
-    def get_user_metadata(self, user_id: int):
-        """Get user first name, last name, and email address."""
+        # Get metadata from specific row
+        row_data: tuple[Any, ...] = data[0]
+
+        return row_data, column_headers
+
+    def get_user_metadata(
+        self, user_id: int
+    ) -> tuple[tuple[Any, ...], tuple[str, ...]]:
+        """Get user metadata."""
+
         data, column_headers = self.view_select_from_where(
             "user_id, first_name, last_name, email_address",
             '"user"',
             f"user_id={user_id}",
         )
-        return data[0], column_headers
 
-    def get_scan_metadata(self, scan_id: int):
-        """Get scan metadata for a specific scan."""
+        # Get metadata from specific row
+        row_data: tuple[Any, ...] = data[0]
+
+        return row_data, column_headers
+
+    def get_scan_metadata(
+        self, scan_id: int
+    ) -> tuple[tuple[Any, ...], tuple[str, ...]]:
+        """Get scan metadata."""
+
         data, column_header = self.view_select_from_where(
             "scan_id, project_id",
             "scan",
             f"scan_id={scan_id}",
         )
+
         # Can't edit a tuple, so turn the tuple into a list
-        data = list(data[0])
-        # Get project title and add it to the scan metadate (for UX)
-        project_id = data[1]
+        row: tuple[Any, ...] = tuple(data[0])
+
+        # Get project title
+        project_id: int = row[1]
         project_data, _ = self.view_select_from_where(
             "title",
             "project",
             f"project_id={project_id}",
         )
-        project_title = project_data[0][0]
-        data[1] = f"{project_id} ({project_title})"
+        project_title: str = project_data[0][0]
+
+        # Add project title to project id metadata
+        project_id_metadata = f"{project_id} ({project_title})"
+
         # Turn the list back into a tuple, the expected return value
-        return tuple(data), column_header
+        updated_row: tuple = (scan_id, project_id_metadata)
+        return updated_row, column_header

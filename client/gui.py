@@ -3,6 +3,7 @@
 import logging
 import sys
 from pathlib import Path
+from typing import Any
 
 from create_project_dialogue import CreateProjectWindow
 from db import DatabaseView, MissingTables, dict_to_conn_str
@@ -14,14 +15,12 @@ from PySide6.QtWidgets import (
     QApplication,
     QGridLayout,
     QHeaderView,
-    QLabel,
     QMainWindow,
     QMessageBox,
     QSplitter,
     QStatusBar,
     QStyle,
     QToolBar,
-    QVBoxLayout,
     QWidget,
 )
 from settings import toml_operations
@@ -46,16 +45,14 @@ class MainWindow(QMainWindow):
         self.current_table_query: tuple[str] | None = None
         self.toolbox: ToolBox | None = None
         self.current_metadata: tuple | None = None
+
         # Create empty windows for use later.
         self.settings: QWidget | None = None
         self.create_project: QWidget | None = None
 
-        self.initialize_ui()
-
-    def initialize_ui(self):
-        """Set up the application's GUI."""
+        # Set up the application's GUI.
         self.setMinimumSize(1080, 720)
-        self.setWindowTitle("Untitled Database Application")
+        self.setWindowTitle("Tomography Archival and Management Software")
         self.connect_to_database()
         self.set_up_main_window()
         self.create_actions()
@@ -279,27 +276,41 @@ class MainWindow(QMainWindow):
             )
 
     def current_table(self) -> str:
-        """Get current table displayed."""
+        """Get the current table displayed."""
+
+        current_table: str
         _, current_table, _ = self.current_table_query
         return current_table
 
-    def on_selection_changed(self):
+    def on_selection_changed(self) -> None:
         """Update the metadata when a new row is selected."""
 
         # Because the rows can be sorted, the Nth item in the visible table may not be the Nth item in data
         # Hence, we have to translate the visible index to the source index
-        proxy_index = self.table_view.currentIndex()
-        source_index = self.proxy_model.mapToSource(proxy_index)
+        proxy_index: QModelIndex = self.table_view.currentIndex()
+        source_index: QModelIndex = self.proxy_model.mapToSource(proxy_index)
+
         # We care about the row, so get the row from the current index
-        row_index = source_index.row()
-        row = self.table_model.get_row_data(row_index)
+        row_index: int = source_index.row()
+        row: tuple[Any] = self.table_model.get_row_data(row_index)
+
+        # Get the primary key from the first column (assumed the first column contains the pk)
         key: int = row[0]
+
+        # Each item has a different metadata format; use the current table to determine what to do
+        metadata: tuple[tuple[any], list[str]]
         if self.current_table() == "project":
             metadata = self.database_view.get_project_metadata(key)
         elif self.current_table() == "scan":
             metadata = self.database_view.get_scan_metadata(key)
         elif self.current_table() == '"user"':
             metadata = self.database_view.get_user_metadata(key)
+        else:
+            # Escape the function if not a valid table
+            logging.warning("%s is not a valid table.", self.current_table())
+            return
+
+        # Update the metadata panel with the new metadata
         self.metadata_panel.update_metadata(metadata)
         self.metadata_panel.layout().update()
 
