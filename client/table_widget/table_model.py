@@ -63,10 +63,12 @@ class TableModel(QAbstractTableModel):
         self, section: int, orientation: Qt.Orientation, role: int = ...
     ) -> Any:
         """Return the header data."""
+
         if role == Qt.DisplayRole:
             if orientation == Qt.Horizontal:
                 header: str = str(self._column_headers[section])
                 return header
+        # Not returning this makes headers not show, for whatever reason.
         return QAbstractTableModel.headerData(self, section, orientation, role)
 
     def get_row_data(self, row_index: int) -> tuple[Any, ...]:

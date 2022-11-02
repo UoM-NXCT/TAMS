@@ -8,7 +8,7 @@ built-in, moving the logic to a custom class makes the code easier to comprehend
 """
 import logging
 
-from PySide6.QtCore import QAbstractItemModel, QItemSelection
+from PySide6.QtCore import QAbstractItemModel, QItemSelection, QSortFilterProxyModel
 from PySide6.QtGui import QMouseEvent
 from PySide6.QtWidgets import QTableView
 
@@ -34,6 +34,7 @@ class TableView(QTableView):
         logging.info("Selected row: %s", self.selected_row)
 
     def setModel(self, model: QAbstractItemModel) -> None:
+
         QTableView.setModel(self, model)
         self.selectRow(0)
 

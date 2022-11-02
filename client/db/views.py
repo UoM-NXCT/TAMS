@@ -95,3 +95,24 @@ class DatabaseView:
             f"user_id={user_id}",
         )
         return data[0], column_headers
+
+    def get_scan_metadata(self, scan_id: int):
+        """Get scan metadata for a specific scan."""
+        data, column_header = self.view_select_from_where(
+            "scan_id, project_id",
+            "scan",
+            f"scan_id={scan_id}",
+        )
+        # Can't edit a tuple, so turn the tuple into a list
+        data = list(data[0])
+        # Get project title and add it to the scan metadate (for UX)
+        project_id = data[1]
+        project_data, _ = self.view_select_from_where(
+            "title",
+            "project",
+            f"project_id={project_id}",
+        )
+        project_title = project_data[0][0]
+        data[1] = f"{project_id} ({project_title})"
+        # Turn the list back into a tuple, the expected return value
+        return tuple(data), column_header

@@ -8,7 +8,7 @@ from create_project_dialogue import CreateProjectWindow
 from db import DatabaseView, MissingTables, dict_to_conn_str
 from metadata_panel import MetadataPanel
 from psycopg.errors import ConnectionFailure
-from PySide6.QtCore import QSize, Qt
+from PySide6.QtCore import QModelIndex, QSize, QSortFilterProxyModel, Qt
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import (
     QApplication,
@@ -42,6 +42,7 @@ class MainWindow(QMainWindow):
         self.database_view: DatabaseView | None = None
         self.connection_string: str | None = None
         self.table_model: TableModel | None = None
+        self.proxy_table_model: QSortFilterProxyModel | None = None
         self.current_table_query: tuple[str] | None = None
         self.toolbox: ToolBox | None = None
         self.current_metadata: tuple | None = None
@@ -77,15 +78,20 @@ class MainWindow(QMainWindow):
                 select_value, from_value
             )
         self.table_model = TableModel(data, column_headers)
-        self.table_view.setModel(self.table_model)
+        self.proxy_model = QSortFilterProxyModel()
+        self.proxy_model.setSourceModel(self.table_model)
+        self.table_view.setModel(self.proxy_model)
 
         # Make table look pretty
         self.table_view.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
-        # Make the table react to selection changes.
+        # Make the table react to selection changes
         self.table_view.selectionModel().selectionChanged.connect(
             self.on_selection_changed
         )
+
+        # Let user sort table by column
+        self.table_view.setSortingEnabled(True)
 
     def update_table_with_projects(self):
         """Update table to display projects."""
@@ -279,11 +285,16 @@ class MainWindow(QMainWindow):
 
     def on_selection_changed(self):
         # Get row.
-        row_index = self.table_view.selected_row
+        proxy_index = self.table_view.currentIndex()
+        source_index = self.proxy_model.mapToSource(proxy_index)
+        row_index = source_index.row()
+        print(row_index)
         row = self.table_model.get_row_data(row_index)
         key: int = row[0]
         if self.current_table() == "project":
             metadata = self.database_view.get_project_metadata(key)
+        elif self.current_table() == "scan":
+            metadata = self.database_view.get_scan_metadata(key)
         elif self.current_table() == '"user"':
             metadata = self.database_view.get_user_metadata(key)
         self.metadata_panel.update_metadata(metadata)
