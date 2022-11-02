@@ -97,7 +97,7 @@ class MainWindow(QMainWindow):
 
     def update_table_with_users(self):
         self.current_table_query = [
-            "first_name, last_name, email_address",
+            "user_id, first_name, last_name, email_address",
             '"user"',
             None,
         ]
@@ -271,7 +271,11 @@ class MainWindow(QMainWindow):
         row_index = self.table_view.selected_row
         row = self.table_model.get_row_data(row_index)
         key: int = row[0]
-        metadata = self.database_view.get_project_metadata(key)
+        match self.current_table():
+            case "project":
+                metadata = self.database_view.get_project_metadata(key)
+            case '"user"':
+                metadata = self.database_view.get_user_metadata(key)
         self.metadata_panel.update_metadata(metadata)
         self.metadata_panel.layout().update()
 

@@ -81,8 +81,17 @@ class DatabaseView:
     def get_project_metadata(self, project_id: int) -> tuple[tuple[Any], list[str]]:
         """Get project title, type, summary, keywords, dates, and directory."""
         data, column_headers = self.view_select_from_where(
-            "title, project_type, summary, keyword",
+            "project_id, title, project_type, summary, keyword",
             "project",
             f"project_id={project_id}",
+        )
+        return data[0], column_headers
+
+    def get_user_metadata(self, user_id: int):
+        """Get user first name, last name, and email address."""
+        data, column_headers = self.view_select_from_where(
+            "user_id, first_name, last_name, email_address",
+            '"user"',
+            f"user_id={user_id}",
         )
         return data[0], column_headers

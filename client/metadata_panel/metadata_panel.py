@@ -1,5 +1,4 @@
-"""Metadata panel
-
+"""
 Custom widget class that inherits the Qt built-in QWidget. Contains the metadata on the current entry; displayed on
 the left panel.
 """
@@ -24,6 +23,7 @@ class MetadataPanel(QWidget):
         metadata_layout: QLayout = QVBoxLayout()
         self.metadata_tree = QTreeWidget()
         self.metadata_tree.setColumnCount(1)
+        # Hide the header; our tree is vertical so there isn't a good reason to include it.
         self.metadata_tree.setHeaderHidden(True)
         metadata_layout.addWidget(self.metadata_tree)
         self.setLayout(metadata_layout)
@@ -39,22 +39,18 @@ class MetadataPanel(QWidget):
             for index, column in enumerate(self.column_headers):
                 item = QTreeWidgetItem([column])
                 values: Any = self.data[index]
-                # TODO: there has to be a nicer way of doing this!
-                if isinstance(values, str):
-                    child = QTreeWidgetItem([values])
-                    child.setToolTip(0, values)
+                if isinstance(values, str) or isinstance(values, int):
+                    child = QTreeWidgetItem([str(values)])
+                    child.setToolTip(0, str(values))
                     item.addChild(child)
-                else:
+                elif isinstance(values, tuple):
                     for value in values:
                         child = QTreeWidgetItem([value])
                         child.setToolTip(0, value)
                         item.addChild(child)
-
                 items.append(item)
             self.metadata_tree.insertTopLevelItems(0, items)
             self.metadata_tree.expandAll()
-        else:
-            pass
 
     def update_metadata(self, metadata: tuple[tuple[Any], list[str]]) -> None:
         """Update metadata variables and tell panel to update itself."""
