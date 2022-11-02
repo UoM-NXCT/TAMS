@@ -271,11 +271,10 @@ class MainWindow(QMainWindow):
         row_index = self.table_view.selected_row
         row = self.table_model.get_row_data(row_index)
         key: int = row[0]
-        match self.current_table():
-            case "project":
-                metadata = self.database_view.get_project_metadata(key)
-            case '"user"':
-                metadata = self.database_view.get_user_metadata(key)
+        if self.current_table() == "project":
+            metadata = self.database_view.get_project_metadata(key)
+        elif self.current_table() == '"user"':
+            metadata = self.database_view.get_user_metadata(key)
         self.metadata_panel.update_metadata(metadata)
         self.metadata_panel.layout().update()
 
