@@ -5,7 +5,13 @@ the left panel.
 """
 from typing import Any
 
-from PySide6.QtWidgets import QLabel, QLayout, QVBoxLayout, QWidget
+from PySide6.QtWidgets import (
+    QLayout,
+    QTreeWidget,
+    QTreeWidgetItem,
+    QVBoxLayout,
+    QWidget,
+)
 
 
 class MetadataPanel(QWidget):
@@ -15,20 +21,38 @@ class MetadataPanel(QWidget):
         super().__init__()
         self.data: tuple[Any] | None = None
         self.column_headers: list[str] | None = None
-        self.metadata_label: QLabel = QLabel()
-        self.metadata_label.setWordWrap(True)
         metadata_layout: QLayout = QVBoxLayout()
-        metadata_layout.addWidget(self.metadata_label)
+        self.metadata_tree = QTreeWidget()
+        self.metadata_tree.setColumnCount(1)
+        self.metadata_tree.setHeaderHidden(True)
+        metadata_layout.addWidget(self.metadata_tree)
         self.setLayout(metadata_layout)
         self.update_content()
 
     def update_content(self) -> None:
         """Update the metadata panel content."""
 
-        if self.data:
-            self.metadata_label.setText(str(self.data))
+        self.metadata_tree.clear()
+
+        if self.data and self.column_headers:
+            items = []
+            for index, column in enumerate(self.column_headers):
+                item = QTreeWidgetItem([column])
+                values: Any = self.data[index]
+                # TODO: there has to be a nicer way of doing this!
+                if isinstance(values, str):
+                    child = QTreeWidgetItem([values])
+                    item.addChild(child)
+                else:
+                    for value in values:
+                        child = QTreeWidgetItem([value])
+                        item.addChild(child)
+
+                items.append(item)
+            self.metadata_tree.insertTopLevelItems(0, items)
+            self.metadata_tree.expandAll()
         else:
-            self.metadata_label.setText("No data selected.")
+            pass
 
     def update_metadata(self, metadata: tuple[tuple[Any], list[str]]) -> None:
         """Update metadata variables and tell panel to update itself."""

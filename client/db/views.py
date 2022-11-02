@@ -64,7 +64,8 @@ class DatabaseView:
             # TODO: Deal with wildcard select.
             column_headers = ["TBD"]
         else:
-            column_headers = list(select_value.strip().split(","))
+            column_headers = list(select_value.replace(" ", "").split(","))
+            print(column_headers)
 
         return data, column_headers
 
