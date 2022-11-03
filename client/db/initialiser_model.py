@@ -34,20 +34,6 @@ class DatabaseInitialiser(Database):
     def populate_with_fake_data(self) -> None:
         """Populate the tables with fake data. This should only be used in development."""
 
-        # Fake instruments
-        self.exec("delete from instrument;")
-        self.exec(
-            "insert into instrument (name, status) values (%s, %s)",
-            ("Nikon", "Utterly destroyed"),
-        )
-        self.exec(
-            "insert into instrument (name, status) values (%s, %s)",
-            ("Zeiss", "Working fine"),
-        )
-        self.exec(
-            "insert into instrument (name, status) values (%s, %s)",
-            ("Rapiscan", "Amin spilt coffee on it"),
-        )
         # Fake samples
         self.exec("delete from sample;")
         self.exec(
