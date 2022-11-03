@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
-"""Custom toolbox
-
-Custom toolbox class that inherits the Qt built-in QToolBox widget. Doing this
-permits extra functionality and removes the amount of code from the main window
-class, improving readability and maintainability.
+"""
+Custom toolbox class that inherits the Qt built-in QToolBox widget.
 """
 
 from PySide6.QtWidgets import QPushButton, QToolBox, QVBoxLayout, QWidget
@@ -12,7 +9,7 @@ from PySide6.QtWidgets import QPushButton, QToolBox, QVBoxLayout, QWidget
 class ToolBox(QToolBox):
     """Custom toolbox class that inherits from the Qt QToolBox built-in class."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         # Create project tab

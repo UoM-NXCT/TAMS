@@ -5,8 +5,9 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from create_project_dialogue import CreateProjectWindow
 from db import DatabaseView, MissingTables, dict_to_conn_str
+from dialogues.create_project_dialogue import CreateProjectWindow
+from dialogues.create_scan_dialogue import CreateScanDialogue
 from metadata_panel import MetadataPanel
 from psycopg.errors import ConnectionFailure
 from PySide6.QtCore import QModelIndex, QSize, QSortFilterProxyModel, Qt
@@ -42,7 +43,7 @@ class MainWindow(QMainWindow):
         self.connection_string: str | None = None
         self.table_model: TableModel | None = None
         self.proxy_table_model: QSortFilterProxyModel | None = None
-        self.current_table_query: tuple[str] | None = None
+        self.current_table_query: tuple | None = None
         self.toolbox: ToolBox | None = None
         self.current_metadata: tuple | None = None
 
@@ -61,9 +62,8 @@ class MainWindow(QMainWindow):
 
         self.show()
 
-    def update_table(self):
+    def update_table(self) -> None:
         """Update table model using SQL command."""
-        logging.info("Updating table")
 
         select_value, from_value, where_value = self.current_table_query
         if where_value:
@@ -90,48 +90,51 @@ class MainWindow(QMainWindow):
         # Let user sort table by column
         self.table_view.setSortingEnabled(True)
 
-    def update_table_with_projects(self):
+    def update_table_with_projects(self) -> None:
         """Update table to display projects."""
 
-        self.current_table_query = [
+        self.current_table_query = (
             "project_id, title, start_date, end_date",
             "project",
             None,
-        ]
+        )
         self.update_table()
 
-    def update_table_with_users(self):
+    def update_table_with_users(self) -> None:
         """Update the table widget to display users."""
 
-        self.current_table_query = [
+        self.current_table_query = (
             "user_id, first_name, last_name, email_address",
             '"user"',
             None,
-        ]
+        )
         self.update_table()
 
-    def update_table_with_scans(self):
+    def update_table_with_scans(self) -> None:
         """Update the table widget to display scans."""
 
-        self.current_table_query = ["scan_id, project_id", "scan", None]
+        self.current_table_query = ("scan_id, project_id", "scan", None)
         self.update_table()
 
-    def set_up_main_window(self):
+    def set_up_main_window(self) -> None:
         """Create and arrange widgets in the main window."""
 
         # Create the status bar
         self.setStatusBar(QStatusBar())
 
-        # Create table; initialise with projects
+        # Create a table; initialize with projects
         self.table_view = TableView()
         self.table_view.setSelectionBehavior(TableView.SelectionBehavior.SelectRows)
         self.update_table_with_projects()
 
         # Create table toolbox
         self.toolbox = ToolBox()
+
+        # Link toolbox buttons to functions
         self.toolbox.projects_button.clicked.connect(self.update_table_with_projects)
         self.toolbox.create_project_button.clicked.connect(self.open_create_project)
         self.toolbox.scans_button.clicked.connect(self.update_table_with_scans)
+        self.toolbox.create_scan_button.clicked.connect(self.open_create_scan)
         self.toolbox.users_button.clicked.connect(self.update_table_with_users)
 
         # Metadata panel
@@ -192,12 +195,21 @@ class MainWindow(QMainWindow):
         """Open the settings window."""
         self.settings = SettingsWindow()
 
-    def open_create_project(self):
+    def open_create_project(self) -> None:
         """
         Open the create project window; pass the database connection string so that
         the window can access the database.
         """
+
         self.create_project = CreateProjectWindow(self.connection_string)
+
+    def open_create_scan(self) -> None:
+        """
+        Open the create scan dialgoue; pass the database connection string so that
+        the window can access the database.
+        """
+
+        self.create_scan_dialogue = CreateScanDialogue(self.connection_string)
 
     def create_window(self):
         """Create the application menu bar."""
