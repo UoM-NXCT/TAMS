@@ -68,5 +68,7 @@ class Database:
     @attempt_sql_command
     def exec(self, *args, **kwargs) -> None:
         """Attempt an SQL command. Failing that, rollback."""
-        if self.cur is not None:
+        if self.cur is not None and self.conn is not None:
             self.cur.execute(*args, **kwargs)
+        else:
+            logging.error("Connection does not exist!")
