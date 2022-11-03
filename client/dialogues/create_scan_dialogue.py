@@ -6,17 +6,14 @@ specified by the input connection string.
 """
 
 import logging
-from datetime import date
-from typing import Any
 
 import psycopg
-from PySide6.QtCore import QDate, Qt
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QComboBox,
     QDialog,
     QFormLayout,
     QLabel,
-    QLineEdit,
     QMessageBox,
     QPushButton,
     QVBoxLayout,
@@ -51,7 +48,10 @@ class CreateScanDialogue(QDialog):
                 cur.execute("select project_id, title from project;")
                 raw_project_ids: list[tuple[int, str]] = cur.fetchall()
                 # Hack the output into a value the Qt ComboBox likes (a list of strings)
-                project_ids: list[str] = [f"{tuple_value[0]} ({tuple_value[1]})" for tuple_value in raw_project_ids]
+                project_ids: list[str] = [
+                    f"{tuple_value[0]} ({tuple_value[1]})"
+                    for tuple_value in raw_project_ids
+                ]
                 print(project_ids)
         self.new_scan_project_id_entry.addItems(project_ids)
 
