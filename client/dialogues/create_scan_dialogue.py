@@ -81,14 +81,20 @@ class CreateScanDialogue(QDialog):
             """Check if a project with a given project id exists in the database."""
             with psycopg.connect(self.connection_string) as conn:
                 with conn.cursor() as cur:
-                    cur.execute(f"select project_id from project where project_id={project_id}")
+                    cur.execute(
+                        f"select project_id from project where project_id={project_id}"
+                    )
                     rows: list = cur.fetchall()
             # Returns false if the list is empty (no rows returned)
             if len(rows) > 1:
-                logging.warning("Multiple projects with the same project id; this shouldn't happen!")
+                logging.warning(
+                    "Multiple projects with the same project id; this shouldn't happen!"
+                )
             return bool(rows)
 
-        selected_project_id: int = int(self.new_scan_project_id_entry.currentText().split()[0])
+        selected_project_id: int = int(
+            self.new_scan_project_id_entry.currentText().split()[0]
+        )
         if not project_id_exists(selected_project_id):
             logging.warning(
                 "Tried to create a scan with a project id that does not exist."
@@ -102,16 +108,7 @@ class CreateScanDialogue(QDialog):
         else:
             with psycopg.connect(self.connection_string) as conn:
                 with conn.cursor() as cur:
-                    cur.execute(
-                        "insert into project (title, summary, start_date, end_date) "
-                        "values (%s, %s, %s, %s);",
-                        (
-                            new_project_title,
-                            new_project_summary,
-                            new_project_start_date,
-                            new_project_end_date,
-                        ),
-                    )
+                    cur.execute("")
                     conn.commit()
                     logging.info("Created and committed project to database.")
                     QMessageBox.information(
