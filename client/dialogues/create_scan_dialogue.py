@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-""" Create project dialogue window.
-
-This window lets a user input and create a new project, which is added to the database
+"""
+This window lets a user input and create a new scan, which is added to the database
 specified by the input connection string.
 """
 
@@ -108,13 +107,15 @@ class CreateScanDialogue(QDialog):
         else:
             with psycopg.connect(self.connection_string) as conn:
                 with conn.cursor() as cur:
-                    cur.execute("")
+                    cur.execute(
+                        f"insert into scan (project_id) values ({selected_project_id});"
+                    )
                     conn.commit()
-                    logging.info("Created and committed project to database.")
+                    logging.info("Created and committed scan to database.")
                     QMessageBox.information(
                         self,
                         "Success",
-                        "Project committed to database.",
+                        "Scan committed to database.",
                         QMessageBox.StandardButton.Ok,
                     )
             # Close window once done.
