@@ -28,6 +28,7 @@ DATABASE_TOML_PATH = Path(r"settings/database.toml")
 
 class SettingsWindow(QDialog):
     """Database settings dialogue allows to set the application settings."""
+
     def __init__(self) -> None:
         super().__init__()
         self.setMinimumSize(400, 300)
@@ -75,9 +76,7 @@ class SettingsWindow(QDialog):
     def general_settings(self) -> None:
         """General settings page allows to set the local library."""
 
-        self.local_library_info = QLabel(
-            self.generate_local_library_info()
-        )
+        self.local_library_info = QLabel(self.generate_local_library_info())
         self.local_library_info.setWordWrap(True)
 
         library_buttons: QWidget = QWidget()
@@ -128,6 +127,7 @@ class SettingsWindow(QDialog):
         local_library = self.get_local_library()
         if local_library:
             QDesktopServices.openUrl(local_library)
+
     def get_local_library(self) -> str:
         """Get the current local library to present to the user."""
 
@@ -218,6 +218,7 @@ class SettingsWindow(QDialog):
 
     def apply(self):
         """Apply the changes to settings."""
+
         # TODO: changes to the local library should be applied not immediately;
         #  refactor under this method!
 
