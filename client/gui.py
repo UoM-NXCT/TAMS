@@ -157,28 +157,41 @@ class MainWindow(QMainWindow):
 
     def create_actions(self):
         """Create the application's menu actions."""
+
         # Create actions for the File menu
+
         self.settings_act = QAction("Settings")
         self.settings_act.setShortcut("Ctrl+Alt+S")
         self.settings_act.setStatusTip("Edit application settings")
         self.settings_act.triggered.connect(self.open_settings)
+
         pixmap = QStyle.StandardPixmap.SP_BrowserReload
         reload_table_icon = self.style().standardIcon(pixmap)
         self.reload_table_act = QAction(reload_table_icon, "Reload")
         self.reload_table_act.setShortcut("F5")
         self.reload_table_act.setToolTip("Reload the active table")
         self.reload_table_act.triggered.connect(self.update_table)
+
+        pixmap = QStyle.StandardPixmap.SP_ArrowDown
+        download_icon = self.style().standardIcon(pixmap)
+        self.download_act = QAction(download_icon, "Download data")
+        self.download_act.setShortcut("Ctrl+D")
+        self.download_act.setToolTip("Download selected data")
+        self.download_act.triggered.connect(self.download_data)
+
         self.quit_act = QAction("&Quit")
         self.quit_act.setShortcut("Ctrl+Q")
         self.quit_act.setStatusTip("Quit application")
         self.quit_act.triggered.connect(self.close)
 
         # Create actions for the View menu
+
         self.full_screen_act = QAction("Full Screen", checkable=True)
         self.full_screen_act.setStatusTip("Toggle full screen mode")
         self.full_screen_act.triggered.connect(self.toggle_full_screen)
 
         # Create actions for the Help menu
+
         pixmap = QStyle.StandardPixmap.SP_MessageBoxInformation
         about_icon = self.style().standardIcon(pixmap)
         self.about_act = QAction(about_icon, "About")
@@ -220,6 +233,8 @@ class MainWindow(QMainWindow):
         file_menu.addAction(self.settings_act)
         file_menu.addAction(self.reload_table_act)
         file_menu.addSeparator()
+        file_menu.addAction(self.download_act)
+        file_menu.addSeparator()
         file_menu.addAction(self.quit_act)
         view_menu = self.menuBar().addMenu("View")
         appearance_submenu = view_menu.addMenu("Appearance")
@@ -236,6 +251,10 @@ class MainWindow(QMainWindow):
         # Add actions to the toolbar
         toolbar.addAction(self.about_act)
         toolbar.addAction(self.reload_table_act)
+        toolbar.addAction(self.download_act)
+
+    def download_data(self):
+        print("Download data")
 
     def about_dialogue(self):
         """Display the About dialog."""
