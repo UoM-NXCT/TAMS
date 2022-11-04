@@ -25,9 +25,10 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 from settings import toml_operations
-from settings_dialogue import SettingsWindow
 from table_widget import TableModel, TableView
 from toolbox import ToolBox
+
+from client.dialogues.settings_dialogue import SettingsWindow
 
 logging.basicConfig(level=logging.DEBUG)
 

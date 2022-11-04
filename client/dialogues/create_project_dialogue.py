@@ -6,7 +6,6 @@ specified by the input connection string.
 """
 
 import logging
-from datetime import date
 
 import psycopg
 from PySide6.QtCore import QDate, Qt

@@ -4,7 +4,6 @@ import sys
 from pathlib import Path
 
 import psycopg
-from db import Database, dict_to_conn_str
 from PySide6.QtGui import QDesktopServices
 from PySide6.QtWidgets import (
     QApplication,
@@ -21,9 +20,9 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-from settings import toml_operations
 
-DATABASE_TOML_PATH = Path(r"settings/database.toml")
+from ..db import Database, dict_to_conn_str
+from ..settings import toml_operations
 
 
 class SettingsWindow(QDialog):
@@ -33,8 +32,12 @@ class SettingsWindow(QDialog):
         super().__init__()
         self.setMinimumSize(400, 300)
         self.setWindowTitle("Settings")
-        self.general_settings_toml: Path = Path(r"settings/general.toml").absolute()
-        self.database_toml: Path = DATABASE_TOML_PATH.absolute()
+        self.general_settings_toml: Path = Path(__file__).parents[1] / Path(
+            "settings/general.toml"
+        )
+        self.database_toml: Path = Path(__file__).parents[1] / Path(
+            "settings/database.toml"
+        )
         self.set_up_settings_window()
         self.show()
 
@@ -127,6 +130,12 @@ class SettingsWindow(QDialog):
         local_library = self.get_local_library()
         if local_library:
             QDesktopServices.openUrl(local_library)
+        else:
+            QMessageBox.warning(
+                self,
+                "No local library set",
+                "No local library set. Please set a local library first.",
+            )
 
     def get_local_library(self) -> str:
         """Get the current local library to present to the user."""
@@ -268,7 +277,7 @@ class SettingsWindow(QDialog):
             logging.error(error)
             QMessageBox.critical(
                 self,
-                f"Database config file not found at {DATABASE_TOML_PATH}",
+                f"Database config file not found at {self.database_toml}",
                 "Check database config settings have been saved.",
                 QMessageBox.StandardButton.Cancel,
             )
@@ -293,7 +302,6 @@ class SettingsWindow(QDialog):
 
 
 if __name__ == "__main__":
-    DATABASE_TOML_PATH = Path("settings/database.toml")
     app = QApplication(sys.argv)
     win = SettingsWindow()
     sys.exit(app.exec())
