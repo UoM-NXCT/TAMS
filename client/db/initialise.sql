@@ -1,3 +1,5 @@
+-- dialect: postgresql
+
 /*
  Create "user" table.
  Note: we put "user" in quote marks as user is a protected name.

@@ -25,9 +25,8 @@ class Database:
         """Return database version when class is represented.
 
         NB absent __str__, str(self) fallbacks to __repr__!
-
-        :return: database version.
         """
+
         if self.cur is not None:
             self.cur.execute("SELECT version()")
             db_version = str(self.cur.fetchone())

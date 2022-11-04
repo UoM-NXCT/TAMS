@@ -5,6 +5,8 @@
  Warning: this will delete all existing data in tables! Use with caution.
  */
 
+-- dialect: postgresql
+
 /*
  Populate with fake instruments.
  */
