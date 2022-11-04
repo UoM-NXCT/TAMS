@@ -8,6 +8,7 @@ from typing import Any
 from db import DatabaseView, MissingTables, dict_to_conn_str
 from dialogues.create_project_dialogue import CreateProjectWindow
 from dialogues.create_scan_dialogue import CreateScanDialogue
+from file_transfer.save import save_to_local
 from metadata_panel import MetadataPanel
 from psycopg.errors import ConnectionFailure
 from PySide6.QtCore import QModelIndex, QSize, QSortFilterProxyModel, Qt
@@ -90,6 +91,7 @@ class MainWindow(QMainWindow):
 
         # Let user sort table by column
         self.table_view.setSortingEnabled(True)
+
 
     def update_table_with_projects(self) -> None:
         """Update table to display projects."""
@@ -254,7 +256,32 @@ class MainWindow(QMainWindow):
         toolbar.addAction(self.download_act)
 
     def download_data(self):
-        print("Download data")
+        """Download selected data."""
+
+        # Get the selected table
+        table = self.current_table()
+
+        # Get the selected rows
+        # Because the rows can be sorted, the Nth item in the visible table may not be the Nth item in data
+        # Hence, we have to translate the visible index to the source index
+        proxy_index: QModelIndex = self.table_view.currentIndex()
+        source_index: QModelIndex = self.proxy_model.mapToSource(proxy_index)
+
+
+        # We care about the row, so get the row from the current index
+        row_index: int = source_index.row()
+        row: tuple[Any] = self.table_model.get_row_data(row_index)
+        row_pk = row[0]
+
+        if table == "project":
+            logging.info("Downloading data from project ID %s", row_pk)
+            local_library: str = toml_operations.get_value_from_toml(Path("settings/general.toml"), "storage", "local_library")
+            permanent_library: str = toml_operations.get_value_from_toml(Path("settings/general.toml"), "storage", "permanent_library")
+            try:
+                save_to_local(Path(local_library), Path(permanent_library), row_pk)
+            except Exception:
+                logging.exception("Error downloading data from project ID %s", row_pk)
+
 
     def about_dialogue(self):
         """Display the About dialog."""
@@ -270,6 +297,7 @@ class MainWindow(QMainWindow):
 
     def connect_to_database(self) -> None:
         """Set up the connection to the database."""
+
         config_file = Path("settings/database.toml").absolute()
         try:
             # Set up database

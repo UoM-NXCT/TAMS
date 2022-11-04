@@ -24,10 +24,9 @@ from tqdm import tqdm
 
 
 def create_dir_if_missing(path: Path) -> None:
-    """Function that creates a directory if one does not exist.
+    """Create a directory if one does not exist.
 
     :param path: target directory
-    :return:
     """
     if not path.exists():
         os.makedirs(path, exist_ok=True)
