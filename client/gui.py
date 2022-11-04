@@ -114,7 +114,7 @@ class MainWindow(QMainWindow):
     def update_table_with_scans(self) -> None:
         """Update the table widget to display scans."""
 
-        self.current_table_query = ("scan_id, project_id", "scan", None)
+        self.current_table_query = ("scan_id, project_id, instrument_id", "scan", None)
         self.update_table()
 
     def set_up_main_window(self) -> None:

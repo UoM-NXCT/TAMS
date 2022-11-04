@@ -115,7 +115,7 @@ class DatabaseView:
         """Get scan metadata."""
 
         data, column_header = self.view_select_from_where(
-            "scan_id, project_id",
+            "scan_id, project_id, instrument_id",
             "scan",
             f"scan_id={scan_id}",
         )
@@ -135,6 +135,18 @@ class DatabaseView:
         # Add project title to project id metadata
         project_id_metadata = f"{project_id} ({project_title})"
 
+        # Get instrument name
+        instrument_id: int = row[2]
+        instrument_data, _ = self.view_select_from_where(
+            "name",
+            "instrument",
+            f"instrument_id={instrument_id}",
+        )
+        instrument_name: str = instrument_data[0][0]
+
+        # Add instrument name to instrument id metadata
+        instrument_id_metadata = f"{instrument_id} ({instrument_name})"
+
         # Turn the list back into a tuple, the expected return value
-        updated_row: tuple = (scan_id, project_id_metadata)
+        updated_row: tuple = (scan_id, project_id_metadata, instrument_id_metadata)
         return updated_row, column_header

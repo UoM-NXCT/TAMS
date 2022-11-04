@@ -75,7 +75,7 @@ class CreateScanDialogue(QDialog):
 
         # Make create project button
         create_scan_button = QPushButton("Create new scan")
-        create_scan_button.clicked.connect(self.accept_project_info)
+        create_scan_button.clicked.connect(self.accept_new_scan_info)
 
         # Create the layout for the settings window.
         create_project_v_box = QVBoxLayout()
@@ -87,26 +87,29 @@ class CreateScanDialogue(QDialog):
         create_project_v_box.addStretch()
         self.setLayout(create_project_v_box)
 
-    def accept_project_info(self) -> None:
+    def accept_new_scan_info(self) -> None:
         """Read input data and save to database."""
 
         def project_id_exists(project_id: int) -> bool:
             """Check if a project with a given project id exists in the database."""
+
             with psycopg.connect(self.connection_string) as conn:
                 with conn.cursor() as cur:
                     cur.execute(
                         f"select project_id from project where project_id={project_id}"
                     )
                     rows: list = cur.fetchall()
+
             # Returns false if the list is empty (no rows returned)
             if len(rows) > 1:
                 logging.warning(
                     "Multiple projects with the same project id; this shouldn't happen!"
                 )
+
             return bool(rows)
 
         def instrument_id_exists(instrument_id: int) -> bool:
-            """Check if a project with a given instrument id exists in the database."""
+            """Check if a project with a given instrument ID exists in the database."""
 
             with psycopg.connect(self.connection_string) as conn:
                 with conn.cursor() as cur:
