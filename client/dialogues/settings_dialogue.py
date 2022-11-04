@@ -77,28 +77,54 @@ class SettingsWindow(QDialog):
         self.setLayout(settings_v_box)
 
     def general_settings(self) -> None:
-        """General settings page allows to set the local library."""
+        """General settings page allows to set the local and permanent library."""
 
+        # Create the layout for the local library settings.
         self.local_library_info = QLabel(self.generate_local_library_info())
         self.local_library_info.setWordWrap(True)
 
-        library_buttons: QWidget = QWidget()
-        library_buttons_layout: QHBoxLayout = QHBoxLayout()
+        local_library_buttons: QWidget = QWidget()
+        local_library_buttons_layout: QHBoxLayout = QHBoxLayout()
 
-        open_library_button: QPushButton = QPushButton("Open local library")
-        open_library_button.clicked.connect(self.open_local_library)
-        library_buttons_layout.addWidget(open_library_button)
+        open_local_library_button: QPushButton = QPushButton("Open local library")
+        open_local_library_button.clicked.connect(
+            lambda: self.open_library(self.get_library("local"), "local")
+        )
+        local_library_buttons_layout.addWidget(open_local_library_button)
 
         edit_local_libary: QPushButton = QPushButton("Edit local library")
-        edit_local_libary.clicked.connect(self.edit_local_library)
-        library_buttons_layout.addWidget(edit_local_libary)
+        edit_local_libary.clicked.connect(lambda: self.edit_library("local"))
+        local_library_buttons_layout.addWidget(edit_local_libary)
 
-        library_buttons.setLayout(library_buttons_layout)
+        local_library_buttons.setLayout(local_library_buttons_layout)
+
+        # Create the layout for the permanent library settings.
+        self.permanent_library_info = QLabel(self.generate_permanent_library_info())
+        self.permanent_library_info.setWordWrap(True)
+
+        permanent_library_buttons: QWidget = QWidget()
+        permanent_library_buttons_layout: QHBoxLayout = QHBoxLayout()
+
+        open_permanent_library_button: QPushButton = QPushButton(
+            "Open permanent library"
+        )
+        open_permanent_library_button.clicked.connect(
+            lambda: self.open_library(self.get_library("permanent"), "permanent")
+        )
+        permanent_library_buttons_layout.addWidget(open_permanent_library_button)
+
+        edit_permanent_libary: QPushButton = QPushButton("Edit permanent library")
+        edit_permanent_libary.clicked.connect(lambda: self.edit_library("permanent"))
+        permanent_library_buttons_layout.addWidget(edit_permanent_libary)
+
+        permanent_library_buttons.setLayout(permanent_library_buttons_layout)
 
         # Add widgets to general settings page layout
         tab_v_box = QVBoxLayout()
         tab_v_box.addWidget(self.local_library_info)
-        tab_v_box.addWidget(library_buttons)
+        tab_v_box.addWidget(local_library_buttons)
+        tab_v_box.addWidget(self.permanent_library_info)
+        tab_v_box.addWidget(permanent_library_buttons)
         tab_v_box.addStretch()
 
         # Set layout for general settings tab
@@ -108,44 +134,62 @@ class SettingsWindow(QDialog):
         """Generate the text to display the local library."""
 
         info: str = f"""
-        <h2>Local library</h2>
+        <h3>Local library</h3>
         <p>
         Select the location of the local library. This directory will store scans for 
         syncing.
         </p>
         <p>
         <em>
-        Current local library:<br>
-            <samp><a href="{self.get_local_library()}">
-                {self.get_local_library()}
+        Current local library:
+            <samp><a href="{self.get_library("local")}">
+                {self.get_library("local")}
             </a></samp>
         </em>
         </p>
         """
         return info
 
-    def open_local_library(self) -> None:
+    def generate_permanent_library_info(self) -> str:
+        """Generate the text to display the local library."""
+
+        info: str = f"""
+        <h3>Permanent library</h3>
+        <p>
+        Select the location of the permanent library. This is the server that stores the raw project and scan files.
+        </p>
+        <p>
+        <em>
+        Current permanent library:
+            <samp><a href="{self.get_library("permanent")}">
+                {self.get_library("permanent")}
+            </a></samp>
+        </em>
+        </p>
+        """
+        return info
+
+    def open_library(self, library_path: str, library_title: str) -> None:
         """Open the local library directory in the file explorer."""
 
-        local_library = self.get_local_library()
-        if local_library:
-            QDesktopServices.openUrl(local_library)
+        if library_path:
+            QDesktopServices.openUrl(library_path)
         else:
             QMessageBox.warning(
                 self,
-                "No local library set",
-                "No local library set. Please set a local library first.",
+                f"No {library_title} library set",
+                f"No {library_title} library set. Please set a {library_title} library first.",
             )
 
-    def get_local_library(self) -> str:
-        """Get the current local library to present to the user."""
+    def get_library(self, library_title: str) -> str:
+        """Get the current library to present to the user."""
 
-        current_local_library = toml_operations.get_value_from_toml(
-            self.general_settings_toml, "storage", "local_library"
+        current_library = toml_operations.get_value_from_toml(
+            self.general_settings_toml, "storage", f"{library_title}_library"
         )
-        if current_local_library:
-            return current_local_library
-        return "No local library set."
+        if current_library:
+            return current_library
+        return f"No {library_title} library set."
 
     def database_settings(self):
         """Database settings widget to allow the user to set the database connection."""
@@ -208,22 +252,30 @@ class SettingsWindow(QDialog):
         # Set layout for general settings tab
         self.database_settings_tab.setLayout(tab_v_box)
 
-    def edit_local_library(self) -> None:
-        """Open a file dialog to select the local library directory."""
+    def edit_library(self, library_title: str) -> None:
+        """Open a file dialog to select the library directory."""
 
-        local_library = QFileDialog.getExistingDirectory(
-            self, "Select local library directory"
+        library = QFileDialog.getExistingDirectory(
+            self, f"Select {library_title} library directory"
         )
-        if local_library:
+        if library:
             toml_operations.update_toml(
-                self.general_settings_toml, "storage", "local_library", local_library
+                self.general_settings_toml,
+                "storage",
+                f"{library_title}_library",
+                library,
             )
         else:
             # If user cancels file dialog, do nothing
             pass
 
-        # Update the local library info text
-        self.local_library_info.setText(self.generate_local_library_info())
+        # Update the library info text
+        if library_title == "local":
+            self.local_library_info.setText(self.generate_local_library_info())
+        elif library_title == "permanent":
+            self.permanent_library_info.setText(self.generate_permanent_library_info())
+        else:
+            logging.warning("Invalid library title: %s", library_title)
 
     def apply(self):
         """Apply the changes to settings."""

@@ -1,2 +1,3 @@
 [storage]
 local_library = "C:/Users/LabAdmin/Documents/GitHub/TAMS/client/tests"
+permanent_library = "C:/Users/LabAdmin/Documents/GitHub/TAMS/client/toolbox"
