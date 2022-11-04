@@ -92,7 +92,6 @@ class MainWindow(QMainWindow):
         # Let user sort table by column
         self.table_view.setSortingEnabled(True)
 
-
     def update_table_with_projects(self) -> None:
         """Update table to display projects."""
 
@@ -267,7 +266,6 @@ class MainWindow(QMainWindow):
         proxy_index: QModelIndex = self.table_view.currentIndex()
         source_index: QModelIndex = self.proxy_model.mapToSource(proxy_index)
 
-
         # We care about the row, so get the row from the current index
         row_index: int = source_index.row()
         row: tuple[Any] = self.table_model.get_row_data(row_index)
@@ -275,13 +273,16 @@ class MainWindow(QMainWindow):
 
         if table == "project":
             logging.info("Downloading data from project ID %s", row_pk)
-            local_library: str = toml_operations.get_value_from_toml(Path("settings/general.toml"), "storage", "local_library")
-            permanent_library: str = toml_operations.get_value_from_toml(Path("settings/general.toml"), "storage", "permanent_library")
+            local_library: str = toml_operations.get_value_from_toml(
+                Path("settings/general.toml"), "storage", "local_library"
+            )
+            permanent_library: str = toml_operations.get_value_from_toml(
+                Path("settings/general.toml"), "storage", "permanent_library"
+            )
             try:
                 save_to_local(Path(local_library), Path(permanent_library), row_pk)
             except Exception:
                 logging.exception("Error downloading data from project ID %s", row_pk)
-
 
     def about_dialogue(self):
         """Display the About dialog."""
