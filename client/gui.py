@@ -23,11 +23,12 @@ from PySide6.QtWidgets import (
     QToolBar,
     QWidget,
 )
-from settings import toml_operations
-from table_widget import TableModel, TableView
-from toolbox import ToolBox
+from table_widget.table_model import TableModel
+from table_widget.table_view import TableView
+from toolbox.toolbox import ToolBox
+from utils.toml import create_toml, get_dict_from_toml, get_value_from_toml, update_toml
 
-from client.dialogues.settings_dialogue import SettingsWindow
+from client.dialogues.settings import SettingsWindow
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -258,10 +259,16 @@ class MainWindow(QMainWindow):
         self.addToolBar(toolbar)
 
         # Add actions to the toolbar
-        toolbar.addAction(self.about_act)
+
+        # File actions
         toolbar.addAction(self.reload_table_act)
         toolbar.addAction(self.download_act)
         toolbar.addAction(self.open_act)
+
+        # Config actions
+        toolbar.addSeparator()
+        toolbar.addAction(self.about_act)
+
 
     def get_value_from_row(self, column: int) -> int:
         """Get the primary key of the selected row in the table view.
@@ -291,12 +298,12 @@ class MainWindow(QMainWindow):
         row_pk: int = self.get_value_from_row(0)
 
         # Get the path to the local data directory
-        local_library: str = toml_operations.get_value_from_toml(
+        local_library: str = get_value_from_toml(
             Path("settings/general.toml"), "storage", "local_library"
         )
 
         # Get the path to the remote data directory
-        permanent_library: str = toml_operations.get_value_from_toml(
+        permanent_library: str = get_value_from_toml(
             Path("settings/general.toml"), "storage", "permanent_library"
         )
 
@@ -370,7 +377,7 @@ class MainWindow(QMainWindow):
         row_pk: int = self.get_value_from_row(0)
 
         # Get the path of the local library
-        local_library: str = toml_operations.get_value_from_toml(
+        local_library: str = get_value_from_toml(
             Path("settings/general.toml"), "storage", "local_library"
         )
 
@@ -434,7 +441,7 @@ class MainWindow(QMainWindow):
         try:
             # Set up database
             logging.info("Connecting to database")
-            config_dict = toml_operations.get_dict_from_toml(config_file)
+            config_dict = get_dict_from_toml(config_file)
             self.connection_string = dict_to_conn_str(config_dict)
             self.database_view = DatabaseView(self.connection_string)
 

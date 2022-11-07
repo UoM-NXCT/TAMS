@@ -1,3 +1,7 @@
+"""
+Settings dialogue.
+"""
+
 import logging
 import sys
 from pathlib import Path
@@ -6,7 +10,6 @@ import psycopg
 from PySide6.QtGui import QDesktopServices
 from PySide6.QtWidgets import (
     QApplication,
-    QButtonGroup,
     QDialog,
     QDialogButtonBox,
     QFileDialog,
@@ -21,7 +24,12 @@ from PySide6.QtWidgets import (
 )
 
 from ..db import Database, dict_to_conn_str
-from ..settings import toml_operations
+from ..utils.toml import (
+    create_toml,
+    get_dict_from_toml,
+    get_value_from_toml,
+    update_toml,
+)
 
 
 class SettingsWindow(QDialog):
@@ -180,15 +188,15 @@ class SettingsWindow(QDialog):
                 f"No {library_title} library set. Please set a {library_title} library first.",
             )
 
-    def get_library(self, library_title: str) -> str:
+    def get_library(self, library_title: str) -> str | None:
         """Get the current library to present to the user."""
 
-        current_library = toml_operations.get_value_from_toml(
+        current_library = get_value_from_toml(
             self.general_settings_toml, "storage", f"{library_title}_library"
         )
         if current_library:
             return current_library
-        return f"No {library_title} library set."
+        return None
 
     def database_settings(self):
         """Database settings widget to allow the user to set the database connection."""
@@ -204,8 +212,8 @@ class SettingsWindow(QDialog):
                     "password": "",
                 }
             }
-            toml_operations.create_toml(self.database_toml, template_db_config)
-        database_config = toml_operations.get_dict_from_toml(self.database_toml)
+            create_toml(self.database_toml, template_db_config)
+        database_config = get_dict_from_toml(self.database_toml)
 
         # Create database host widgets
         self.host_label = QLabel("Host")
@@ -254,19 +262,31 @@ class SettingsWindow(QDialog):
     def edit_library(self, library_title: str) -> None:
         """Open a file dialog to select the library directory."""
 
+        if self.get_library(library_title):
+            initial_directory: str = self.get_library(library_title)
+        else:
+            # Use current directory if no library is set
+            initial_directory: str = ""
+
         library = QFileDialog.getExistingDirectory(
-            self, f"Select {library_title} library directory"
+            self,
+            caption=f"Select {library_title} library directory",
+            dir=initial_directory,
         )
         if library:
-            toml_operations.update_toml(
+            update_toml(
                 self.general_settings_toml,
                 "storage",
                 f"{library_title}_library",
                 library,
             )
         else:
-            # If user cancels file dialog, do nothing
-            pass
+            logging.info("User cancelled file dialog")
+            QMessageBox.warning(
+                self,
+                f"No {library_title} library set",
+                f"No {library_title} library set. Please set a {library_title} library first.",
+            )
 
         # Update the library info text
         if library_title == "local":
@@ -274,7 +294,7 @@ class SettingsWindow(QDialog):
         elif library_title == "permanent":
             self.permanent_library_info.setText(self.generate_permanent_library_info())
         else:
-            logging.warning("Invalid library title: %s", library_title)
+            logging.critical("Invalid library title: %s", library_title)
 
     def apply(self):
         """Apply the changes to settings."""
@@ -285,9 +305,7 @@ class SettingsWindow(QDialog):
         # Construct new config dict
         def update_if_modified(line_edit: QLineEdit, key: str):
             if line_edit.isModified():
-                toml_operations.update_toml(
-                    self.database_toml, "postgresql", key, line_edit.text()
-                )
+                update_toml(self.database_toml, "postgresql", key, line_edit.text())
 
         update_if_modified(self.host_edit, "host")
         update_if_modified(self.port_edit, "port")
@@ -302,9 +320,7 @@ class SettingsWindow(QDialog):
         try:
             if not self.database_toml.is_file():
                 raise FileNotFoundError
-            database_config_dict = toml_operations.get_dict_from_toml(
-                self.database_toml
-            )
+            database_config_dict = get_dict_from_toml(self.database_toml)
             database_config = dict_to_conn_str(database_config_dict)
             with Database(database_config) as database:
                 QMessageBox.information(
