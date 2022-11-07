@@ -10,6 +10,7 @@ from ..file_transfer.file_operations import (
 
 TEST_DIR = Path(__file__).parent
 
+
 class TestFileOperations(unittest.TestCase):
     """Test functions in file_operations.py file."""
 
@@ -28,9 +29,7 @@ class TestFileOperations(unittest.TestCase):
         # Test move functionality
         file_to_be_moved = TEST_DIR / Path(r"text_files/move_me.txt")
         self.assertEqual(True, file_to_be_moved.is_file())
-        target_dir_of_file_to_be_moved = TEST_DIR / Path(
-            "example_directory"
-        )
+        target_dir_of_file_to_be_moved = TEST_DIR / Path("example_directory")
         self.assertEqual(True, target_dir_of_file_to_be_moved.is_dir())
         move_or_copy_item(
             file_to_be_moved, target_dir_of_file_to_be_moved, keep_original=False
@@ -54,9 +53,7 @@ class TestFileOperations(unittest.TestCase):
         # Test copy functionality
         file_to_be_copied = TEST_DIR / Path("text_files/copy_me.txt")
         self.assertEqual(True, file_to_be_copied.is_file())
-        target_dir_of_file_to_be_moved = TEST_DIR / Path(
-            "example_directory"
-        )
+        target_dir_of_file_to_be_moved = TEST_DIR / Path("example_directory")
         self.assertEqual(True, target_dir_of_file_to_be_moved.is_dir())
         move_or_copy_item(
             file_to_be_copied, target_dir_of_file_to_be_moved, keep_original=True
