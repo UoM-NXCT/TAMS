@@ -61,6 +61,7 @@ def get_dict_from_toml(toml_file: Path) -> dict | None:
     :return: a Python dictionary of the date from the TOML file or None if the method
     encounters an exception
     """
+
     try:
         with open(toml_file, mode="rb") as file:
             config = tomllib.load(file)

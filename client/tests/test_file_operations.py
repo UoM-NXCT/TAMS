@@ -8,13 +8,14 @@ from ..file_transfer.file_operations import (
     move_or_copy_item,
 )
 
+TEST_DIR = Path(__file__).parent
 
 class TestFileOperations(unittest.TestCase):
     """Test functions in file_operations.py file."""
 
     def test_create_dir_if_missing(self) -> None:
         """Test function that creates a directory at a location if it doesn't exist."""
-        dir_target = Path(r"client/tests/new_dir").absolute()
+        dir_target = TEST_DIR / Path("new_dir")
         self.assertEqual(False, dir_target.exists())
         create_dir_if_missing(dir_target)
         self.assertEqual(True, dir_target.exists())
@@ -25,11 +26,11 @@ class TestFileOperations(unittest.TestCase):
         """Test function that moves or copies an item."""
 
         # Test move functionality
-        file_to_be_moved = Path(r"client/tests/text_files/move_me.txt").absolute()
+        file_to_be_moved = TEST_DIR / Path(r"text_files/move_me.txt")
         self.assertEqual(True, file_to_be_moved.is_file())
-        target_dir_of_file_to_be_moved = Path(
-            r"client/tests/example_directory"
-        ).absolute()
+        target_dir_of_file_to_be_moved = TEST_DIR / Path(
+            "example_directory"
+        )
         self.assertEqual(True, target_dir_of_file_to_be_moved.is_dir())
         move_or_copy_item(
             file_to_be_moved, target_dir_of_file_to_be_moved, keep_original=False
@@ -39,7 +40,7 @@ class TestFileOperations(unittest.TestCase):
         location_of_moved_file = target_dir_of_file_to_be_moved / Path("move_me.txt")
         self.assertEqual(True, location_of_moved_file.is_file())
         # Move file back after test
-        original_file_directory = Path(r"client/tests/text_files").absolute()
+        original_file_directory = TEST_DIR / Path(r"text_files")
         move_or_copy_item(
             location_of_moved_file,
             original_file_directory,
@@ -51,11 +52,11 @@ class TestFileOperations(unittest.TestCase):
         """Test function that moves or copies an item."""
 
         # Test copy functionality
-        file_to_be_copied = Path(r"client/tests/text_files/copy_me.txt").absolute()
+        file_to_be_copied = TEST_DIR / Path("text_files/copy_me.txt")
         self.assertEqual(True, file_to_be_copied.is_file())
-        target_dir_of_file_to_be_moved = Path(
-            r"client/tests/example_directory"
-        ).absolute()
+        target_dir_of_file_to_be_moved = TEST_DIR / Path(
+            "example_directory"
+        )
         self.assertEqual(True, target_dir_of_file_to_be_moved.is_dir())
         move_or_copy_item(
             file_to_be_copied, target_dir_of_file_to_be_moved, keep_original=True
@@ -71,8 +72,8 @@ class TestFileOperations(unittest.TestCase):
     def test_find_and_move(self) -> None:
         """Test function that finds and moves files from one directory to another."""
 
-        source_dir = Path(r"client/tests/text_files").absolute()
-        target_dir = Path(r"client/tests/example_directory").absolute()
+        source_dir = TEST_DIR / Path(r"text_files")
+        target_dir = TEST_DIR / Path(r"example_directory")
         find_and_move("*.txt", source_dir, target_dir)
         copy_me_text_file_init = source_dir / Path("copy_me.txt")
         move_me_text_file_init = source_dir / Path("move_me.txt")
