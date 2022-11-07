@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import unittest
 
 from client.db.utils import dict_to_conn_str

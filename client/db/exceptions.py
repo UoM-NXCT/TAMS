@@ -1,8 +1,5 @@
-""" Database exceptions
-
-This file contains custom database exceptions:
-
--  MissingTables.
+"""
+This file contains custom database exceptions.
 """
 
 

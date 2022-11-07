@@ -24,7 +24,7 @@ class TableModel(QAbstractTableModel):
 
     def data(
         self,
-        index: Union[QModelIndex, QPersistentModelIndex],
+        index: QModelIndex | QPersistentModelIndex,
         role: int = ...,
     ) -> Any:
         """Returns presentation information for given locations in the table."""

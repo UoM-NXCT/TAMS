@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """ File operation methods
 
 This script contains common file operation methods.

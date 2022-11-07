@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Custom toolbox class that inherits the Qt built-in QToolBox widget.
 """

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import unittest
 from os import remove
 from pathlib import Path

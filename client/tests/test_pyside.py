@@ -2,7 +2,6 @@
 Tests for the Qt styles (via PySide6).
 """
 from PySide6.QtWidgets import QStyleFactory
-from pytest import mark
 
 
 class TestPyside6:

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """ TOML operation methods
 
 This script contains common TOML file operation methods.

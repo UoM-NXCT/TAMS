@@ -1,8 +1,5 @@
-# -*- coding: utf-8 -*-
-""" Database methods
-
+"""
 This script contains the Database class which performs key database methods.
-
 """
 
 import logging

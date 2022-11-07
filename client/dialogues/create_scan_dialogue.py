@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 This window lets a user input and create a new scan, which is added to the database
 specified by the input connection string.

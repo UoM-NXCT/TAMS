@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Initialiser model
 
 Contains a model that initialises the database. For use when first creating a database.
@@ -19,7 +18,7 @@ class DatabaseInitialiser(Database):
         logging.info("Creating database tables")
 
         init_instructions: Path = Path("initialise.sql")
-        with open(init_instructions, "r", encoding="utf8") as sql_file:
+        with open(init_instructions, encoding="utf8") as sql_file:
             self.exec(sql_file.read())
 
     def populate_with_dummy_data(self) -> None:
@@ -30,7 +29,7 @@ class DatabaseInitialiser(Database):
         logging.info("Populating database with fake data")
 
         dummy_data_instructions: Path = Path("dummy_data.sql")
-        with open(dummy_data_instructions, "r", encoding="utf8") as sql_file:
+        with open(dummy_data_instructions, encoding="utf8") as sql_file:
             self.exec(sql_file.read())
 
 

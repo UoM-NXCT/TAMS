@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 This files classes to represent data from the database to the user.
 """
