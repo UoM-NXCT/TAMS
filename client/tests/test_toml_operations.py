@@ -9,7 +9,7 @@ try:
 except ModuleNotFoundError:
     import tomli as tomllib
 
-from client.settings.toml_operations import (
+from client.utils.toml import (
     create_toml,
     get_dict_from_toml,
     get_value_from_toml,

@@ -272,6 +272,7 @@ class SettingsWindow(QDialog):
             self,
             caption=f"Select {library_title} library directory",
             dir=initial_directory,
+            options=QFileDialog.ShowDirsOnly,
         )
         if library:
             update_toml(

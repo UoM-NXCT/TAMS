@@ -269,7 +269,6 @@ class MainWindow(QMainWindow):
         toolbar.addSeparator()
         toolbar.addAction(self.about_act)
 
-
     def get_value_from_row(self, column: int) -> int:
         """Get the primary key of the selected row in the table view.
 
