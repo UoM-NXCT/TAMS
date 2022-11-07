@@ -42,7 +42,7 @@ profile = "black"
 dialect = "postgres"
 
 [tool.pytest.ini_options]
-addopts = "--ignore=tests/test_pyside.py"
+addopts = "--ignore=client/tests/test_pyside.py"
 
 [build-system]
 requires = ["poetry-core"]
