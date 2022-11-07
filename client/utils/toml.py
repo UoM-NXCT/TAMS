@@ -2,7 +2,6 @@
 Common TOML file operation methods.
 """
 
-import logging
 from pathlib import Path
 from typing import Any
 
@@ -55,13 +54,9 @@ def get_dict_from_toml(toml_file: Path) -> dict | None:
     encounters an exception
     """
 
-    try:
-        with open(toml_file, mode="rb") as file:
-            config: dict[str, Any] = tomllib.load(file)
-            return config
-    except FileNotFoundError:
-        logging.exception("Exception occurred")
-    return None
+    with open(toml_file, mode="rb") as file:
+        config: dict[str, Any] = tomllib.load(file)
+        return config
 
 
 def get_value_from_toml(toml_file: Path, section: str, key: str) -> Any:
