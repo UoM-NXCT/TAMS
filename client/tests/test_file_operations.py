@@ -58,10 +58,12 @@ class TestFileOperations(unittest.TestCase):
         move_or_copy_item(
             file_to_be_copied, target_dir_of_file_to_be_moved, keep_original=True
         )
+
         # File should exist at both locations
         self.assertEqual(True, file_to_be_copied.is_file())
         location_of_copied_file = target_dir_of_file_to_be_moved / Path("copy_me.txt")
         self.assertEqual(True, location_of_copied_file.is_file())
+
         # Delete file back after test
         location_of_copied_file.unlink()
         self.assertEqual(False, location_of_copied_file.is_file())
@@ -71,18 +73,18 @@ class TestFileOperations(unittest.TestCase):
 
         source_dir = TEST_DIR / Path(r"text_files")
         target_dir = TEST_DIR / Path(r"example_directory")
+
         find_and_move("*.txt", source_dir, target_dir)
+
         copy_me_text_file_init = source_dir / Path("copy_me.txt")
         move_me_text_file_init = source_dir / Path("move_me.txt")
         copy_me_text_file_final = target_dir / Path("copy_me.txt")
         move_me_text_file_final = target_dir / Path("move_me.txt")
+
         self.assertEqual(False, copy_me_text_file_init.is_file())
         self.assertEqual(True, copy_me_text_file_final.is_file())
         self.assertEqual(False, move_me_text_file_init.is_file())
         self.assertEqual(True, move_me_text_file_final.is_file())
+
         # Move files back after test
         find_and_move("*.txt", target_dir, source_dir)
-
-
-if __name__ == "__main__":
-    unittest.main()
