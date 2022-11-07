@@ -265,8 +265,11 @@ class MainWindow(QMainWindow):
         toolbar.addAction(self.download_act)
         toolbar.addAction(self.open_act)
 
-    def get_row_primary_key(self) -> int:
-        """Get the primary key of the selected row in the table view."""
+    def get_value_from_row(self, column: int) -> int:
+        """Get the primary key of the selected row in the table view.
+
+        :param column: the column number of the value.
+        """
 
         # Rows can be sorted, so the Nth table item may not be the Nth item in data
         # Hence, we have to translate the visible index to the source index
@@ -276,9 +279,9 @@ class MainWindow(QMainWindow):
         # We care about the row, so get the row from the current index
         row_index: int = source_index.row()
         row: tuple[Any] = self.table_model.get_row_data(row_index)
-        row_pk = row[0]
+        row_value = row[column]
 
-        return row_pk
+        return row_value
 
     def download_data(self):
         """Download selected data."""
@@ -287,7 +290,7 @@ class MainWindow(QMainWindow):
         table = self.current_table()
 
         # Get the primary key of the selected row
-        row_pk: int = self.get_row_primary_key()
+        row_pk: int = self.get_value_from_row(0)
 
         if table == "project":
             logging.info("Downloading data from project ID %s", row_pk)
@@ -333,7 +336,7 @@ class MainWindow(QMainWindow):
         table = self.current_table()
 
         # Get the primary key of the selected row
-        row_pk: int = self.get_row_primary_key()
+        row_pk: int = self.get_value_from_row(0)
 
         if table == "project":
             logging.info("Opening data from project ID %s", row_pk)
@@ -349,7 +352,24 @@ class MainWindow(QMainWindow):
                 QMessageBox.critical(
                     self,
                     "Error",
-                    f"Project ID {row_pk} does not exist in the local library. Please download the data first.",
+                    f"Project ID {row_pk} does not exist in the local library. Has the data been downloaded?",
+                )
+        elif table == "scan":
+            logging.info("Opening data from scan ID %s", row_pk)
+            project_id: int = self.get_value_from_row(1)
+            local_library: str = toml_operations.get_value_from_toml(
+                Path("settings/general.toml"), "storage", "local_library"
+            )
+            scan_path: Path = Path(local_library) / str(project_id) / str(row_pk)
+            if scan_path.exists():
+                logging.info("Opening scan path %s", scan_path)
+                QDesktopServices.openUrl(QUrl.fromLocalFile(str(scan_path)))
+            else:
+                logging.error("Scan path %s does not exist", scan_path)
+                QMessageBox.critical(
+                    self,
+                    "Error",
+                    f"Scan ID {row_pk} does not exist in the local library. Has the data been downloaded?",
                 )
         else:
             logging.error("Cannot open data from table %s", table)

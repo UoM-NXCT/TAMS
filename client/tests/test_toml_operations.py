@@ -24,7 +24,7 @@ class TestTOML(unittest.TestCase):
     def test_create_toml(self) -> None:
         """Test function that creates TOML file with given data."""
 
-        new_toml_path = Path(r"client/tests/new_toml.toml")
+        new_toml_path = Path(r"new_toml.toml")
         dict_to_be_stored = {"Scientist": {"name": "Einstein", "thesis_year": 1905}}
         create_toml(new_toml_path, dict_to_be_stored)
         self.assertEqual(True, new_toml_path.is_file())
@@ -38,15 +38,15 @@ class TestTOML(unittest.TestCase):
     def test_get_dict_from_toml(self) -> None:
         """Test function that returns a dictionary from a TOML file."""
 
-        path_to_toml = Path(r"client/tests/test_toml_files/my_cat.toml")
+        path_to_toml = Path(r"test_toml_files/my_cat.toml")
         toml_dict = get_dict_from_toml(path_to_toml)
         expected_dict = {"cat": {"name": "Dusty", "age": 7}}
-        self.assertEqual(toml_dict, expected_dict)
+        self.assertEqual(expected_dict, toml_dict)
 
     def test_get_value_from_toml(self) -> None:
         """Test a function that returns a value from a TOML file."""
 
-        path_to_toml = Path(r"client/tests/test_toml_files/my_cat.toml")
+        path_to_toml = Path(r"test_toml_files/my_cat.toml")
         cat_name = get_value_from_toml(path_to_toml, "cat", "name")
         cat_age = get_value_from_toml(path_to_toml, "cat", "age")
         self.assertEqual(cat_name, "Dusty")
@@ -55,7 +55,7 @@ class TestTOML(unittest.TestCase):
     def test_update_toml(self) -> None:
         """Test a function that updates a TOML file with given data."""
 
-        path_to_toml = Path(r"client/tests/test_toml_files/my_dog.toml")
+        path_to_toml = Path(r"test_toml_files/my_dog.toml")
         update_toml(path_to_toml, "dog", "age", 12)
         new_age = get_value_from_toml(path_to_toml, "dog", "age")
         self.assertEqual(12, new_age)
