@@ -61,8 +61,8 @@ def save_to_local(local: Path, permanent: Path, project_id: int, *scan_ids) -> N
 
     # Find and move data from permanent library to local library
     for scan in scan_ids:
-        target: Path = permanent_storage_dir / Path(scan)
-        destination: Path = local_prj_dir / Path(scan)
+        target: Path = permanent_storage_dir / Path(str(scan))
+        destination: Path = local_prj_dir / Path(str(scan))
         logging.info("Moving data from %s to %s", target, destination)
         find_and_move("*", target, destination, copy=True)
 

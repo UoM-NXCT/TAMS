@@ -290,15 +290,19 @@ class MainWindow(QMainWindow):
         # Get the primary key of the selected row
         row_pk: int = self.get_value_from_row(0)
 
+        # Get the path to the local data directory
+        local_library: str = toml_operations.get_value_from_toml(
+            Path("settings/general.toml"), "storage", "local_library"
+        )
+
+        # Get the path to the remote data directory
+        permanent_library: str = toml_operations.get_value_from_toml(
+            Path("settings/general.toml"), "storage", "permanent_library"
+        )
+
         if table == "project":
             logging.info("Downloading data from project ID %s", row_pk)
 
-            local_library: str = toml_operations.get_value_from_toml(
-                Path("settings/general.toml"), "storage", "local_library"
-            )
-            permanent_library: str = toml_operations.get_value_from_toml(
-                Path("settings/general.toml"), "storage", "permanent_library"
-            )
             try:
                 QMessageBox.information(
                     self,
@@ -319,6 +323,35 @@ class MainWindow(QMainWindow):
                     "Error",
                     f"Error downloading data from project ID {row_pk}, see log for details",
                 )
+        elif table == "scan":
+            logging.info("Downloading data from scan ID %s", row_pk)
+
+            # Get the path of the local scan directory
+            project_id: int = self.get_value_from_row(1)
+
+            try:
+                QMessageBox.information(
+                    self,
+                    "Downloading data",
+                    f"Downloading data from scan ID {row_pk}",
+                )
+                save_to_local(
+                    Path(local_library), Path(permanent_library), project_id, row_pk
+                )
+                QMessageBox.information(
+                    self,
+                    "Download complete",
+                    f"Downloaded data from scan ID {row_pk}",
+                )
+            except Exception:
+                # TODO: specify exceptions
+                logging.exception("Error downloading data from project ID %s", row_pk)
+                QMessageBox.critical(
+                    self,
+                    "Error",
+                    f"Error downloading data from project ID {row_pk}, see log for details",
+                )
+
         else:
             logging.error("Cannot download data from table %s", table)
             QMessageBox.critical(
@@ -336,12 +369,17 @@ class MainWindow(QMainWindow):
         # Get the primary key of the selected row
         row_pk: int = self.get_value_from_row(0)
 
+        # Get the path of the local library
+        local_library: str = toml_operations.get_value_from_toml(
+            Path("settings/general.toml"), "storage", "local_library"
+        )
+
         if table == "project":
             logging.info("Opening data from project ID %s", row_pk)
-            local_library: str = toml_operations.get_value_from_toml(
-                Path("settings/general.toml"), "storage", "local_library"
-            )
+
+            # Get the path of the local project directory
             project_path: Path = Path(local_library) / str(row_pk)
+
             if project_path.exists():
                 logging.info("Opening project path %s", project_path)
                 QDesktopServices.openUrl(QUrl.fromLocalFile(str(project_path)))
@@ -354,11 +392,11 @@ class MainWindow(QMainWindow):
                 )
         elif table == "scan":
             logging.info("Opening data from scan ID %s", row_pk)
+
+            # Get the path of the local scan directory
             project_id: int = self.get_value_from_row(1)
-            local_library: str = toml_operations.get_value_from_toml(
-                Path("settings/general.toml"), "storage", "local_library"
-            )
             scan_path: Path = Path(local_library) / str(project_id) / str(row_pk)
+
             if scan_path.exists():
                 logging.info("Opening scan path %s", scan_path)
                 QDesktopServices.openUrl(QUrl.fromLocalFile(str(scan_path)))
