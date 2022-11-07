@@ -7,7 +7,7 @@ authors = [
     "Tom Kusonsuphanimit <tom.kusonsuphanimit@manchester.ac.uk>"
 ]
 readme = "README.md"
-repository = "https://github.com/tjkuson/"
+repository = "https://github.com/UoM-NXCT/TAMS"
 
 [tool.poetry.urls]
 "NXCT homepage" = "https://nxct.ac.uk/"
