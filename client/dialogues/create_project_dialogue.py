@@ -38,6 +38,7 @@ class CreateProjectWindow(QDialog):
 
     def set_up_settings_window(self) -> None:
         """Create and arrange widgets in the project creation window."""
+
         header_label = QLabel("Create new project")
         self.new_project_title_entry = QLineEdit()
         self.new_project_summary_entry = QLineEdit()
@@ -116,5 +117,6 @@ class CreateProjectWindow(QDialog):
                         "Project committed to database.",
                         QMessageBox.StandardButton.Ok,
                     )
+
             # Close window once done.
             self.close()

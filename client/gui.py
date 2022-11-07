@@ -11,8 +11,8 @@ from dialogues.create_scan_dialogue import CreateScanDialogue
 from file_transfer.save import save_to_local
 from metadata_panel import MetadataPanel
 from psycopg.errors import ConnectionFailure
-from PySide6.QtCore import QModelIndex, QSize, QSortFilterProxyModel, Qt
-from PySide6.QtGui import QAction
+from PySide6.QtCore import QModelIndex, QSize, QSortFilterProxyModel, Qt, QUrl
+from PySide6.QtGui import QAction, QDesktopServices
 from PySide6.QtWidgets import (
     QApplication,
     QGridLayout,
@@ -180,6 +180,13 @@ class MainWindow(QMainWindow):
         self.download_act.setToolTip("Download selected data")
         self.download_act.triggered.connect(self.download_data)
 
+        pixmap = QStyle.StandardPixmap.SP_DialogOpenButton
+        open_icon = self.style().standardIcon(pixmap)
+        self.open_act = QAction(open_icon, "Open data")
+        self.open_act.setShortcut("Ctrl+O")
+        self.open_act.setToolTip("Open selected data")
+        self.open_act.triggered.connect(self.open_data)
+
         self.quit_act = QAction("&Quit")
         self.quit_act.setShortcut("Ctrl+Q")
         self.quit_act.setStatusTip("Quit application")
@@ -228,6 +235,7 @@ class MainWindow(QMainWindow):
 
     def create_window(self):
         """Create the application menu bar."""
+
         # Due to macOS guidelines, the menu bar will not appear in the GUI.
         self.menuBar().setNativeMenuBar(True)
         file_menu = self.menuBar().addMenu("File")
@@ -235,6 +243,7 @@ class MainWindow(QMainWindow):
         file_menu.addAction(self.reload_table_act)
         file_menu.addSeparator()
         file_menu.addAction(self.download_act)
+        file_menu.addAction(self.open_act)
         file_menu.addSeparator()
         file_menu.addAction(self.quit_act)
         view_menu = self.menuBar().addMenu("View")
@@ -245,7 +254,8 @@ class MainWindow(QMainWindow):
 
     def create_tool_bar(self) -> None:
         """Create the application toolbar."""
-        toolbar = QToolBar("Main Toolbar")
+
+        toolbar: QToolBar = QToolBar("Main Toolbar")
         toolbar.setIconSize(QSize(16, 16))
         self.addToolBar(toolbar)
 
@@ -253,15 +263,12 @@ class MainWindow(QMainWindow):
         toolbar.addAction(self.about_act)
         toolbar.addAction(self.reload_table_act)
         toolbar.addAction(self.download_act)
+        toolbar.addAction(self.open_act)
 
-    def download_data(self):
-        """Download selected data."""
+    def get_row_primary_key(self) -> int:
+        """Get the primary key of the selected row in the table view."""
 
-        # Get the selected table
-        table = self.current_table()
-
-        # Get the selected rows
-        # Because the rows can be sorted, the Nth item in the visible table may not be the Nth item in data
+        # Rows can be sorted, so the Nth table item may not be the Nth item in data
         # Hence, we have to translate the visible index to the source index
         proxy_index: QModelIndex = self.table_view.currentIndex()
         source_index: QModelIndex = self.proxy_model.mapToSource(proxy_index)
@@ -271,8 +278,20 @@ class MainWindow(QMainWindow):
         row: tuple[Any] = self.table_model.get_row_data(row_index)
         row_pk = row[0]
 
+        return row_pk
+
+    def download_data(self):
+        """Download selected data."""
+
+        # Get the selected table
+        table = self.current_table()
+
+        # Get the primary key of the selected row
+        row_pk: int = self.get_row_primary_key()
+
         if table == "project":
             logging.info("Downloading data from project ID %s", row_pk)
+
             local_library: str = toml_operations.get_value_from_toml(
                 Path("settings/general.toml"), "storage", "local_library"
             )
@@ -280,9 +299,65 @@ class MainWindow(QMainWindow):
                 Path("settings/general.toml"), "storage", "permanent_library"
             )
             try:
+                QMessageBox.information(
+                    self,
+                    "Downloading data",
+                    f"Downloading data from project ID {row_pk}",
+                )
                 save_to_local(Path(local_library), Path(permanent_library), row_pk)
+                QMessageBox.information(
+                    self,
+                    "Download complete",
+                    f"Downloaded data from project ID {row_pk}",
+                )
             except Exception:
+                # TODO: specify exceptions
                 logging.exception("Error downloading data from project ID %s", row_pk)
+                QMessageBox.critical(
+                    self,
+                    "Error",
+                    f"Error downloading data from project ID {row_pk}, see log for details",
+                )
+        else:
+            logging.error("Cannot download data from table %s", table)
+            QMessageBox.critical(
+                self,
+                "Error",
+                f"Cannot download data from table {table}",
+            )
+
+    def open_data(self) -> None:
+        """Open selected data."""
+
+        # Get the selected table
+        table = self.current_table()
+
+        # Get the primary key of the selected row
+        row_pk: int = self.get_row_primary_key()
+
+        if table == "project":
+            logging.info("Opening data from project ID %s", row_pk)
+            local_library: str = toml_operations.get_value_from_toml(
+                Path("settings/general.toml"), "storage", "local_library"
+            )
+            project_path: Path = Path(local_library) / str(row_pk)
+            if project_path.exists():
+                logging.info("Opening project path %s", project_path)
+                QDesktopServices.openUrl(QUrl.fromLocalFile(str(project_path)))
+            else:
+                logging.error("Project path %s does not exist", project_path)
+                QMessageBox.critical(
+                    self,
+                    "Error",
+                    f"Project ID {row_pk} does not exist in the local library. Please download the data first.",
+                )
+        else:
+            logging.error("Cannot open data from table %s", table)
+            QMessageBox.critical(
+                self,
+                "Error",
+                f"Cannot open data from table {table}",
+            )
 
     def about_dialogue(self):
         """Display the About dialog."""

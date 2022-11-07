@@ -196,7 +196,7 @@ class SettingsWindow(QDialog):
 
         if not self.database_toml.is_file():
             # Create a database config file if one does not already exist
-            template_db_config = {
+            template_db_config: dict = {
                 "postgresql": {
                     "host": "",
                     "port": "5432",
