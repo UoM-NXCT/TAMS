@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """ Archival script
 
 This script archives data locally, in satellite storage, and in permanent storage.
