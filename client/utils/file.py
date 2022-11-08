@@ -20,8 +20,6 @@ def create_dir_if_missing(path: Path) -> None:
     if not path.exists():
         os.makedirs(path, exist_ok=True)
         logging.info("Created directory at %s.", path)
-    elif path.exists():
-        logging.info("Did not create directory at %s as it already exists.", path)
 
 
 def move_or_copy_item(
@@ -34,9 +32,14 @@ def move_or_copy_item(
     :param keep_original: determines if move or copy
     """
 
+    if keep_original:
+        verb = "Copying"
+    else:
+        verb = "Moving"
+
     logging.info(
         "%s %s to %s...",
-        lambda: "Copying" if keep_original else "Moving",
+        verb,
         item,
         destination_directory,
     )
@@ -45,7 +48,7 @@ def move_or_copy_item(
 
     try:
 
-        # Copy file or directory to destination
+        # Check file or directory is a file or directory, respectively
         if item.is_file():
             shutil.copy(item, destination_directory / item.name)
         elif item.is_dir():
@@ -64,10 +67,19 @@ def move_or_copy_item(
     # If any permission issue
     except PermissionError:
         logging.exception("Exception raised.")
+    except FileExistsError:
+        # Just move on if the file already exists
+        logging.info(
+            "File already exists at %s, skipping", destination_directory / item.name
+        )
 
 
 def find_and_move(
-    glob_arg: str, search_dir: Path, *destinations: Path, copy: bool = False, gui: bool = False
+    glob_arg: str,
+    search_dir: Path,
+    *destinations: Path,
+    copy: bool = False,
+    gui: bool = False,
 ) -> None:
     """Function that finds files using .glob method in given directory and moves them to
     another directory.
@@ -77,12 +89,14 @@ def find_and_move(
     :param search_dir: directory that is searched
     :param destinations: list of destinations
     """
+
     number_of_counters = len(list(search_dir.glob(glob_arg)))
     if number_of_counters:
         for destination in destinations:
             if gui:
                 progress_dialogue = ProgressDialogue(
-                    len(list(search_dir.glob(glob_arg))))
+                    len(list(search_dir.glob(glob_arg)))
+                )
             for item in list(search_dir.glob(glob_arg)):
                 # Copy file to local reconstructed data directory
                 move_or_copy_item(

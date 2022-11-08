@@ -1,13 +1,12 @@
+"""
+Main window for the GUI.
+"""
+
 import logging
 import sys
 from pathlib import Path
 from typing import Any
 
-from db import DatabaseView, MissingTables, dict_to_conn_str
-from dialogues.create_project_dialogue import CreateProjectWindow
-from dialogues.create_scan_dialogue import CreateScanDialogue
-from file_transfer.save import save_to_local
-from metadata_panel import MetadataPanel
 from psycopg.errors import ConnectionFailure
 from PySide6.QtCore import QModelIndex, QSize, QSortFilterProxyModel, Qt, QUrl
 from PySide6.QtGui import QAction, QDesktopServices
@@ -26,9 +25,15 @@ from PySide6.QtWidgets import (
 from table_widget.table_model import TableModel
 from table_widget.table_view import TableView
 from toolbox.toolbox import ToolBox
-from utils.toml import create_toml, get_dict_from_toml, get_value_from_toml, update_toml
+from utils.toml import get_dict_from_toml, get_value_from_toml
 
+from client.db import DatabaseView, MissingTables, dict_to_conn_str
+from client.dialogues.create_project_dialogue import CreateProjectWindow
+from client.dialogues.create_scan_dialogue import CreateScanDialogue
+from client.dialogues.progress import ProgressDialogue
 from client.dialogues.settings import SettingsWindow
+from client.metadata_panel import MetadataPanel
+from client.runners.save import DownloadScansRunner
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -43,14 +48,16 @@ class MainWindow(QMainWindow):
         self.database_view: DatabaseView | None = None
         self.connection_string: str | None = None
         self.table_model: TableModel | None = None
-        self.proxy_table_model: QSortFilterProxyModel | None = None
+        self.proxy_model: QSortFilterProxyModel | None = None
         self.current_table_query: tuple | None = None
         self.toolbox: ToolBox | None = None
         self.current_metadata: tuple | None = None
 
-        # Create empty windows for use later.
-        self.settings: QWidget | None = None
-        self.create_project: QWidget | None = None
+        # Define empty widgets for use later
+        self.settings: QWidget
+        self.create_prj: QWidget
+        self.create_scan_dialogue: QWidget
+        self.progress_dialogue: ProgressDialogue
 
         # Set up the application's GUI.
         self.setMinimumSize(1080, 720)
@@ -222,7 +229,7 @@ class MainWindow(QMainWindow):
         the window can access the database.
         """
 
-        self.create_project = CreateProjectWindow(self.connection_string)
+        self.create_prj = CreateProjectWindow(self.connection_string)
 
     def open_create_scan(self) -> None:
         """
@@ -310,25 +317,15 @@ class MainWindow(QMainWindow):
             logging.info("Downloading data from project ID %s", row_pk)
 
             try:
-                QMessageBox.information(
-                    self,
-                    "Downloading data",
-                    f"Downloading data from project ID {row_pk}",
+                runner = DownloadScansRunner(
+                    Path(local_library), Path(permanent_library), row_pk
                 )
-                save_to_local(Path(local_library), Path(permanent_library), row_pk)
-                QMessageBox.information(
-                    self,
-                    "Download complete",
-                    f"Downloaded data from project ID {row_pk}",
-                )
+                self.progress_dialogue = ProgressDialogue(runner)
+
             except Exception:
                 # TODO: specify exceptions
                 logging.exception("Error downloading data from project ID %s", row_pk)
-                QMessageBox.critical(
-                    self,
-                    "Error",
-                    f"Error downloading data from project ID {row_pk}, see log for details",
-                )
+                raise Exception
         elif table == "scan":
             logging.info("Downloading data from scan ID %s", row_pk)
 
@@ -341,6 +338,7 @@ class MainWindow(QMainWindow):
                     "Downloading data",
                     f"Downloading data from scan ID {row_pk}",
                 )
+                # TODO: update to runner
                 save_to_local(
                     Path(local_library), Path(permanent_library), project_id, row_pk
                 )
@@ -492,10 +490,10 @@ class MainWindow(QMainWindow):
         row_index: int = source_index.row()
         row: tuple[Any] = self.table_model.get_row_data(row_index)
 
-        # Get the primary key from the first column (assumed the first column contains the pk)
+        # Get the primary key from the first column (assume first column is the pk)
         key: int = row[0]
 
-        # Each item has a different metadata format; use the current table to determine what to do
+        # Each item has a different metadata format; use the current table to method
         metadata: tuple[tuple[any], list[str]]
         if self.current_table() == "project":
             metadata = self.database_view.get_project_metadata(key)
