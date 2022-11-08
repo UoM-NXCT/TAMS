@@ -68,7 +68,3 @@ class TestTOML(unittest.TestCase):
         with open(path_to_toml, mode="wb") as file:
             data = {"dog": {"name": "Loca", "age": 10}}
             tomli_w.dump(data, file)
-
-
-if __name__ == "__main__":
-    unittest.main()

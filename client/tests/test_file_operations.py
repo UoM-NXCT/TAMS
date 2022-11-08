@@ -2,11 +2,7 @@ import unittest
 from pathlib import Path
 from shutil import rmtree
 
-from ..file_transfer.file_operations import (
-    create_dir_if_missing,
-    find_and_move,
-    move_or_copy_item,
-)
+from client.utils.file import create_dir_if_missing, find_and_move, move_or_copy_item
 
 TEST_DIR = Path(__file__).parent
 
