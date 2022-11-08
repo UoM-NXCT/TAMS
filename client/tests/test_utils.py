@@ -1,3 +1,7 @@
+"""
+Test utils module.
+"""
+
 import unittest
 from os import remove
 from pathlib import Path
@@ -5,13 +9,12 @@ from shutil import rmtree
 
 import tomli_w
 
-from client.utils.file import create_dir_if_missing, find_and_move, move_or_copy_item
-
 try:
     import tomllib
 except ModuleNotFoundError:
     import tomli as tomllib
 
+from client.utils.file import create_dir_if_missing, find_and_move, move_or_copy_item
 from client.utils.toml import (
     create_toml,
     get_dict_from_toml,
@@ -23,7 +26,7 @@ TEST_DIR = Path(__file__).parent
 
 
 class TestFile(unittest.TestCase):
-    """Test functions in file_operations.py file."""
+    """Test functions in file.py utils file."""
 
     def test_create_dir_if_missing(self) -> None:
         """Test function that creates a directory at a location if it doesn't exist."""
@@ -102,7 +105,7 @@ class TestFile(unittest.TestCase):
 
 
 class TestTOML(unittest.TestCase):
-    """Test functions in toml_operations.py file."""
+    """Test functions in toml.py utils file."""
 
     def test_create_toml(self) -> None:
         """Test function that creates TOML file with given data."""

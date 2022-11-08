@@ -5,7 +5,7 @@ Library operations for saving data.
 import logging
 from pathlib import Path
 
-from client.file_transfer.file_operations import create_dir_if_missing, find_and_move
+from client.utils.file import create_dir_if_missing, find_and_move
 
 
 def save_to_local(local: Path, permanent: Path, project_id: int, *scan_ids) -> None:
@@ -64,6 +64,6 @@ def save_to_local(local: Path, permanent: Path, project_id: int, *scan_ids) -> N
         target: Path = permanent_storage_dir / Path(str(scan))
         destination: Path = local_prj_dir / Path(str(scan))
         logging.info("Moving data from %s to %s", target, destination)
-        find_and_move("*", target, destination, copy=True)
+        find_and_move("*", target, destination, copy=True, gui=True)
 
     logging.info("Project %s data saved to local library.", project_id)

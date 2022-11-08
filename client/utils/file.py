@@ -9,6 +9,8 @@ from pathlib import Path
 
 from tqdm import tqdm
 
+from client.dialogues.progress import ProgressDialogue
+
 
 def create_dir_if_missing(path: Path) -> None:
     """Create a directory if one does not exist.
@@ -38,17 +40,24 @@ def move_or_copy_item(
         item,
         destination_directory,
     )
+
     create_dir_if_missing(destination_directory)
+
     try:
+
+        # Copy file or directory to destination
         if item.is_file():
             shutil.copy(item, destination_directory / item.name)
         elif item.is_dir():
             shutil.copytree(item, destination_directory / item.name)
+
+        # Delete original if not keeping original
         if not keep_original:
             if item.is_file():
                 os.remove(item)
             elif item.is_dir():
                 os.rmdir(item)
+
     # If source and destination are same
     except shutil.SameFileError:
         logging.exception("Exception raised.")
@@ -58,7 +67,7 @@ def move_or_copy_item(
 
 
 def find_and_move(
-    glob_arg: str, search_dir: Path, *destinations: Path, copy: bool = False
+    glob_arg: str, search_dir: Path, *destinations: Path, copy: bool = False, gui: bool = False
 ) -> None:
     """Function that finds files using .glob method in given directory and moves them to
     another directory.
@@ -71,16 +80,17 @@ def find_and_move(
     number_of_counters = len(list(search_dir.glob(glob_arg)))
     if number_of_counters:
         for destination in destinations:
-            for item in tqdm(
-                search_dir.glob(glob_arg),
-                f"Moving {glob_arg} files from {search_dir} to {destination}",
-                total=len(list(search_dir.glob(glob_arg))),
-            ):
+            if gui:
+                progress_dialogue = ProgressDialogue(
+                    len(list(search_dir.glob(glob_arg))))
+            for item in list(search_dir.glob(glob_arg)):
                 # Copy file to local reconstructed data directory
                 move_or_copy_item(
                     item,
                     Path(search_dir) / Path(destination),
                 )
+                if gui:
+                    progress_dialogue.add_progress(1)
         for item in tqdm(
             search_dir.glob(glob_arg),
             f"Deleting {glob_arg} files from {search_dir}",
