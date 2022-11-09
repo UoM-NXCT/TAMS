@@ -15,7 +15,7 @@ It aims to make storing and accessing data easy and quick.
 - [Licence](#licence)
 - [Warranty](#warranty)
 
-## Get started <a href="get-started"></a>
+## Get started
 
 TAMS is currently in development, so it does not yet have installation instructions and is not recommended for production use.
 
@@ -31,7 +31,7 @@ For example, Postgres is installed on my computer under `C:\Program Files\Postgr
 SET PATH=%PATH%;C:\Program Files\PostgreSQL\14\bin
 ```
 
-## Develop <a href="develop"></a>
+## Develop
 
 Installation instructions are a bit different for those looking to develop the software.
 
@@ -113,15 +113,15 @@ poetry run mypy client
 
 However, `mypy` does not play well with PySide6. This means some things may be flagged wrongly.
 
-## Issues <a href="issues"></a>
+## Issues
 
 If you have found a bug, you can file it under the 'issues' tab. You can also request new features.
 
-## Licence <a href="licence"></a>
+## Licence
 
 This project is licenced under the [MIT licence](LICENCE).
 
-## Warranty <a href="warranty"></a>
+## Warranty
 
 TAMS is distributed in the hope that it will be useful, but with **absolutely no warranty**.
 
