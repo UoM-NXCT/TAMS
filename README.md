@@ -7,7 +7,15 @@ TAMS is an open-source tomography archival and management application released b
 
 It aims to make storing and accessing data easy and quick.
 
-## Get started
+## Table of Contents
+
+- [Get started](#get-started)
+- [Develop](#develop)
+- [Issues](#issues)
+- [Licence](#licence)
+- [Warranty](#warranty)
+
+## Get started <a href="get-started"></a>
 
 TAMS is currently in development, so it does not yet have installation instructions and is not recommended for production use.
 
@@ -23,13 +31,13 @@ For example, Postgres is installed on my computer under `C:\Program Files\Postgr
 SET PATH=%PATH%;C:\Program Files\PostgreSQL\14\bin
 ```
 
-## Develop
+## Develop <a href="develop"></a>
 
 Installation instructions are a bit different for those looking to develop the software.
 
-### GUI (Poetry)
+### GUI
 
-[Poetry](https://python-poetry.org/) is a mature package management system for Python. It uses Pip to install 
+[Poetry](https://python-poetry.org/) is a mature package management system for Python. It uses Pip to install
 packages and handle dependencies.
 
 There are two main ways to use [Poetry](https://python-poetry.org/docs/basic-usage/).
@@ -40,7 +48,7 @@ The first way is to use `poetry run`.
 poetry run python client/gui.py
 ```
 
-The second way is to use Poetry to generate a `requirements.txt` file and install the 
+The second way is to use Poetry to generate a `requirements.txt` file and install the
 requirements directly using the file with `pip`.
 
 ```commandline
@@ -51,11 +59,8 @@ python client/gui.py
 
 ### PostgreSQL server (container)
 
-*Container support for the GUI client is not yet functional; this is likely because container software doesn't work well
-with GUI displays. However, you are welcome to try it.*
-
-You can use container software such as Podman and Docker to run the server in a container. Podman is preferred as it 
-because of it does not require a daemon or root privileges. However, you may prefer Docker if you run Windows or would 
+You can use container software such as Podman and Docker to run the server in a container. Podman is preferred as it
+because of it does not require a daemon or root privileges. However, you may prefer Docker if you run Windows or would
 like greater community support (Docker is more commonly used).
 
 ##### Build and run
@@ -108,14 +113,16 @@ poetry run mypy client
 
 However, `mypy` does not play well with PySide6. This means some things may be flagged wrongly.
 
-## Issues
+## Issues <a href="issues"></a>
 
 If you have found a bug, you can file it under the 'issues' tab. You can also request new features.
 
-## Licence
+## Licence <a href="licence"></a>
 
 This project is licenced under the [MIT licence](LICENCE).
 
-## Warranty
+## Warranty <a href="warranty"></a>
 
-TAMS is distributed in the hope that it will be useful, but with **absolutely no warranty**. Read the [licence](LICENCE) for more information.
+TAMS is distributed in the hope that it will be useful, but with **absolutely no warranty**.
+
+Read the [licence](LICENCE) for more information.
