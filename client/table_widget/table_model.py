@@ -25,8 +25,8 @@ class TableModel(QAbstractTableModel):
     def __init__(self, data: list[tuple], column_headers: list[str]):
         super().__init__()
         # Anticipate a list of tuples, as this is what database returns upon select.
-        self._data = data
-        self._column_headers = column_headers
+        self._data = data or []
+        self._column_headers = column_headers or []
 
     def data(
         self,
@@ -51,12 +51,18 @@ class TableModel(QAbstractTableModel):
                 # If it is a string or int, just render its string representation.
                 return f"{value}"
 
+            # If we get here, we have an unhandled type. Return it as-is.
+            return value
+
             # Value was not captured above
             return f"Unknown value type: {type(value)}"
 
-        # Unsupported role
-        logging.warning("Unsupported role in table render: %s", role)
-        return None
+        if role == Qt.TextAlignmentRole:
+            value: Any = self._data[index.row()][index.column()]
+
+            if isinstance(value, (int, float)):
+                # Align numbers to the right and vertically centre
+                return Qt.AlignRight | Qt.AlignVCenter
 
     def rowCount(self, *args, **kwargs) -> int:
         """Return the length of the outer list."""

@@ -42,7 +42,8 @@ class AbstractJobRunner(QRunnable):
             self.job()
 
             while self.is_paused:
-                # Wait for resume
+                # Wait for a resume; release the GIL, so the loop does not hog the CPU.
+                # Without this, the loop will waste resources doing nothing!
                 time.sleep(0)
             if self.is_killed:
                 # Break loop
