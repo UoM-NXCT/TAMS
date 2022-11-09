@@ -41,16 +41,11 @@ disable = """
     invalid-name
 """
 
-
 [tool.isort]
 profile = "black"
 
 [tool.sqlfluff.core]
 dialect = "postgres"
-
-[tool.pytest.ini_options]
-# GitHub Actions can't run GUI tests and it's not worth my time to fix
-addopts = "--ignore=client/tests/test_pyside.py --ignore=client/tests/test_utils.py"
 
 [build-system]
 requires = ["poetry-core"]
