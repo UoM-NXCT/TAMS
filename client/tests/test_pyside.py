@@ -1,10 +1,12 @@
 """
 Tests for the Qt styles (via PySide6).
 """
+import unittest
+
 from PySide6.QtWidgets import QStyleFactory
 
 
-class TestPyside6:
+class TestPyside6(unittest.TestCase):
     """Test the PySide6 module."""
 
     def test_style_keys(self) -> None:

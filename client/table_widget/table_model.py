@@ -1,14 +1,15 @@
-"""Define a table model used in the GUI.
+"""
+Define a table model used in the GUI.
 
-The model handles providing the data for display by the view. We write a custom model which is a subclass of
-QAbstractTableModel.
+The model handles providing the data for display by the view. We write a custom model
+which is a subclass of QAbstractTableModel.
 
 The reason for using a custom model over the built-in models is for greater control over
 data representation.
 """
 
 from datetime import date, datetime
-from typing import Any, Union
+from typing import Any
 
 from PySide6.QtCore import QAbstractTableModel, QModelIndex, QPersistentModelIndex, Qt
 

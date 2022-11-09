@@ -1,5 +1,7 @@
 """
-Settings dialogue.
+Settings dialogue for the user to view and change settings.
+
+Settings are saved as TOML files in the settings directory.
 """
 
 import logging
@@ -39,12 +41,12 @@ class SettingsWindow(QDialog):
         super().__init__()
         self.setMinimumSize(400, 300)
         self.setWindowTitle("Settings")
-        self.general_settings_toml: Path = Path(__file__).parents[1] / Path(
-            "settings/general.toml"
-        )
-        self.database_toml: Path = Path(__file__).parents[1] / Path(
-            "settings/database.toml"
-        )
+
+        # Store paths to settings TOML files
+        settings_dir: Path = Path(__file__).parents[1] / "settings"
+        self.general_settings_toml: Path = settings_dir / "general_settings.toml"
+        self.database_toml: Path = settings_dir / "database.toml"
+
         self.set_up_settings_window()
         self.show()
 
@@ -90,48 +92,46 @@ class SettingsWindow(QDialog):
         self.local_library_info = QLabel(self.generate_local_library_info())
         self.local_library_info.setWordWrap(True)
 
-        local_library_buttons: QWidget = QWidget()
-        local_library_buttons_layout: QHBoxLayout = QHBoxLayout()
+        local_lib_buttons: QWidget = QWidget()
+        local_lib_buttons_layout: QHBoxLayout = QHBoxLayout()
 
-        open_local_library_button: QPushButton = QPushButton("Open local library")
-        open_local_library_button.clicked.connect(
+        open_local_lib_button: QPushButton = QPushButton("Open local library")
+        open_local_lib_button.clicked.connect(
             lambda: self.open_library(self.get_library("local"), "local")
         )
-        local_library_buttons_layout.addWidget(open_local_library_button)
+        local_lib_buttons_layout.addWidget(open_local_lib_button)
 
         edit_local_libary: QPushButton = QPushButton("Edit local library")
         edit_local_libary.clicked.connect(lambda: self.edit_library("local"))
-        local_library_buttons_layout.addWidget(edit_local_libary)
+        local_lib_buttons_layout.addWidget(edit_local_libary)
 
-        local_library_buttons.setLayout(local_library_buttons_layout)
+        local_lib_buttons.setLayout(local_lib_buttons_layout)
 
         # Create the layout for the permanent library settings.
         self.permanent_library_info = QLabel(self.generate_permanent_library_info())
         self.permanent_library_info.setWordWrap(True)
 
-        permanent_library_buttons: QWidget = QWidget()
-        permanent_library_buttons_layout: QHBoxLayout = QHBoxLayout()
+        permanent_lib_buttons: QWidget = QWidget()
+        permanent_lib_buttons_layout: QHBoxLayout = QHBoxLayout()
 
-        open_permanent_library_button: QPushButton = QPushButton(
-            "Open permanent library"
-        )
-        open_permanent_library_button.clicked.connect(
+        open_permanent_lib_button: QPushButton = QPushButton("Open permanent library")
+        open_permanent_lib_button.clicked.connect(
             lambda: self.open_library(self.get_library("permanent"), "permanent")
         )
-        permanent_library_buttons_layout.addWidget(open_permanent_library_button)
+        permanent_lib_buttons_layout.addWidget(open_permanent_lib_button)
 
-        edit_permanent_libary: QPushButton = QPushButton("Edit permanent library")
-        edit_permanent_libary.clicked.connect(lambda: self.edit_library("permanent"))
-        permanent_library_buttons_layout.addWidget(edit_permanent_libary)
+        edit_permanent_lib: QPushButton = QPushButton("Edit permanent library")
+        edit_permanent_lib.clicked.connect(lambda: self.edit_library("permanent"))
+        permanent_lib_buttons_layout.addWidget(edit_permanent_lib)
 
-        permanent_library_buttons.setLayout(permanent_library_buttons_layout)
+        permanent_lib_buttons.setLayout(permanent_lib_buttons_layout)
 
         # Add widgets to general settings page layout
         tab_v_box = QVBoxLayout()
         tab_v_box.addWidget(self.local_library_info)
-        tab_v_box.addWidget(local_library_buttons)
+        tab_v_box.addWidget(local_lib_buttons)
         tab_v_box.addWidget(self.permanent_library_info)
-        tab_v_box.addWidget(permanent_library_buttons)
+        tab_v_box.addWidget(permanent_lib_buttons)
         tab_v_box.addStretch()
 
         # Set layout for general settings tab
@@ -176,26 +176,26 @@ class SettingsWindow(QDialog):
         """
         return info
 
-    def open_library(self, library_path: str, library_title: str) -> None:
+    def open_library(self, lib_path: str, lib_title: str) -> None:
         """Open the local library directory in the file explorer."""
 
-        if library_path:
-            QDesktopServices.openUrl(library_path)
+        if lib_path:
+            QDesktopServices.openUrl(lib_path)
         else:
             QMessageBox.warning(
                 self,
-                f"No {library_title} library set",
-                f"No {library_title} library set. Please set a {library_title} library first.",
+                f"No {lib_title} library set",
+                f"No {lib_title} library set. Please set a {lib_title} library first.",
             )
 
     def get_library(self, library_title: str) -> str | None:
         """Get the current library to present to the user."""
 
-        current_library = get_value_from_toml(
+        current_lib = get_value_from_toml(
             self.general_settings_toml, "storage", f"{library_title}_library"
         )
-        if current_library:
-            return current_library
+        if current_lib:
+            return current_lib
         return None
 
     def database_settings(self):
@@ -236,10 +236,10 @@ class SettingsWindow(QDialog):
         self.password_edit = QLineEdit(database_config["postgresql"]["password"])
 
         # Test connection, OK, cancel, and apply buttons
-        self.test_button = QPushButton(self)
-        self.test_button.setText("Test connection")
-        self.test_button.setToolTip("Test the database connection")
-        self.test_button.clicked.connect(self.test_db_connection)
+        self.test_btn = QPushButton(self)
+        self.test_btn.setText("Test connection")
+        self.test_btn.setToolTip("Test the database connection")
+        self.test_btn.clicked.connect(self.test_db_connection)
 
         # Add widgets to general settings page layout
         tab_v_box = QVBoxLayout()
@@ -253,24 +253,24 @@ class SettingsWindow(QDialog):
         tab_v_box.addWidget(self.user_edit)
         tab_v_box.addWidget(self.password_label)
         tab_v_box.addWidget(self.password_edit)
-        tab_v_box.addWidget(self.test_button)
+        tab_v_box.addWidget(self.test_btn)
         tab_v_box.addStretch()
 
         # Set layout for general settings tab
         self.database_settings_tab.setLayout(tab_v_box)
 
-    def edit_library(self, library_title: str) -> None:
+    def edit_library(self, lib_title: str) -> None:
         """Open a file dialog to select the library directory."""
 
-        if self.get_library(library_title):
-            initial_directory: str = self.get_library(library_title)
+        if self.get_library(lib_title):
+            initial_directory: str = self.get_library(lib_title)
         else:
             # Use current directory if no library is set
             initial_directory: str = ""
 
         library = QFileDialog.getExistingDirectory(
             self,
-            caption=f"Select {library_title} library directory",
+            caption=f"Select {lib_title} library directory",
             dir=initial_directory,
             options=QFileDialog.ShowDirsOnly,
         )
@@ -278,24 +278,24 @@ class SettingsWindow(QDialog):
             update_toml(
                 self.general_settings_toml,
                 "storage",
-                f"{library_title}_library",
+                f"{lib_title}_library",
                 library,
             )
         else:
             logging.info("User cancelled file dialog")
             QMessageBox.warning(
                 self,
-                f"No {library_title} library set",
-                f"No {library_title} library set. Please set a {library_title} library first.",
+                f"No {lib_title} library set",
+                f"No {lib_title} library set. Please set a {lib_title} library first.",
             )
 
         # Update the library info text
-        if library_title == "local":
+        if lib_title == "local":
             self.local_library_info.setText(self.generate_local_library_info())
-        elif library_title == "permanent":
+        elif lib_title == "permanent":
             self.permanent_library_info.setText(self.generate_permanent_library_info())
         else:
-            logging.critical("Invalid library title: %s", library_title)
+            logging.critical("Invalid library title: %s", lib_title)
 
     def apply(self):
         """Apply the changes to settings."""
@@ -303,8 +303,9 @@ class SettingsWindow(QDialog):
         # TODO: changes to the local library should be applied not immediately;
         #  refactor under this method!
 
-        # Construct new config dict
-        def update_if_modified(line_edit: QLineEdit, key: str):
+        def update_if_modified(line_edit: QLineEdit, key: str) -> None:
+            """Update the config dict if the line edit has been modified."""
+
             if line_edit.isModified():
                 update_toml(self.database_toml, "postgresql", key, line_edit.text())
 
@@ -313,7 +314,6 @@ class SettingsWindow(QDialog):
         update_if_modified(self.name_edit, "database")
         update_if_modified(self.user_edit, "user")
         update_if_modified(self.password_edit, "password")
-        logging.info("Updated database.toml file.")
 
     def test_db_connection(self) -> None:
         """Test the database connection."""
@@ -332,17 +332,17 @@ class SettingsWindow(QDialog):
                     QMessageBox.StandardButton.Ok,
                 )
 
-        except psycopg.OperationalError as error:
-            logging.exception(error)
+        except psycopg.OperationalError:
+            logging.exception("Exception raised")
             QMessageBox.critical(
                 self,
-                f"Database config incorrect",
+                "Database config incorrect",
                 "Check database config settings are correct.",
                 QMessageBox.StandardButton.Cancel,
             )
 
-        except FileNotFoundError as error:
-            logging.error(error)
+        except FileNotFoundError:
+            logging.exception("Exception raised")
             QMessageBox.critical(
                 self,
                 f"Database config file not found at {self.database_toml}",
@@ -350,21 +350,12 @@ class SettingsWindow(QDialog):
                 QMessageBox.StandardButton.Cancel,
             )
 
-        except TypeError as error:
-            logging.error(error)
-            QMessageBox.critical(
-                self,
-                f"Database config file type error",
-                "Check database config settings have been saved in the correct data type.",
-                QMessageBox.StandardButton.Cancel,
-            )
-
-        except Exception as exc:
+        except TypeError:
             logging.exception("Exception raised")
             QMessageBox.critical(
                 self,
-                "Unable to connect to database",
-                str(exc),
+                "Database config file type error",
+                "Check database config settings are saved as the correct data type.",
                 QMessageBox.StandardButton.Cancel,
             )
 

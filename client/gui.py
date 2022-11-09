@@ -140,10 +140,10 @@ class MainWindow(QMainWindow):
 
         # Link toolbox buttons to functions
         self.toolbox.projects_button.clicked.connect(self.update_table_with_projects)
-        self.toolbox.create_project_button.clicked.connect(self.open_create_project)
+        self.toolbox.create_prj_btn.clicked.connect(self.open_create_project)
         self.toolbox.scans_button.clicked.connect(self.update_table_with_scans)
-        self.toolbox.create_scan_button.clicked.connect(self.open_create_scan)
-        self.toolbox.users_button.clicked.connect(self.update_table_with_users)
+        self.toolbox.create_scan_btn.clicked.connect(self.open_create_scan)
+        self.toolbox.users_btn.clicked.connect(self.update_table_with_users)
 
         # Metadata panel
         self.metadata_panel = MetadataPanel()
@@ -333,20 +333,10 @@ class MainWindow(QMainWindow):
             project_id: int = self.get_value_from_row(1)
 
             try:
-                QMessageBox.information(
-                    self,
-                    "Downloading data",
-                    f"Downloading data from scan ID {row_pk}",
-                )
-                # TODO: update to runner
-                save_to_local(
+                runner = DownloadScansRunner(
                     Path(local_library), Path(permanent_library), project_id, row_pk
                 )
-                QMessageBox.information(
-                    self,
-                    "Download complete",
-                    f"Downloaded data from scan ID {row_pk}",
-                )
+                self.progress_dialogue = ProgressDialogue(runner)
             except Exception:
                 # TODO: specify exceptions
                 logging.exception("Error downloading data from project ID %s", row_pk)
