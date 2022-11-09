@@ -11,6 +11,9 @@ It aims to make storing and accessing data easy and quick.
 
 - [Get started](#get-started)
 - [Develop](#develop)
+  - [GUI](#gui)
+  - [PostgreSQL server](#postgresql-server)
+  - [Tests](#tests)
 - [Issues](#issues)
 - [Licence](#licence)
 - [Warranty](#warranty)
@@ -57,7 +60,7 @@ pip install -r requirements.txt
 python client/gui.py
 ```
 
-### PostgreSQL server (container)
+### PostgreSQL server
 
 You can use container software such as Podman and Docker to run the server in a container. Podman is preferred as it
 because of it does not require a daemon or root privileges. However, you may prefer Docker if you run Windows or would
@@ -103,15 +106,31 @@ Or,
 docker-compose up db
 ```
 
-### Type hints
+### Tests
 
-This project supports `mypy`. To type-check, run:
+#### pytest
+
+Test the application using [pytest](https://docs.pytest.org/en/stable/).
+
+```commandline
+poetry run pytest client
+```
+
+You can also use `pytest` directly if you have it installed.
+
+#### Type hints
+
+This project uses type hints to help with development.
+
+Use [mypy](http://mypy-lang.org/) to check type hints.
 
 ```commandline
 poetry run mypy client
 ```
 
-However, `mypy` does not play well with PySide6. This means some things may be flagged wrongly.
+You can also use `mypy` directly if you have it installed.
+
+However, `mypy` does not work with PySide6, so you should ignore some of its complaints.
 
 ## Issues
 

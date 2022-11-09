@@ -31,21 +31,36 @@ mypy = "^0.982"
 coverage = "^6.5.0"
 sqlfluff = "^1.4.1"
 
+
+# black configuration
+
 [tool.black]
 line-length = 88
 target-version = ["py310"]
 
+
+# PyLint configuration
+
 [tool.pylint.'MESSAGES CONTROL']
 max-line-length = 88
+# Qt uses camelCase for its methods; tell pylint to ignore invalid-name
 disable = """
     invalid-name
 """
 
+
+# isort configuration
+
 [tool.isort]
 profile = "black"
 
+
+# sqlfluff configuration
+
 [tool.sqlfluff.core]
 dialect = "postgres"
+
+
 
 [build-system]
 requires = ["poetry-core"]
