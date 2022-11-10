@@ -5,39 +5,42 @@ This files classes to represent data from the database to the user.
 import logging
 from typing import Any
 
-from .database_model import Database
 from .exceptions import MissingTables
+from .models import Database
 
 
 class DatabaseView:
     """Represent data from the database."""
 
-    def __init__(self, connection_string: str) -> None:
+    def __init__(self, conn_str: str) -> None:
         """Initialize database view and connect to database."""
 
-        self.connection_string: str = connection_string
-        with Database(self.connection_string) as database:
+        self.conn_str: str = conn_str
+
+        # Check it is possible to connect to the database
+        with Database(self.conn_str) as database:
             if database.conn.closed:
                 raise ConnectionError("Unable to connect to database")
             logging.info("Connection to database in DatabaseView successful.")
 
-    def get_tables(self) -> list[tuple]:
+    def get_tables(self) -> list[tuple[str, ...]]:
         """Get list of tables in the database."""
 
         query: str = "select table_name from information_schema.tables where table_schema='public' and table_type='BASE TABLE';"
-        with Database(self.connection_string) as database:
+        with Database(self.conn_str) as database:
             database.exec(query)
             return database.cur.fetchall()
 
     def validate_tables(self) -> None:
-        """Validate tables in the database; raises an exception if they are not valid."""
+        """Validate tables in the database."""
 
         # Check the required tables exist
-        tables_needed: set[tuple] = {
+        tables_needed: set[tuple[str], ...] = {
             ("project",),
+            ("scan",),
         }
-        tables_present: set[tuple] = set(self.get_tables())
-        missing_tables: set[tuple] = tables_needed - tables_present
+        tables_present: set[tuple[str, ...]] = set(self.get_tables())
+        missing_tables: set[tuple[str, ...]] = tables_needed - tables_present
         if missing_tables:
             raise MissingTables(missing_tables)
 
@@ -55,7 +58,7 @@ class DatabaseView:
         query = f"{query};"
 
         # Get data
-        with Database(self.connection_string) as database:
+        with Database(self.conn_str) as database:
             database.exec(query)
             data: list[tuple] = database.cur.fetchall()
         if select_value == "*":
@@ -70,11 +73,8 @@ class DatabaseView:
     def get_version(self) -> str:
         """Get database version."""
 
-        query: str = "select version();"
-        with Database(self.connection_string) as database:
-            database.exec(query)
-            version: str = str(database.cur.fetchone())
-        return version
+        with Database(self.conn_str) as database:
+            return str(database)
 
     def get_project_metadata(
         self, project_id: int
@@ -123,16 +123,16 @@ class DatabaseView:
         row: tuple[Any, ...] = tuple(data[0])
 
         # Get project title
-        project_id: int = row[1]
-        project_data, _ = self.view_select_from_where(
+        prj_id: int = row[1]
+        prj_data, _ = self.view_select_from_where(
             "title",
             "project",
-            f"project_id={project_id}",
+            f"project_id={prj_id}",
         )
-        project_title: str = project_data[0][0]
+        prj_title: str = prj_data[0][0]
 
         # Add project title to project id metadata
-        project_id_metadata = f"{project_id} ({project_title})"
+        prj_id_metadata = f"{prj_id} ({prj_title})"
 
         # Get instrument name
         instrument_id: int = row[2]
@@ -147,5 +147,5 @@ class DatabaseView:
         instrument_id_metadata = f"{instrument_id} ({instrument_name})"
 
         # Turn the list back into a tuple, the expected return value
-        updated_row: tuple = (scan_id, project_id_metadata, instrument_id_metadata)
+        updated_row: tuple = (scan_id, prj_id_metadata, instrument_id_metadata)
         return updated_row, column_header

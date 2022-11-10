@@ -1,7 +1,4 @@
-""" Contains the database utility functions:
-
--  dict_to_conn_str: takes a dict and returns a Pyscopg connection string.
-"""
+"""Contains the database utility functions."""
 
 
 def dict_to_conn_str(config_dict: dict) -> str:
@@ -15,7 +12,5 @@ def dict_to_conn_str(config_dict: dict) -> str:
     dbname: str = psql_config["database"]
     user: str = psql_config["user"]
     password: str = psql_config["password"]
-    connection_string: str = (
-        f"host={host} dbname={dbname} user={user} password" f"={password}"
-    )
-    return connection_string
+    conn_str: str = f"host={host} dbname={dbname} user={user} password" f"={password}"
+    return conn_str
