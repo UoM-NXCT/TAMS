@@ -23,7 +23,7 @@ class DatabaseView:
                 raise ConnectionError("Unable to connect to database")
             logging.info("Connection to database in DatabaseView successful.")
 
-    def get_tables(self) -> list[tuple[str, ...]]:
+    def get_tables(self) -> list[tuple[str]]:
         """Get list of tables in the database."""
 
         query: str = "select table_name from information_schema.tables where table_schema='public' and table_type='BASE TABLE';"
@@ -35,12 +35,12 @@ class DatabaseView:
         """Validate tables in the database."""
 
         # Check the required tables exist
-        tables_needed: set[tuple[str], ...] = {
+        tables_needed: set[tuple[str]] = {
             ("project",),
             ("scan",),
         }
-        tables_present: set[tuple[str, ...]] = set(self.get_tables())
-        missing_tables: set[tuple[str, ...]] = tables_needed - tables_present
+        tables_present: set[tuple[str]] = set(self.get_tables())
+        missing_tables: set[tuple[str]] = tables_needed - tables_present
         if missing_tables:
             raise MissingTables(missing_tables)
 

@@ -23,8 +23,8 @@ class Database:
 
         if self.cur is not None:
             self.cur.execute("select version();")
-            row: tuple[str, ...] = self.cur.fetchone()
-            return row[0]  # mypy complains but this is correct
+            version: str = self.cur.fetchone()[0]
+            return version
 
         # If the cursor is None, the database is not connected.
         return str(None)
