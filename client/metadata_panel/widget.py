@@ -65,15 +65,15 @@ class MetadataPanel(QWidget):
 
                 # Render and add the values to the tree item
                 child: QTreeWidgetItem
-                if isinstance(values, (str, int)):
+                if isinstance(values, (str, int, date)):
                     child = QTreeWidgetItem([str(values)])
-                    child.setToolTip(0, str(values))
-                    item.addChild(child)
-                elif isinstance(values, date):
-                    child = QTreeWidgetItem([str(values)])
-                    child.setToolTip(0, f"{values} (YYYY-MM-DD)")
+                    if isinstance(values, date):
+                        child.setToolTip(0, f"{values} (YYYY-MM-DD)")
+                    else:
+                        child.setToolTip(0, str(values))
                     item.addChild(child)
                 elif isinstance(values, tuple):
+                    # TODO: this is a hack; try to find a better way to handle this.
                     for value in values:
                         child = QTreeWidgetItem([value])
                         child.setToolTip(0, value)
