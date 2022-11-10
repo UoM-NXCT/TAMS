@@ -7,10 +7,6 @@ import os
 import shutil
 from pathlib import Path
 
-from tqdm import tqdm
-
-from client.dialogues.progress import ProgressDialogue
-
 
 def create_dir_if_missing(path: Path) -> None:
     """Create a directory if one does not exist.
@@ -93,24 +89,15 @@ def find_and_move(
     number_of_counters = len(list(search_dir.glob(glob_arg)))
     if number_of_counters:
         for destination in destinations:
-            if gui:
-                progress_dialogue = ProgressDialogue(
-                    len(list(search_dir.glob(glob_arg)))
-                )
             for item in list(search_dir.glob(glob_arg)):
                 # Copy file to local reconstructed data directory
                 move_or_copy_item(
                     item,
                     Path(search_dir) / Path(destination),
                 )
-                if gui:
-                    progress_dialogue.add_progress(1)
-        for item in tqdm(
-            search_dir.glob(glob_arg),
-            f"Deleting {glob_arg} files from {search_dir}",
-            total=len(list(search_dir.glob(glob_arg))),
-        ):
-            if not copy:
+
+        if not copy:
+            for item in list(search_dir.glob(glob_arg)):
                 if item.is_file():
                     os.remove(item)
                 elif item.is_dir():

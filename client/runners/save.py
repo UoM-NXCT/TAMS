@@ -44,11 +44,11 @@ class DownloadScansRunner(AbstractJobRunner):
 
         # If no scan IDs are provided, save all scans in project
         if not scan_ids:
-            self.scan_ids: list[str] = [
+            self.scan_ids: tuple[str, ...] = tuple(
                 scan_dir.name
                 for scan_dir in self.permanent_storage_dir.glob("*")
                 if scan_dir.is_dir()
-            ]
+            )
         else:
             self.scan_ids = scan_ids
 
@@ -62,9 +62,9 @@ class DownloadScansRunner(AbstractJobRunner):
 
         # Create directories if they do not already exist
         self.local_prj_dir: Path = local / str(project_id)
-        local_scan_dirs: list[Path] = [
+        local_scan_dirs: tuple[Path, ...] = tuple(
             self.local_prj_dir / str(scan_id) for scan_id in self.scan_ids
-        ]
+        )
         create_dir_if_missing(self.local_prj_dir)
         for local_scan_dir in local_scan_dirs:
             create_dir_if_missing(local_scan_dir)
@@ -72,7 +72,7 @@ class DownloadScansRunner(AbstractJobRunner):
         # Count files to be moved
         total_files: int = 0
         for scan_id in self.scan_ids:
-            total_files += len(list(self.permanent_storage_dir.glob(f"{scan_id}/*")))
+            total_files += len(tuple(self.permanent_storage_dir.glob(f"{scan_id}/*")))
         self.max_progress = total_files
 
     def job(self):

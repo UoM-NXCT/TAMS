@@ -645,7 +645,7 @@ python-versions = ">=3.6"
 name = "tqdm"
 version = "4.64.1"
 description = "Fast, Extensible Progress Meter"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,>=2.7"
 
@@ -697,7 +697,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "<3.12,^3.10,"
-content-hash = "5e069920afbf8acfd88f3603aa8bb8b1c6cb2d3578a75568983791c3b6d33e54"
+content-hash = "3590672d7084b4e9b746d976a7f1474920c4f4c129be643fca8994edfcccafc5"
 
 [metadata.files]
 aiohttp = [
