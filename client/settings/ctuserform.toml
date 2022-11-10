@@ -1,5 +1,6 @@
-[info]
-project_id = "example_project"
-instrument_id = "Tom's iPhone 7 Plus"
-user_id = "tjk"
-scan_id = "scan_123"
+[hardcoded]
+# Hardcoded scan information; do not change
+scan_id = 0
+project_id = 0
+instrument_id = 0
+

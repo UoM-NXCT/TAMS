@@ -5,7 +5,11 @@ Runner for dowloading files to the local library.
 import time
 from pathlib import Path
 
+from client import settings
+from client.db.utils import dict_to_conn_str
+from client.db.views import DatabaseView
 from client.utils.file import create_dir_if_missing, move_or_copy_item
+from client.utils.toml import create_toml, get_dict_from_toml
 
 from .abstract import AbstractJobRunner, WorkerKilledException
 
@@ -75,12 +79,24 @@ class DownloadScansRunner(AbstractJobRunner):
             total_files += len(tuple(self.permanent_storage_dir.glob(f"{scan_id}/*")))
         self.max_progress = total_files
 
+    def get_scan_form_data(self, scan_id: int):
+        """Get the metadata for a scan."""
+        conn_dict: dict = get_dict_from_toml(settings.database)
+        conn_str: str = dict_to_conn_str(conn_dict)
+        db = DatabaseView(conn_str)
+        return db.get_scan_form_data(scan_id)
+
     def job(self):
         """Save data to local library."""
 
         for scan in self.scan_ids:
             target: Path = self.permanent_storage_dir / Path(str(scan))
             destination: Path = self.local_prj_dir / Path(str(scan))
+            user_form = destination / "user_form.toml"
+            scan_form_data = self.get_scan_form_data(scan)
+
+            create_toml(user_form, scan_form_data)
+
             for item in target.glob("*"):
                 time.sleep(0)
                 move_or_copy_item(item, destination, keep_original=True)

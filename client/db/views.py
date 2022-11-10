@@ -149,3 +149,15 @@ class DatabaseView:
         # Turn the list back into a tuple, the expected return value
         updated_row: tuple = (scan_id, prj_id_metadata, instrument_id_metadata)
         return updated_row, column_header
+
+    def get_scan_form_data(self, scan_id: int) -> dict:
+        hardcoded_data, hardcoded_column_headers = self.view_select_from_where(
+            "scan_id, project_id, instrument_id",
+            "scan",
+            f"scan_id={scan_id}",
+        )
+        hardcoded_data: tuple = hardcoded_data[0]
+        data = {
+            "hardcoded": dict(zip(hardcoded_column_headers, hardcoded_data)),
+        }
+        return data
