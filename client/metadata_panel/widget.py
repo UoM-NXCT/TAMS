@@ -1,5 +1,5 @@
 """
-Custom widget class that inherits the Qt built-in QWidget.
+Custom widget class inherits the Qt built-in QWidget.
 
 Contains the metadata on the current entry; displayed on the right panel.
 """
@@ -64,17 +64,18 @@ class MetadataPanel(QWidget):
                 values: Any = self._data[index]
 
                 # Render and add the values to the tree item
+                child: QTreeWidgetItem
                 if isinstance(values, (str, int)):
-                    child: QTreeWidgetItem = QTreeWidgetItem([str(values)])
+                    child = QTreeWidgetItem([str(values)])
                     child.setToolTip(0, str(values))
                     item.addChild(child)
                 elif isinstance(values, date):
-                    child: QTreeWidgetItem = QTreeWidgetItem([str(values)])
+                    child = QTreeWidgetItem([str(values)])
                     child.setToolTip(0, f"{values} (YYYY-MM-DD)")
                     item.addChild(child)
                 elif isinstance(values, tuple):
                     for value in values:
-                        child: QTreeWidgetItem = QTreeWidgetItem([value])
+                        child = QTreeWidgetItem([value])
                         child.setToolTip(0, value)
                         item.addChild(child)
 
