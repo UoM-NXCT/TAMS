@@ -22,11 +22,8 @@ from PySide6.QtWidgets import (
     QToolBar,
     QWidget,
 )
-from table_widget.table_model import TableModel
-from table_widget.table_view import TableView
-from toolbox.toolbox import ToolBox
-from utils.toml import get_dict_from_toml, get_value_from_toml
 
+from client import settings
 from client.db import DatabaseView, MissingTables, dict_to_conn_str
 from client.dialogues.create_project_dialogue import CreateProjectWindow
 from client.dialogues.create_scan_dialogue import CreateScanDialogue
@@ -34,8 +31,12 @@ from client.dialogues.progress import ProgressDialogue
 from client.dialogues.settings import SettingsWindow
 from client.metadata_panel import MetadataPanel
 from client.runners.save import DownloadScansRunner
+from client.table_widget.model import TableModel
+from client.table_widget.view import TableView
+from client.toolbox.toolbox import ToolBox
+from client.utils.toml import get_dict_from_toml, get_value_from_toml
 
-logging.basicConfig(level=logging.DEBUG)
+TAMS_ROOT = Path(__file__).parents[1]
 
 
 class MainWindow(QMainWindow):
@@ -424,11 +425,10 @@ class MainWindow(QMainWindow):
     def connect_to_database(self) -> None:
         """Set up the connection to the database."""
 
-        config_file = Path("settings/database.toml").absolute()
         try:
             # Set up database
             logging.info("Connecting to database")
-            config_dict = get_dict_from_toml(config_file)
+            config_dict = get_dict_from_toml(settings.database)
             self.connection_string = dict_to_conn_str(config_dict)
             self.database_view = DatabaseView(self.connection_string)
 
@@ -499,9 +499,3 @@ class MainWindow(QMainWindow):
         # Update the metadata panel with the new metadata
         self.metadata_panel.update_metadata(metadata)
         self.metadata_panel.layout().update()
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    win = MainWindow()
-    sys.exit(app.exec())

@@ -24,6 +24,10 @@ TAMS is currently in development, so it does not yet have installation instructi
 
 If you wish to use TAMS regardless, clone this repository, install the dependencies from `pyproject.toml`, and run the application.
 
+```commandline
+poetry run python -m client
+```
+
 ### Windows installation instructions (WIP)
 
 The Qt library depends on Postgres' library, which must be available in the path to load. You can do this by adding your Postgres installation bin folder to your path.
