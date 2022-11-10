@@ -75,7 +75,6 @@ def find_and_move(
     search_dir: Path,
     *destinations: Path,
     copy: bool = False,
-    gui: bool = False,
 ) -> None:
     """Function that finds files using .glob method in given directory and moves them to
     another directory.
@@ -86,10 +85,10 @@ def find_and_move(
     :param destinations: list of destinations
     """
 
-    number_of_counters = len(list(search_dir.glob(glob_arg)))
+    number_of_counters = len(tuple(search_dir.glob(glob_arg)))
     if number_of_counters:
         for destination in destinations:
-            for item in list(search_dir.glob(glob_arg)):
+            for item in tuple(search_dir.glob(glob_arg)):
                 # Copy file to local reconstructed data directory
                 move_or_copy_item(
                     item,
@@ -97,7 +96,7 @@ def find_and_move(
                 )
 
         if not copy:
-            for item in list(search_dir.glob(glob_arg)):
+            for item in tuple(search_dir.glob(glob_arg)):
                 if item.is_file():
                     os.remove(item)
                 elif item.is_dir():

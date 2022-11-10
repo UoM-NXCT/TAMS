@@ -10,7 +10,7 @@ from typing import Any
 try:
     import tomllib  # noqa
 except ModuleNotFoundError:
-    import tomli as tomllib
+    import tomli as tomllib  # type: ignore
 
 import tomli_w
 
