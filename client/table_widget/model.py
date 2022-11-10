@@ -22,7 +22,7 @@ from PySide6.QtCore import QAbstractTableModel, QModelIndex, QPersistentModelInd
 class TableModel(QAbstractTableModel):
     """Define the custom table model, a subclass of a built-in Qt abstract model."""
 
-    def __init__(self, data: list[tuple], column_headers: list[str]):
+    def __init__(self, data: list[tuple], column_headers: list[str]) -> None:
         super().__init__()
         # Anticipate a list of tuples, as this is what database returns upon select.
         self._data = data or []
@@ -89,6 +89,7 @@ class TableModel(QAbstractTableModel):
             if orientation == Qt.Horizontal:
                 header: str = str(self._column_headers[section])
                 return header
+
         # Not returning this makes headers not show, for whatever reason.
         return QAbstractTableModel.headerData(self, section, orientation, role)
 

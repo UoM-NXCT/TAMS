@@ -1,1 +1,1 @@
-from .metadata_panel import MetadataPanel
+from .widget import MetadataPanel
