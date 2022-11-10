@@ -25,8 +25,9 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from ..db import Database, dict_to_conn_str
-from ..utils.toml import (
+from client import settings
+from client.db import Database, dict_to_conn_str
+from client.utils.toml import (
     create_toml,
     get_dict_from_toml,
     get_value_from_toml,
@@ -44,8 +45,6 @@ class SettingsWindow(QDialog):
 
         # Store paths to settings TOML files
         settings_dir: Path = Path(__file__).parents[1] / "settings"
-        self.general_settings_toml: Path = settings_dir / "general_settings.toml"
-        self.database_toml: Path = settings_dir / "database.toml"
 
         self.set_up_settings_window()
         self.show()
@@ -192,7 +191,7 @@ class SettingsWindow(QDialog):
         """Get the current library to present to the user."""
 
         current_lib = get_value_from_toml(
-            self.general_settings_toml, "storage", f"{library_title}_library"
+            settings.general, "storage", f"{library_title}_library"
         )
         if current_lib:
             return current_lib
@@ -201,7 +200,7 @@ class SettingsWindow(QDialog):
     def database_settings(self):
         """Database settings widget to allow the user to set the database connection."""
 
-        if not self.database_toml.is_file():
+        if not settings.database.is_file():
             # Create a database config file if one does not already exist
             template_db_config: dict = {
                 "postgresql": {
@@ -212,8 +211,8 @@ class SettingsWindow(QDialog):
                     "password": "",
                 }
             }
-            create_toml(self.database_toml, template_db_config)
-        database_config = get_dict_from_toml(self.database_toml)
+            create_toml(settings.database, template_db_config)
+        database_config = get_dict_from_toml(settings.database)
 
         # Create database host widgets
         self.host_label = QLabel("Host")
@@ -307,7 +306,7 @@ class SettingsWindow(QDialog):
             """Update the config dict if the line edit has been modified."""
 
             if line_edit.isModified():
-                update_toml(self.database_toml, "postgresql", key, line_edit.text())
+                update_toml(settings.database, "postgresql", key, line_edit.text())
 
         update_if_modified(self.host_edit, "host")
         update_if_modified(self.port_edit, "port")
@@ -319,9 +318,9 @@ class SettingsWindow(QDialog):
         """Test the database connection."""
 
         try:
-            if not self.database_toml.is_file():
+            if not settings.database.is_file():
                 raise FileNotFoundError
-            database_config_dict = get_dict_from_toml(self.database_toml)
+            database_config_dict = get_dict_from_toml(settings.database)
             database_config = dict_to_conn_str(database_config_dict)
             with Database(database_config) as database:
                 QMessageBox.information(
@@ -345,7 +344,7 @@ class SettingsWindow(QDialog):
             logging.exception("Exception raised")
             QMessageBox.critical(
                 self,
-                f"Database config file not found at {self.database_toml}",
+                f"Database config file not found at {settings.database}",
                 "Check database config settings have been saved.",
                 QMessageBox.StandardButton.Cancel,
             )

@@ -2,10 +2,9 @@
 Entry point for the GUI application script.
 """
 
-import logging
 import sys
 
-from PySide6.QtWidgets import QApplication, QMainWindow
+from PySide6.QtWidgets import QApplication
 
 from client.gui import MainWindow
 
@@ -13,12 +12,8 @@ from client.gui import MainWindow
 def main() -> None:
     """Main function implements the GUI."""
 
-    logging.info("Starting application.")
     app: QApplication = QApplication(sys.argv)
-
-    logging.info("Creating main window.")
-    main_window: QMainWindow = MainWindow()  # pylint: disable=unused-variable
-
+    main_window: MainWindow = MainWindow()  # pylint: disable=unused-variable
     sys.exit(app.exec())
 
 
