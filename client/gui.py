@@ -150,8 +150,8 @@ class MainWindow(QMainWindow):
         self.metadata_panel = MetadataPanel()
 
         # Create layout
-        layout = QGridLayout()
-        splitter = QSplitter(Qt.Horizontal)
+        layout: QGridLayout = QGridLayout()
+        splitter: QSplitter = QSplitter(Qt.Horizontal)
         splitter.addWidget(self.toolbox)
         splitter.addWidget(self.table_view)
         splitter.addWidget(self.metadata_panel)

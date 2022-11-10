@@ -151,6 +151,9 @@ class DatabaseView:
         return updated_row, column_header
 
     def get_scan_form_data(self, scan_id: int) -> dict:
+        """Get scan form data for user_form.toml."""
+
+        # Get hardcoded data (data that should not be changed by the user)
         hardcoded_data, hardcoded_column_headers = self.view_select_from_where(
             "scan_id, project_id, instrument_id",
             "scan",

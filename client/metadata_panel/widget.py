@@ -3,17 +3,25 @@ Custom widget class inherits the Qt built-in QWidget.
 
 Contains the metadata on the current entry; displayed on the right panel.
 """
-
+from collections import namedtuple
 from datetime import date
 from typing import Any
 
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QImage
 from PySide6.QtWidgets import (
+    QLabel,
     QLayout,
+    QSplitter,
+    QTableView,
     QTreeWidget,
     QTreeWidgetItem,
     QVBoxLayout,
     QWidget,
 )
+
+from client import settings
+from client.thumbnails.model import PreviewDelegate, PreviewModel
 
 
 class MetadataPanel(QWidget):
@@ -28,6 +36,31 @@ class MetadataPanel(QWidget):
 
         # Create the layout
         metadata_layout: QLayout = QVBoxLayout()
+        splitter: QSplitter = QSplitter(Qt.Vertical)
+
+        # Create the thumbnail widget
+        # Create a custom namedtuple class to hold our data.
+        self.preview = namedtuple("preview", "id title image")
+        self.thumbnail_view = QTableView()
+        self.thumbnail_view.horizontalHeader().hide()
+        self.thumbnail_view.verticalHeader().hide()
+        self.thumbnail_view.setGridStyle(Qt.NoPen)
+        self.thumbnail_view.set
+        delegate = PreviewDelegate()
+        self.thumbnail_view.setItemDelegate(delegate)
+        self.thumbnail_model = PreviewModel()
+        self.thumbnail_view.setModel(self.thumbnail_model)
+        splitter.addWidget(self.thumbnail_view)
+
+        # Add placeholder image to thumbnail widget
+        images = (settings.placeholder_image,)
+        for n, fn in enumerate(images):
+            image = QImage(fn)
+            item = self.preview(n, fn, image)
+            self.thumbnail_model.previews.append(item)
+        self.thumbnail_model.layoutChanged.emit()
+        self.thumbnail_view.resizeRowsToContents()
+        self.thumbnail_view.resizeColumnsToContents()
 
         # Create the tree widget
         self.metadata_tree: QTreeWidget = QTreeWidget()
@@ -36,7 +69,9 @@ class MetadataPanel(QWidget):
         self.metadata_tree.setHeaderHidden(True)
 
         # Add the tree to the layout
-        metadata_layout.addWidget(self.metadata_tree)
+        splitter.addWidget(self.metadata_tree)
+
+        metadata_layout.addWidget(splitter)
 
         # Set the layout
         self.setLayout(metadata_layout)

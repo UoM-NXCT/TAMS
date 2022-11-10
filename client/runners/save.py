@@ -92,18 +92,18 @@ class DownloadScansRunner(AbstractJobRunner):
         for scan in self.scan_ids:
             target: Path = self.permanent_storage_dir / Path(str(scan))
             destination: Path = self.local_prj_dir / Path(str(scan))
-            user_form = destination / "user_form.toml"
-            scan_form_data = self.get_scan_form_data(scan)
 
+            # Create user form
+            user_form: Path = destination / "user_form.toml"
+            scan_form_data: dict = self.get_scan_form_data(scan)
             create_toml(user_form, scan_form_data)
 
             for item in target.glob("*"):
-                time.sleep(0)
                 move_or_copy_item(item, destination, keep_original=True)
                 # Increment progress bar
                 self.signals.progress.emit(1)
                 while self.is_paused:
-                    time.sleep(0.1)
+                    time.sleep(0)
                 if self.is_killed:
                     raise WorkerKilledException
                 if self.is_finished:
