@@ -1,97 +1,116 @@
 """
-Model for the thumbnail widget.
+The thumbnail widget scales an image to fill a box while maintaining aspect ratio.
 """
 
-import math
-from typing import Any
+from pathlib import Path
 
-from PySide6.QtCore import (
-    QAbstractTableModel,
-    QModelIndex,
-    QPersistentModelIndex,
-    QSize,
-    Qt,
+from PySide6.QtCore import QRect, QSize, Qt
+from PySide6.QtGui import QPalette, QPixmap, QResizeEvent
+from PySide6.QtWidgets import (
+    QApplication,
+    QFrame,
+    QLabel,
+    QMainWindow,
+    QSplitter,
+    QVBoxLayout,
 )
-from PySide6.QtGui import QImage, QPainter
-from PySide6.QtWidgets import QStyledItemDelegate, QStyleOptionViewItem
+
+from client import settings
 
 
-class PreviewDelegate(QStyledItemDelegate):
-    """A custom delegate to draw the thumbnails."""
+class ThumbnailWidget(QFrame):
+    """A widget that scales an image to fill a box while maintaining aspect ratio."""
 
-    def paint(
-        self,
-        painter: QPainter,
-        option: QStyleOptionViewItem,
-        index: QModelIndex | QPersistentModelIndex,
-    ) -> None:
-        """Draw the thumbnail."""
-
-        # data is our preview object
-        data = index.model().data(index, Qt.DisplayRole)
-        if data is None:
-            return
-
-        cell_padding: int = 0  # all sides
-
-        # option.rect holds the area we are painting on the widget (our table cell)
-        width: int = option.rect.width() - cell_padding * 2
-        height: int = option.rect.height() - cell_padding * 2
-
-        # Scale our pixmap thumbnail to fit
-        scaled: QImage = data.image.scaled(
-            width,
-            height,
-            Qt.KeepAspectRatio,
-        )
-
-        # Position the image in the center of the cell
-        x: float = cell_padding + (width - scaled.width()) / 2
-        y: float = cell_padding + (height - scaled.height()) / 2
-
-        painter.drawImage(option.rect.x() + x, option.rect.y() + y, scaled)
-
-    def sizeHint(
-        self, option: QStyleOptionViewItem, index: QModelIndex | QPersistentModelIndex
-    ) -> QSize:
-        """Return the size of the thumbnail."""
-
-        # All items the same size.
-        return QSize(200, 200)
-
-
-class PreviewModel(QAbstractTableModel):
-    """Use a table view to display the thumbnails.
-
-    Hence, we can display multiple thumbnails, though we only display one currently.
-    """
-
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
-        # .data holds our data for display, as a list of Preview objects.
-        self.previews = []
-        self.number_of_columns = 1
 
-    def data(
-        self,
-        index: QModelIndex | QPersistentModelIndex,
-        role: int = ...,  # Yes, an ellipsis is not an int. This is a PySide6 bug.
-    ) -> Any:
-        try:
-            data = self.previews[index.row() * self.number_of_columns + index.column()]
-        except IndexError:
-            # Incomplete last row.
-            return
+        # Use a layout to prevent the image from being stretched
+        layout: QVBoxLayout = QVBoxLayout()
+        self.setLayout(layout)
 
-        if role == Qt.DisplayRole:
-            return data  # Pass the data to our delegate to draw.
+        # Create a label to display the image
+        self.label: QLabel = QLabel()
 
-        if role == Qt.ToolTipRole:
-            return data.title
+        # Center the image in the label
+        self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-    def columnCount(self, parent: QModelIndex | QPersistentModelIndex = ...) -> int:
-        return self.number_of_columns
+        # Add the label to the layout
+        layout.addWidget(self.label)
 
-    def rowCount(self, parent: QModelIndex | QPersistentModelIndex = ...) -> int:
-        number_of_items: int = len(self.previews)
-        return math.ceil(number_of_items / self.number_of_columns)
+        # Set the letterbox/pillarbox colour to black
+        pal: QPalette = self.palette()
+        pal.setColor(QPalette.ColorRole.Window, Qt.GlobalColor.black)
+        self.setAutoFillBackground(True)
+        self.setPalette(pal)
+
+        # No black borders around non-letterboxed/pillarboxed images
+        layout.setContentsMargins(0, 0, 0, 0)
+
+        self.original_pixmap: QPixmap = QPixmap()
+
+    def load(self, source: Path) -> None:
+        """Load an image from a file and display it in the thumbnail."""
+
+        self.original_pixmap = QPixmap(source)
+        self.label.setPixmap(self.original_pixmap)
+
+        # Keep Qt from preventing the image from being scaled down
+        self.setMinimumSize(1, 1)
+
+    def resizeEvent(self, _event: QResizeEvent) -> None:
+        """Resize handler to update the dimensions of the displayed image."""
+
+        rect: QRect = self.geometry()
+
+        size: QSize = QSize(rect.width(), rect.height())
+
+        # Scale the image to fit the thumbnail
+        if self.original_pixmap and not self.original_pixmap.isNull():
+            self.label.setPixmap(
+                self.original_pixmap.scaled(size, Qt.AspectRatioMode.KeepAspectRatio)
+            )
+            # Don't waste time generating a new pixmap if it didn't alter its bounds
+            pixmap_size: QSize = self.label.pixmap().size()
+            if (pixmap_size.width() == size.width()) and (
+                pixmap_size.height() <= size.height()
+            ):
+                return
+            if (pixmap_size.height() == size.height()) and (
+                pixmap_size.width() <= size.width()
+            ):
+                return
+
+            self.label.setPixmap(
+                self.original_pixmap.scaled(
+                    size,
+                    Qt.AspectRatioMode.KeepAspectRatio,
+                    Qt.TransformationMode.SmoothTransformation,
+                )
+            )
+
+
+class DemoWindow(QMainWindow):
+    """Test the thumbnail widget."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.setWindowTitle("Thumbnail Viewer")
+        self.resize(800, 600)
+
+        splitter: QSplitter = QSplitter(Qt.Orientation.Vertical)
+        thumbnail = ThumbnailWidget()
+        thumbnail.load(settings.placeholder_image)
+        splitter.addWidget(thumbnail)
+        label: QLabel = QLabel("Hello World")
+        splitter.addWidget(label)
+
+        self.setCentralWidget(splitter)
+
+
+if __name__ == "__main__":
+    import sys
+
+    app: QApplication = QApplication(sys.argv)
+    demo: DemoWindow = DemoWindow()
+    demo.show()
+    sys.exit(app.exec())
