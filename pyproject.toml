@@ -35,6 +35,9 @@ pyinstaller = "^5.6.2"
 line-length = 88
 target-version = ["py310", "py311"]
 
+[tool.pylint.MASTER]
+extension-pkg-whitelist = "PySide6"
+
 [tool.pylint."MESSAGES CONTROL"]
 max-line-length = 88
 # Qt uses camelCase for its methods; tell pylint to ignore invalid-name
