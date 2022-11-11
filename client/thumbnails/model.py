@@ -6,16 +6,7 @@ from pathlib import Path
 
 from PySide6.QtCore import QRect, QSize, Qt
 from PySide6.QtGui import QPalette, QPixmap, QResizeEvent
-from PySide6.QtWidgets import (
-    QApplication,
-    QFrame,
-    QLabel,
-    QMainWindow,
-    QSplitter,
-    QVBoxLayout,
-)
-
-from client import settings
+from PySide6.QtWidgets import QFrame, QLabel, QVBoxLayout
 
 
 class ThumbnailWidget(QFrame):
@@ -49,7 +40,10 @@ class ThumbnailWidget(QFrame):
         self.original_pixmap: QPixmap = QPixmap()
 
     def load(self, source: Path) -> None:
-        """Load an image from a file and display it in the thumbnail."""
+        """Load an image from a file and display it in the thumbnail.
+
+        This is not an overload. It is a custom method.
+        """
 
         self.original_pixmap = QPixmap(source)
         self.label.setPixmap(self.original_pixmap)
@@ -69,6 +63,7 @@ class ThumbnailWidget(QFrame):
             self.label.setPixmap(
                 self.original_pixmap.scaled(size, Qt.AspectRatioMode.KeepAspectRatio)
             )
+
             # Don't waste time generating a new pixmap if it didn't alter its bounds
             pixmap_size: QSize = self.label.pixmap().size()
             if (pixmap_size.width() == size.width()) and (
@@ -87,30 +82,3 @@ class ThumbnailWidget(QFrame):
                     Qt.TransformationMode.SmoothTransformation,
                 )
             )
-
-
-class DemoWindow(QMainWindow):
-    """Test the thumbnail widget."""
-
-    def __init__(self) -> None:
-        super().__init__()
-        self.setWindowTitle("Thumbnail Viewer")
-        self.resize(800, 600)
-
-        splitter: QSplitter = QSplitter(Qt.Orientation.Vertical)
-        thumbnail = ThumbnailWidget()
-        thumbnail.load(settings.placeholder_image)
-        splitter.addWidget(thumbnail)
-        label: QLabel = QLabel("Hello World")
-        splitter.addWidget(label)
-
-        self.setCentralWidget(splitter)
-
-
-if __name__ == "__main__":
-    import sys
-
-    app: QApplication = QApplication(sys.argv)
-    demo: DemoWindow = DemoWindow()
-    demo.show()
-    sys.exit(app.exec())
