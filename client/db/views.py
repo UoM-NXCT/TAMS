@@ -2,7 +2,6 @@
 This files classes to represent data from the database to the user.
 """
 
-import logging
 from typing import Any
 
 from .exceptions import MissingTables
@@ -19,17 +18,18 @@ class DatabaseView:
 
         # Check it is possible to connect to the database
         with Database(self.conn_str) as database:
-            if database.conn.closed:
+            if not database.conn or database.conn.closed:
                 raise ConnectionError("Unable to connect to database")
-            logging.info("Connection to database in DatabaseView successful.")
 
     def get_tables(self) -> list[tuple[str]]:
         """Get list of tables in the database."""
 
         query: str = "select table_name from information_schema.tables where table_schema='public' and table_type='BASE TABLE';"
         with Database(self.conn_str) as database:
-            database.exec(query)
-            return database.cur.fetchall()
+            if database.cur:
+                database.exec(query)
+                return database.cur.fetchall()
+            raise ConnectionError("Unable to connect to database")
 
     def validate_tables(self) -> None:
         """Validate tables in the database."""
@@ -46,7 +46,7 @@ class DatabaseView:
 
     def view_select_from_where(
         self, select_value: str, from_value: str, *where_value: tuple[str] | str
-    ) -> tuple[list[tuple], tuple[str, ...]]:
+    ) -> tuple[list[tuple[Any, ...]], tuple[str, ...]]:
         """Return selection."""
 
         # Construct SQL query
@@ -59,8 +59,11 @@ class DatabaseView:
 
         # Get data
         with Database(self.conn_str) as database:
-            database.exec(query)
-            data: list[tuple] = database.cur.fetchall()
+            if database.cur:
+                database.exec(query)
+                data: list[tuple[Any, ...]] = database.cur.fetchall()
+            else:
+                raise ConnectionError("Unable to connect to database")
         if select_value == "*":
             # TODO: Deal with wildcard select.
             raise Exception("Wildcard selects not supported yet!")
@@ -147,10 +150,14 @@ class DatabaseView:
         instrument_id_metadata = f"{instrument_id} ({instrument_name})"
 
         # Turn the list back into a tuple, the expected return value
-        updated_row: tuple = (scan_id, prj_id_metadata, instrument_id_metadata)
+        updated_row: tuple[int, str, str] = (
+            scan_id,
+            prj_id_metadata,
+            instrument_id_metadata,
+        )
         return updated_row, column_header
 
-    def get_scan_form_data(self, scan_id: int) -> dict:
+    def get_scan_form_data(self, scan_id: int) -> dict[str, dict[str, Any]]:
         """Get scan form data for user_form.toml."""
 
         # Get hardcoded data (data that should not be changed by the user)
@@ -159,8 +166,7 @@ class DatabaseView:
             "scan",
             f"scan_id={scan_id}",
         )
-        hardcoded_data = hardcoded_data[0]
-        data = {
-            "hardcoded": dict(zip(hardcoded_column_headers, hardcoded_data)),
+        data: dict[str, dict[str, Any]] = {
+            "hardcoded": dict(zip(hardcoded_column_headers, hardcoded_data[0])),
         }
         return data
