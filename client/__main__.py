@@ -13,7 +13,7 @@ def main() -> None:
     """Main function implements the GUI."""
 
     app: QApplication = QApplication(sys.argv)
-    main_window: MainWindow = MainWindow()  # pylint: disable=unused-variable
+    _window: MainWindow = MainWindow()
     sys.exit(app.exec())
 
 

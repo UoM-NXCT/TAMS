@@ -159,7 +159,7 @@ class DatabaseView:
             "scan",
             f"scan_id={scan_id}",
         )
-        hardcoded_data: tuple = hardcoded_data[0]
+        hardcoded_data = hardcoded_data[0]
         data = {
             "hardcoded": dict(zip(hardcoded_column_headers, hardcoded_data)),
         }

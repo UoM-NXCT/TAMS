@@ -4,6 +4,7 @@ Runner for dowloading files to the local library.
 
 import time
 from pathlib import Path
+from typing import Any
 
 from client import settings
 from client.db.utils import dict_to_conn_str
@@ -17,7 +18,9 @@ from .abstract import AbstractJobRunner, WorkerKilledException
 class DownloadScansRunner(AbstractJobRunner):
     """Runner that downloads data to the local library."""
 
-    def __init__(self, local: Path, permanent: Path, project_id: int, *scan_ids):
+    def __init__(
+        self, local: Path, permanent: Path, project_id: int, *scan_ids
+    ) -> None:
         """Initialize the runner."""
 
         super().__init__()
@@ -95,7 +98,7 @@ class DownloadScansRunner(AbstractJobRunner):
 
             # Create user form
             user_form: Path = destination / "user_form.toml"
-            scan_form_data: dict = self.get_scan_form_data(scan)
+            scan_form_data: dict[str, Any] = self.get_scan_form_data(scan)
             create_toml(user_form, scan_form_data)
 
             for item in target.glob("*"):

@@ -47,12 +47,20 @@ class ThumbnailWidget(QFrame):
 
         self.original_pixmap = QPixmap(source)
         self.label.setPixmap(self.original_pixmap)
+        self.setToolTip(str(source.absolute()))
 
         # Keep Qt from preventing the image from being scaled down
         self.setMinimumSize(1, 1)
 
+        # Force a resize event to update the image to fit the thumbnail
+        _arbitrary_event: QResizeEvent = QResizeEvent(self.size(), self.size())
+        self.resizeEvent(_arbitrary_event)
+
     def resizeEvent(self, _event: QResizeEvent) -> None:
-        """Resize handler to update the dimensions of the displayed image."""
+        """Resize handler to update the dimensions of the displayed image.
+
+        Overloads parent resizeEvent method.
+        """
 
         rect: QRect = self.geometry()
 

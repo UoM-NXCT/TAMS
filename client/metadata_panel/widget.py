@@ -3,17 +3,14 @@ Custom widget class inherits the Qt built-in QWidget.
 
 Contains the metadata on the current entry; displayed on the right panel.
 """
-from collections import namedtuple
 from datetime import date
+from pathlib import Path
 from typing import Any
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QImage
 from PySide6.QtWidgets import (
-    QLabel,
     QLayout,
     QSplitter,
-    QTableView,
     QTreeWidget,
     QTreeWidgetItem,
     QVBoxLayout,
@@ -21,7 +18,9 @@ from PySide6.QtWidgets import (
 )
 
 from client import settings
-from client.thumbnails.model import PreviewDelegate, PreviewModel
+from client.thumbnail.model import ThumbnailWidget
+
+from .thumbnail import get_thumbnail
 
 
 class MetadataPanel(QWidget):
@@ -36,31 +35,12 @@ class MetadataPanel(QWidget):
 
         # Create the layout
         metadata_layout: QLayout = QVBoxLayout()
-        splitter: QSplitter = QSplitter(Qt.Vertical)
+        splitter: QSplitter = QSplitter(Qt.Orientation.Vertical)
 
         # Create the thumbnail widget
-        # Create a custom namedtuple class to hold our data.
-        self.preview = namedtuple("preview", "id title image")
-        self.thumbnail_view = QTableView()
-        self.thumbnail_view.horizontalHeader().hide()
-        self.thumbnail_view.verticalHeader().hide()
-        self.thumbnail_view.setGridStyle(Qt.NoPen)
-        self.thumbnail_view.set
-        delegate = PreviewDelegate()
-        self.thumbnail_view.setItemDelegate(delegate)
-        self.thumbnail_model = PreviewModel()
-        self.thumbnail_view.setModel(self.thumbnail_model)
-        splitter.addWidget(self.thumbnail_view)
-
-        # Add placeholder image to thumbnail widget
-        images = (settings.placeholder_image,)
-        for n, fn in enumerate(images):
-            image = QImage(fn)
-            item = self.preview(n, fn, image)
-            self.thumbnail_model.previews.append(item)
-        self.thumbnail_model.layoutChanged.emit()
-        self.thumbnail_view.resizeRowsToContents()
-        self.thumbnail_view.resizeColumnsToContents()
+        self.thumbnail_widget: ThumbnailWidget = ThumbnailWidget()
+        self.thumbnail_widget.load(settings.placeholder_image)
+        splitter.addWidget(self.thumbnail_widget)
 
         # Create the tree widget
         self.metadata_tree: QTreeWidget = QTreeWidget()
@@ -87,7 +67,7 @@ class MetadataPanel(QWidget):
 
         if self._data and self._column_headers:
 
-            items: list = []
+            items: list[QTreeWidgetItem] = []
 
             # Iterate over the data and column headers
             for index, column in enumerate(self._column_headers):
@@ -123,8 +103,47 @@ class MetadataPanel(QWidget):
             # Expand the tree to show all items by default
             self.metadata_tree.expandAll()
 
+    def update_thumbnail(self) -> None:
+        """Update the thumbnail widget."""
+
+        if self._data and self._column_headers:
+
+            # Get the project ID
+            try:
+                project_id: int | str | None = self._data[
+                    self._column_headers.index("project_id")
+                ]
+                if isinstance(project_id, str):
+                    # If the project ID is a string, it is of tge form "project_id (title)"
+                    # Get the first word and convert it to an integer to get the project ID
+                    project_id = int(project_id.split()[0])
+            except ValueError:
+                # If the project ID is not found, set it to None
+                project_id = None
+
+            # Get the scan ID
+            try:
+                scan_id: int | str | None = self._data[
+                    self._column_headers.index("scan_id")
+                ]
+                if isinstance(scan_id, str):
+                    # If the scan ID is a string, it is of tge form "scan_id (title)"
+                    # Get the first word and convert it to an integer to get the scan ID
+                    scan_id = int(scan_id.split()[0])
+            except ValueError:
+                # If the scan ID is not found, set it to None
+                scan_id = None
+
+            if project_id:
+                # If both the project ID and scan ID are found, load the thumbnail
+                thumbnail: Path = get_thumbnail(project_id, scan_id)
+                self.thumbnail_widget.load(thumbnail)
+            else:
+                self.thumbnail_widget.load(settings.placeholder_image)
+
     def update_metadata(self, metadata: tuple[tuple[Any], list[str]]) -> None:
         """Update metadata variables and tell panel to update itself."""
 
         self._data, self._column_headers = metadata
         self.update_content()
+        self.update_thumbnail()

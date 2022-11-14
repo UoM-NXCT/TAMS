@@ -15,7 +15,7 @@ except ModuleNotFoundError:
 import tomli_w
 
 
-def create_toml(toml_file: Path, config: dict) -> None:
+def create_toml(toml_file: Path, config: dict[str, Any]) -> None:
     """Create a new TOML file with given config data
 
     :param toml_file: path to new TOML file
@@ -46,7 +46,7 @@ def update_toml(toml_file: Path, section: str, key: str, value: object) -> None:
         tomli_w.dump(config, file)
 
 
-def get_dict_from_toml(toml_file: Path) -> dict | None:
+def get_dict_from_toml(toml_file: Path) -> dict[str, Any]:
     """Return the data from a TOML file as a Python dictionary.
 
     :param toml_file: target TOML file

@@ -136,6 +136,14 @@ You can also use `mypy` directly if you have it installed.
 
 However, `mypy` does not work with PySide6, so you should ignore some of its complaints.
 
+### Compilation
+
+Compile the application using [PyInstaller](https://www.pyinstaller.org/).
+
+```commandline
+poetry run pyinstaller __main__.spec
+```
+
 ## Issues
 
 If you have found a bug, you can file it under the 'issues' tab. You can also request new features.
