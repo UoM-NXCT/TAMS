@@ -10,7 +10,7 @@ from typing import Any
 from client import settings
 from client.db.utils import dict_to_conn_str
 from client.db.views import DatabaseView
-from client.utils.file import create_dir_if_missing, move_or_copy_item
+from client.utils.file import create_dir_if_missing, move_item
 from client.utils.toml import create_toml, get_dict_from_toml
 
 from .abstract import AbstractJobRunner, WorkerKilledException
@@ -20,7 +20,7 @@ class DownloadScansRunner(AbstractJobRunner):
     """Runner that downloads data to the local library."""
 
     def __init__(
-        self, local: Path, permanent: Path, project_id: int, *scan_ids
+        self, local: Path, permanent: Path, prj_id: int, *scan_ids: int
     ) -> None:
         """Initialize the runner."""
 
@@ -42,13 +42,13 @@ class DownloadScansRunner(AbstractJobRunner):
             )
 
         # Check project exists in permanent library
-        self.permanent_storage_dir: Path = permanent / str(project_id)
+        self.permanent_storage_dir: Path = permanent / str(prj_id)
         if (
             not self.permanent_storage_dir.exists()
             and self.permanent_storage_dir.is_dir()
         ):
             raise ValueError(
-                f"Project {project_id} directory does not exist in permanent library."
+                f"Project {prj_id} directory does not exist in permanent library."
             )
 
         # If no scan IDs are provided, save all scans in project
@@ -59,7 +59,7 @@ class DownloadScansRunner(AbstractJobRunner):
                 if scan_dir.is_dir()
             )
         else:
-            self.scan_ids = scan_ids
+            self.scan_ids = tuple(str(scan_id) for scan_id in scan_ids)
 
         # Check scan exists in permanent library
         for scan_id in self.scan_ids:
@@ -70,7 +70,7 @@ class DownloadScansRunner(AbstractJobRunner):
                 )
 
         # Create directories if they do not already exist
-        self.local_prj_dir: Path = local / str(project_id)
+        self.local_prj_dir: Path = local / str(prj_id)
         local_scan_dirs: tuple[Path, ...] = tuple(
             self.local_prj_dir / str(scan_id) for scan_id in self.scan_ids
         )
@@ -84,27 +84,27 @@ class DownloadScansRunner(AbstractJobRunner):
             total_files += len(tuple(self.permanent_storage_dir.glob(f"{scan_id}/*")))
         self.max_progress = total_files
 
-    def get_scan_form_data(self, scan_id: int):
+    def get_scan_form_data(self, scan_id: int) -> dict[str, dict[str, Any]]:
         """Get the metadata for a scan."""
-        conn_dict: dict = get_dict_from_toml(settings.database)
+        conn_dict: dict[str, dict[str, Any]] = get_dict_from_toml(settings.database)
         conn_str: str = dict_to_conn_str(conn_dict)
         db = DatabaseView(conn_str)
         return db.get_scan_form_data(scan_id)
 
-    def job(self):
+    def job(self) -> None:
         """Save data to local library."""
 
         for scan in self.scan_ids:
-            target: Path = self.permanent_storage_dir / Path(str(scan))
-            destination: Path = self.local_prj_dir / Path(str(scan))
+            target: Path = self.permanent_storage_dir / Path(scan)
+            destination: Path = self.local_prj_dir / Path(scan)
 
             # Create user form
             user_form: Path = destination / "user_form.toml"
-            scan_form_data: dict[str, Any] = self.get_scan_form_data(scan)
+            scan_form_data: dict[str, Any] = self.get_scan_form_data(int(scan))
             create_toml(user_form, scan_form_data)
 
             for item in target.glob("*"):
-                move_or_copy_item(item, destination, keep_original=True)
+                move_item(item, destination, keep_original=True)
                 # Increment progress bar
                 self.signals.progress.emit(1)
                 while self.is_paused:

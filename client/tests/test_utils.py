@@ -14,7 +14,7 @@ try:
 except ModuleNotFoundError:
     import tomli as tomllib
 
-from client.utils.file import create_dir_if_missing, find_and_move, move_or_copy_item
+from client.utils.file import create_dir_if_missing, find_and_move, move_item
 from client.utils.toml import (
     create_toml,
     get_dict_from_toml,
@@ -45,7 +45,7 @@ class TestFile(unittest.TestCase):
         self.assertEqual(True, file_to_be_moved.is_file())
         target_dir_of_file_to_be_moved = TEST_DIR / Path("example_directory")
         self.assertEqual(True, target_dir_of_file_to_be_moved.is_dir())
-        move_or_copy_item(
+        move_item(
             file_to_be_moved, target_dir_of_file_to_be_moved, keep_original=False
         )
         # File should no longer exist at original location, it should be at new location
@@ -54,7 +54,7 @@ class TestFile(unittest.TestCase):
         self.assertEqual(True, location_of_moved_file.is_file())
         # Move file back after test
         original_file_directory = TEST_DIR / Path(r"text_files")
-        move_or_copy_item(
+        move_item(
             location_of_moved_file,
             original_file_directory,
             keep_original=False,
@@ -69,7 +69,7 @@ class TestFile(unittest.TestCase):
         self.assertEqual(True, file_to_be_copied.is_file())
         target_dir_of_file_to_be_moved = TEST_DIR / Path("example_directory")
         self.assertEqual(True, target_dir_of_file_to_be_moved.is_dir())
-        move_or_copy_item(
+        move_item(
             file_to_be_copied, target_dir_of_file_to_be_moved, keep_original=True
         )
 

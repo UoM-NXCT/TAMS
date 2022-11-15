@@ -18,7 +18,7 @@ def create_dir_if_missing(path: Path) -> None:
         logging.info("Created directory at %s.", path)
 
 
-def move_or_copy_item(
+def move_item(
     item: Path, destination_directory: Path, keep_original: bool = True
 ) -> None:
     """Function that copies or moves item to a given location.
@@ -90,7 +90,7 @@ def find_and_move(
         for destination in destinations:
             for item in tuple(search_dir.glob(glob_arg)):
                 # Copy file to local reconstructed data directory
-                move_or_copy_item(
+                move_item(
                     item,
                     Path(search_dir) / Path(destination),
                 )

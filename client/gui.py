@@ -60,7 +60,7 @@ class MainWindow(QMainWindow):
 
         # Set up the application's GUI.
         self.setMinimumSize(1080, 720)
-        self.setWindowTitle("Tomography Archival and Management Software")
+        self.setWindowTitle("Tomography Archival Management Software")
         self.connect_to_database()
         self.set_up_main_window()
         self.create_actions()

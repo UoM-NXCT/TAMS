@@ -59,7 +59,7 @@ class AbstractJobRunner(QRunnable):
                 # Break loop
                 raise WorkerFinishedException
 
-    def job(self):
+    def job(self) -> None:
         """To be implemented by subclasses."""
 
         raise NotImplementedError("Runner subclass must implement this method.")
