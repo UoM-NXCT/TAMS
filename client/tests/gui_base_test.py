@@ -7,7 +7,6 @@ from client.gui import MainWindow
 
 
 class GuiBaseTest(TestCase):
-
     @classmethod
     def setUp(cls) -> None:
         cls.app: QApplication = QApplication(sys.argv)
@@ -25,7 +24,9 @@ class GuiBaseTest(TestCase):
     def window_title_seen(self) -> None:
         """Test the window title is correct."""
 
-        self.assertEqual(self.gui.windowTitle(), "Tomography Archival Management Software")
+        self.assertEqual(
+            self.gui.windowTitle(), "Tomography Archival Management Software"
+        )
 
     def test_common(self):
         self.gui_loaded()

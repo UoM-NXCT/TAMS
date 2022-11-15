@@ -45,9 +45,7 @@ class TestFile(unittest.TestCase):
         self.assertEqual(True, file_to_be_moved.is_file())
         target_dir_of_file_to_be_moved = TEST_DIR / Path("example_directory")
         self.assertEqual(True, target_dir_of_file_to_be_moved.is_dir())
-        move_item(
-            file_to_be_moved, target_dir_of_file_to_be_moved, keep_original=False
-        )
+        move_item(file_to_be_moved, target_dir_of_file_to_be_moved, keep_original=False)
         # File should no longer exist at original location, it should be at new location
         self.assertEqual(False, file_to_be_moved.is_file())
         location_of_moved_file = target_dir_of_file_to_be_moved / Path("move_me.txt")
@@ -69,9 +67,7 @@ class TestFile(unittest.TestCase):
         self.assertEqual(True, file_to_be_copied.is_file())
         target_dir_of_file_to_be_moved = TEST_DIR / Path("example_directory")
         self.assertEqual(True, target_dir_of_file_to_be_moved.is_dir())
-        move_item(
-            file_to_be_copied, target_dir_of_file_to_be_moved, keep_original=True
-        )
+        move_item(file_to_be_copied, target_dir_of_file_to_be_moved, keep_original=True)
 
         # File should exist at both locations
         self.assertEqual(True, file_to_be_copied.is_file())

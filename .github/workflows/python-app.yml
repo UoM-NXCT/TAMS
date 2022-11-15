@@ -39,4 +39,4 @@ jobs:
       - name: Test with pytest
         run: |
           # GitHub Actions can't run GUI tests and it's not worth my time to fix it
-          poetry run pytest --ignore=client/tests/test_pyside.py --ignore=client/tests/test_utils.py
+          poetry run pytest --ignore=client/tests/test_pyside.py --ignore=client/tests/test_utils.py --ignore=client/tests/gui_base_test.py
