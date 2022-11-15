@@ -22,7 +22,7 @@ from PySide6.QtCore import QAbstractTableModel, QModelIndex, QPersistentModelInd
 class TableModel(QAbstractTableModel):
     """Define the custom table model, a subclass of a built-in Qt abstract model."""
 
-    def __init__(self, data: list[tuple], column_headers: list[str]) -> None:
+    def __init__(self, data: list[tuple], column_headers: tuple[str]) -> None:
         super().__init__()
         # Anticipate a list of tuples, as this is what database returns upon select.
         self._data = data or []

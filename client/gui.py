@@ -3,15 +3,13 @@ Main window for the GUI.
 """
 
 import logging
-import sys
 from pathlib import Path
 from typing import Any
 
-from psycopg.errors import ConnectionFailure
+from psycopg.errors import ConnectionFailure, OperationalError
 from PySide6.QtCore import QModelIndex, QSize, QSortFilterProxyModel, Qt, QUrl
 from PySide6.QtGui import QAction, QDesktopServices
 from PySide6.QtWidgets import (
-    QApplication,
     QGridLayout,
     QHeaderView,
     QMainWindow,
@@ -75,14 +73,18 @@ class MainWindow(QMainWindow):
         """Update table model using SQL command."""
 
         select_value, from_value, where_value = self.current_table_query
-        if where_value:
-            data, column_headers = self.database_view.view_select_from_where(
-                select_value, from_value, where_value
-            )
+        if self.database_view:
+            if where_value:
+                data, column_headers = self.database_view.view_select_from_where(
+                    select_value, from_value, where_value
+                )
+            else:
+                data, column_headers = self.database_view.view_select_from_where(
+                    select_value, from_value
+                )
         else:
-            data, column_headers = self.database_view.view_select_from_where(
-                select_value, from_value
-            )
+            data = list()
+            column_headers = tuple()
         self.table_model = TableModel(data, column_headers)
         self.proxy_model = QSortFilterProxyModel()
         self.proxy_model.setSourceModel(self.table_model)
@@ -442,6 +444,15 @@ class MainWindow(QMainWindow):
                 self,
                 "Unable to connect; exception raised.",
                 f"Check if config file is missing! Exception: {exc}",
+                QMessageBox.StandardButton.Ok,
+            )
+        except OperationalError as exc:
+            # Raised on invalid connection string
+            logging.exception("Exception raised. Is config file invalid?")
+            QMessageBox.information(
+                self,
+                "Unable to connect; exception raised.",
+                f"Check if config file is invalid! Exception: {exc}",
                 QMessageBox.StandardButton.Ok,
             )
         except ConnectionFailure as exc:

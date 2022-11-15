@@ -10,7 +10,14 @@ from PySide6.QtCore import QObject, QRunnable, Signal, Slot
 class WorkerKilledException(Exception):
     """Exception raised when a worker is killed."""
 
-    def __init__(self, message="Worker has been killed."):
+    def __init__(self, message: str = "Worker has been killed."):
+        super().__init__(message)
+
+
+class WorkerFinishedException(Exception):
+    """Exception raised when a worker is finished."""
+
+    def __init__(self, message: str = "Worker has finished."):
         super().__init__(message)
 
 
@@ -48,6 +55,9 @@ class AbstractJobRunner(QRunnable):
             if self.is_killed:
                 # Break loop
                 raise WorkerKilledException
+            if self.is_finished:
+                # Break loop
+                raise WorkerFinishedException
 
     def job(self):
         """To be implemented by subclasses."""

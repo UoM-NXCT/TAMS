@@ -2,6 +2,7 @@
 Runner for dowloading files to the local library.
 """
 
+import logging
 import time
 from pathlib import Path
 from typing import Any
@@ -23,6 +24,7 @@ class DownloadScansRunner(AbstractJobRunner):
     ) -> None:
         """Initialize the runner."""
 
+        logging.info("Initializing download scans runner")
         super().__init__()
 
         # Check if libraries exist

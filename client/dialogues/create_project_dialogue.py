@@ -59,7 +59,7 @@ class CreateProjectWindow(QDialog):
 
         # Create the layout for the settings window.
         create_project_v_box = QVBoxLayout()
-        create_project_v_box.setAlignment(Qt.AlignTop)
+        create_project_v_box.setAlignment(Qt.AlignmentFlag.AlignTop)
         create_project_v_box.addWidget(header_label)
         create_project_v_box.addSpacing(10)
         create_project_v_box.addLayout(dialogue_form, 1)

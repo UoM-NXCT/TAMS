@@ -197,12 +197,12 @@ class SettingsWindow(QDialog):
             return current_lib
         return None
 
-    def database_settings(self):
+    def database_settings(self) -> None:
         """Database settings widget to allow the user to set the database connection."""
 
         if not settings.database.is_file():
             # Create a database config file if one does not already exist
-            template_db_config: dict = {
+            template_db_config: dict[str, dict[str, str]] = {
                 "postgresql": {
                     "host": "",
                     "port": "5432",
@@ -275,7 +275,7 @@ class SettingsWindow(QDialog):
         )
         if library:
             update_toml(
-                self.general_settings_toml,
+                settings.general,
                 "storage",
                 f"{lib_title}_library",
                 library,
@@ -296,7 +296,7 @@ class SettingsWindow(QDialog):
         else:
             logging.critical("Invalid library title: %s", lib_title)
 
-    def apply(self):
+    def apply(self) -> None:
         """Apply the changes to settings."""
 
         # TODO: changes to the local library should be applied not immediately;

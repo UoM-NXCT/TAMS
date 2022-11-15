@@ -4,6 +4,7 @@ specified by the input connection string.
 """
 
 import logging
+from typing import Any
 
 import psycopg
 from PySide6.QtCore import Qt
@@ -78,7 +79,7 @@ class CreateScanDialogue(QDialog):
 
         # Create the layout for the settings window.
         create_project_v_box = QVBoxLayout()
-        create_project_v_box.setAlignment(Qt.AlignTop)
+        create_project_v_box.setAlignment(Qt.AlignmentFlag.AlignTop)
         create_project_v_box.addWidget(header_label)
         create_project_v_box.addSpacing(10)
         create_project_v_box.addLayout(dialogue_form, 1)
@@ -97,7 +98,7 @@ class CreateScanDialogue(QDialog):
                     cur.execute(
                         f"select project_id from project where project_id={project_id}"
                     )
-                    rows: list = cur.fetchall()
+                    rows: list[tuple[Any, ...]] = cur.fetchall()
 
             # Returns false if the list is empty (no rows returned)
             if len(rows) > 1:
@@ -115,7 +116,7 @@ class CreateScanDialogue(QDialog):
                     cur.execute(
                         f"select instrument_id from instrument where instrument_id={instrument_id}"
                     )
-                    rows: list = cur.fetchall()
+                    rows: list[tuple[Any, ...]] = cur.fetchall()
 
             # Returns false if the list is empty (no rows returned)
             if len(rows) > 1:
