@@ -86,7 +86,7 @@ class ValidateScansRunner(AbstractJobRunner):
         # Check local scan directories exist
         for scan_dir in self.local_scan_dirs:
             if not scan_dir.exists():
-                self.signals.result.emit(False)
+                self.result(False)
                 self.signals.finished.emit()
 
         for scan in self.scan_ids:
@@ -114,12 +114,12 @@ class ValidateScansRunner(AbstractJobRunner):
                     # Compare hashes
                     if target_hash != destination_hash:
                         logging.info("Hashes do not match.")
-                        self.signals.result.emit(False)
+                        self.result(False)
                         self.signals.finished.emit()
-                
+
                 except FileNotFoundError:
                     logging.info("File not found, validation fail.")
-                    self.signals.result.emit(False)
+                    self.result(False)
                     self.signals.finished.emit()
 
 

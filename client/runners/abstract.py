@@ -40,6 +40,7 @@ class AbstractJobRunner(QRunnable):
         self.is_paused: bool = False
         self.is_killed: bool = False
         self.is_finished: bool = False
+        self.result_value: bool = False
         self.max_progress: int = 100
 
     @Slot()
@@ -86,3 +87,9 @@ class AbstractJobRunner(QRunnable):
 
         self.is_finished = True
         self.signals.finished.emit()
+
+    def result(self, success: bool) -> None:
+        """Return the result of the job."""
+
+        self.result_value = success
+        self.signals.result.emit(success)

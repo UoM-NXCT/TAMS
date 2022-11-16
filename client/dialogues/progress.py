@@ -18,7 +18,7 @@ from client.runners.abstract import AbstractJobRunner
 class ProgressDialogue(QDialog):
     """Progress dialogue."""
 
-    def __init__(self, runner: AbstractJobRunner) -> None:
+    def __init__(self, runner: AbstractJobRunner, hide: bool = False) -> None:
         """Initialize the dialogue.
 
         :param runner: the job runner.
@@ -26,7 +26,7 @@ class ProgressDialogue(QDialog):
 
         super().__init__()
 
-        self.setWindowTitle("Downloading files")
+        self.setWindowTitle("Performing operation...")
 
         # Create the layout
         layout: QHBoxLayout = QHBoxLayout()
@@ -65,7 +65,8 @@ class ProgressDialogue(QDialog):
         self.progress.setRange(0, self.runner.max_progress)
 
         # Show the dialogue
-        self.show()
+        if not hide:
+            self.show()
 
     def update_progress(self, value_increment: int) -> None:
         """Update the progress bar."""
@@ -77,9 +78,14 @@ class ProgressDialogue(QDialog):
         """Show a message box when the job is done."""
 
         self.runner.pause()
-        QMessageBox.information(
-            self, "File transfer done", "Files transferred successfully."
-        )
+        if self.runner.result_value:
+            QMessageBox.information(
+                self, "Operation done", "Operation completed successfully."
+            )
+        else:
+            QMessageBox.critical(
+                self, "Operation failed", "Operation failed."
+            )
         self.close()
 
     def closeEvent(self, arg__1: QCloseEvent) -> None:
