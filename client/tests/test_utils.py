@@ -15,6 +15,7 @@ except ModuleNotFoundError:
     import tomli as tomllib
 
 from client.utils.file import create_dir_if_missing, find_and_move, move_item
+from client.utils.hash import hash_in_chunks
 from client.utils.toml import (
     create_toml,
     get_dict_from_toml,
@@ -149,3 +150,15 @@ class TestTOML(unittest.TestCase):
         with open(path_to_toml, mode="wb") as file:
             data = {"dog": {"name": "Loca", "age": 10}}
             tomli_w.dump(data, file)
+
+
+class TestHash(unittest.TestCase):
+    def test_hash_in_chunks(self):
+        """Test function that hashes a file in chunks."""
+
+        file_to_hash: Path = TEST_DIR / Path("text_files/copy_me.txt")
+        hash_value: str = hash_in_chunks(file_to_hash)
+        self.assertEqual(
+            "47d7f25678e02dd969b7699a2f0309128bc2dbc6c09daa64c135cf9af7630883511a073db91c10c4694846db8c77d63d",
+            hash_value,
+        )

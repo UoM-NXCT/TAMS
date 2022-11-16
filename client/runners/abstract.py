@@ -25,6 +25,7 @@ class WorkerSignals(QObject):
     """Worker signals."""
 
     progress: Signal = Signal(int)
+    result: Signal = Signal(bool)
     finished: Signal = Signal()
     kill: Signal = Signal()
 

@@ -29,6 +29,7 @@ from client.dialogues.progress import ProgressDialogue
 from client.dialogues.settings import SettingsWindow
 from client.metadata_panel import MetadataPanel
 from client.runners.save import DownloadScansRunner
+from client.runners.validate import ValidateScansRunner
 from client.table_widget.model import TableModel
 from client.table_widget.view import TableView
 from client.toolbox.toolbox import ToolBox
@@ -196,6 +197,13 @@ class MainWindow(QMainWindow):
         self.open_act.setToolTip("Open selected data")
         self.open_act.triggered.connect(self.open_data)
 
+        pixmap = QStyle.StandardPixmap.SP_FileDialogContentsView
+        validate_icon = self.style().standardIcon(pixmap)
+        self.validate_act = QAction(validate_icon, "Validate data")
+        self.validate_act.setShortcut("Ctrl+V")
+        self.validate_act.setToolTip("Validate selected data")
+        self.validate_act.triggered.connect(self.validate_data)
+
         self.quit_act = QAction("&Quit")
         self.quit_act.setShortcut("Ctrl+Q")
         self.quit_act.setStatusTip("Quit application")
@@ -253,6 +261,7 @@ class MainWindow(QMainWindow):
         file_menu.addSeparator()
         file_menu.addAction(self.download_act)
         file_menu.addAction(self.open_act)
+        file_menu.addAction(self.validate_act)
         file_menu.addSeparator()
         file_menu.addAction(self.quit_act)
         view_menu = self.menuBar().addMenu("View")
@@ -274,6 +283,7 @@ class MainWindow(QMainWindow):
         toolbar.addAction(self.reload_table_act)
         toolbar.addAction(self.download_act)
         toolbar.addAction(self.open_act)
+        toolbar.addAction(self.validate_act)
 
         # Config actions
         toolbar.addSeparator()
@@ -410,6 +420,66 @@ class MainWindow(QMainWindow):
                 self,
                 "Error",
                 f"Cannot open data from table {table}",
+            )
+
+    def validate_data(self):
+        """Download selected data."""
+
+        # Get the selected table
+        table = self.current_table()
+
+        # Get the primary key of the selected row
+        row_pk: int = self.get_value_from_row(0)
+
+        # Get the path to the local data directory
+        local_library: str = get_value_from_toml(
+            Path("settings/general.toml"), "storage", "local_library"
+        )
+
+        # Get the path to the remote data directory
+        permanent_library: str = get_value_from_toml(
+            Path("settings/general.toml"), "storage", "permanent_library"
+        )
+
+        if table == "project":
+            logging.info("Validating data from project ID %s", row_pk)
+
+            try:
+                runner = ValidateScansRunner(
+                    Path(local_library), Path(permanent_library), row_pk
+                )
+                self.progress_dialogue = ProgressDialogue(runner)
+
+            except Exception:
+                # TODO: specify exceptions
+                logging.exception("Error validating data from project ID %s", row_pk)
+                raise Exception
+        elif table == "scan":
+            logging.info("Validating data from scan ID %s", row_pk)
+
+            # Get the path of the local scan directory
+            project_id: int = self.get_value_from_row(1)
+
+            try:
+                runner = ValidateScansRunner(
+                    Path(local_library), Path(permanent_library), project_id, row_pk
+                )
+                self.progress_dialogue = ProgressDialogue(runner)
+            except Exception:
+                # TODO: specify exceptions
+                logging.exception("Error Validating data from project ID %s", row_pk)
+                QMessageBox.critical(
+                    self,
+                    "Error",
+                    f"Error validating data from project ID {row_pk}, see log for details",
+                )
+
+        else:
+            logging.error("Cannot validate data from table %s", table)
+            QMessageBox.critical(
+                self,
+                "Error",
+                f"Cannot download data from table {table}",
             )
 
     def about_dialogue(self):
