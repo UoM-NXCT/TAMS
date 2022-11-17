@@ -125,7 +125,9 @@ class ValidateScansRunner(Worker):
 
                             # Compare hashes
                             if target_hash != local_hash:
-                                logging.info("Hashes do not match: file %s is invalid.", item)
+                                logging.info(
+                                    "Hashes do not match: file %s is invalid.", item
+                                )
                                 self.set_result(False)
                             else:
                                 logging.info("Hashes match: file %s is valid.", item)
