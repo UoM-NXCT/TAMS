@@ -13,10 +13,10 @@ from client.db.views import DatabaseView
 from client.utils.file import create_dir_if_missing, move_item
 from client.utils.toml import create_toml, get_dict_from_toml
 
-from .abstract import AbstractJobRunner, WorkerKilledException
+from .generic import Worker, WorkerKilledException
 
 
-class DownloadScansRunner(AbstractJobRunner):
+class DownloadScansWorker(Worker):
     """Runner that downloads data to the local library."""
 
     def __init__(
@@ -24,8 +24,9 @@ class DownloadScansRunner(AbstractJobRunner):
     ) -> None:
         """Initialize the runner."""
 
-        logging.info("Initializing download scans runner")
-        super().__init__()
+        super().__init__(fn=self.job)
+
+        # We can only download scans if the libraries exist!
 
         # Check if libraries exist
         if not local.exists():
@@ -41,11 +42,13 @@ class DownloadScansRunner(AbstractJobRunner):
                 f"Permanent library directory {permanent} is not a directory."
             )
 
+        # If the libraries exist, we still need to check if the project exists
+
         # Check project exists in permanent library
         self.permanent_storage_dir: Path = permanent / str(prj_id)
         if (
             not self.permanent_storage_dir.exists()
-            and self.permanent_storage_dir.is_dir()
+            or not self.permanent_storage_dir.is_dir()
         ):
             raise ValueError(
                 f"Project {prj_id} directory does not exist in permanent library."
@@ -53,12 +56,14 @@ class DownloadScansRunner(AbstractJobRunner):
 
         # If no scan IDs are provided, save all scans in project
         if not scan_ids:
+            # Assume each directory in the project directory is a scan
             self.scan_ids: tuple[str, ...] = tuple(
                 scan_dir.name
                 for scan_dir in self.permanent_storage_dir.glob("*")
                 if scan_dir.is_dir()
             )
         else:
+            # Convert list to tuple
             self.scan_ids = tuple(str(scan_id) for scan_id in scan_ids)
 
         # Check scan exists in permanent library
@@ -78,11 +83,11 @@ class DownloadScansRunner(AbstractJobRunner):
         for local_scan_dir in local_scan_dirs:
             create_dir_if_missing(local_scan_dir)
 
-        # Count files to be moved
+        # Count files to be moved for progress bar
         total_files: int = 0
         for scan_id in self.scan_ids:
             total_files += len(tuple(self.permanent_storage_dir.glob(f"{scan_id}/*")))
-        self.max_progress = total_files
+        self.set_max_progress(total_files)
 
     def get_scan_form_data(self, scan_id: int) -> dict[str, dict[str, Any]]:
         """Get the metadata for a scan."""
@@ -94,8 +99,13 @@ class DownloadScansRunner(AbstractJobRunner):
     def job(self) -> None:
         """Save data to local library."""
 
+        # Save each scan in scan list
         for scan in self.scan_ids:
+
+            # Target the scan directory in the permanent library
             target: Path = self.permanent_storage_dir / Path(scan)
+
+            # Save to local library
             destination: Path = self.local_prj_dir / Path(scan)
 
             # Create user form
@@ -104,15 +114,23 @@ class DownloadScansRunner(AbstractJobRunner):
             scan_form_data: dict[str, Any] = self.get_scan_form_data(int(scan))
             create_toml(user_form, scan_form_data)
 
+            # Move files
             for item in target.glob("*"):
+
+                # Move item
                 move_item(item, destination, keep_original=True)
+
                 # Increment progress bar
                 self.signals.progress.emit(1)
+
+                # Pause if worker is paused
                 while self.is_paused:
+                    # Keep waiting until resumed
                     time.sleep(0)
+
+                # Check if worker has been killed
                 if self.is_killed:
                     raise WorkerKilledException
                 if self.is_finished:
                     # Break loop if job is finished
                     break
-        self.finish()
