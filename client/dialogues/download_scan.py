@@ -1,6 +1,7 @@
 """
-Progress bar dialogue for arbitrary jobs.
+Progress bar dialogue for downloading the scan.
 """
+import logging
 
 from PySide6.QtCore import QThreadPool
 from PySide6.QtGui import QCloseEvent
@@ -12,21 +13,22 @@ from PySide6.QtWidgets import (
     QPushButton,
 )
 
-from client.runners.abstract import AbstractJobRunner
+from client.runners.save import DownloadScansWorker
 
 
-class ProgressDialogue(QDialog):
+class SaveFilesDialogue(QDialog):
     """Progress dialogue."""
 
-    def __init__(self, runner: AbstractJobRunner, hide: bool = False) -> None:
-        """Initialize the dialogue.
-
-        :param runner: the job runner.
-        """
+    def __init__(
+        self,
+        runner: DownloadScansWorker,
+        hide: bool = False,
+    ) -> None:
+        """Initialize the dialogue."""
 
         super().__init__()
 
-        self.setWindowTitle("Performing operation...")
+        self.setWindowTitle("Downloading data...")
 
         # Create the layout
         layout: QHBoxLayout = QHBoxLayout()
@@ -50,7 +52,7 @@ class ProgressDialogue(QDialog):
         self.threadpool: QThreadPool = QThreadPool()
 
         # Create a runner
-        self.runner: AbstractJobRunner = runner
+        self.runner: DownloadScansWorker = runner
         self.runner.signals.progress.connect(self.update_progress)
         self.runner.signals.finished.connect(self.job_done)
         self.runner.signals.kill.connect(self.close)
@@ -62,7 +64,7 @@ class ProgressDialogue(QDialog):
         btn_resume.pressed.connect(self.runner.resume)
 
         # Update progress bar
-        self.progress.setRange(0, self.runner.max_progress)
+        self.progress.setRange(0, self.runner.get_max_progress())
 
         # Show the dialogue
         if not hide:
@@ -77,15 +79,21 @@ class ProgressDialogue(QDialog):
     def job_done(self) -> None:
         """Show a message box when the job is done."""
 
-        self.runner.pause()
-        if self.runner.result_value:
-            QMessageBox.information(
-                self, "Operation done", "Operation completed successfully."
-            )
-        else:
-            QMessageBox.critical(
-                self, "Operation failed", "Operation failed."
-            )
+        # Pause the runner if not paused already
+        if not self.runner.is_paused:
+            self.runner.pause()
+
+        # Show a message box
+        QMessageBox.information(
+            self,
+            "Scans downloaded",
+            "Scans downloaded successfully.",
+        )
+
+        # Kill the runner on job done if not killed already
+        if not self.runner.is_killed:
+            self.runner.kill()
+
         self.close()
 
     def closeEvent(self, arg__1: QCloseEvent) -> None:
@@ -94,5 +102,10 @@ class ProgressDialogue(QDialog):
         Overloads QDialog.closeEvent method.
         """
 
-        self.runner.kill()
+        logging.info("Closing %s.", self.__class__.__name__)
+
+        # Kill the runner on close if not killed already
+        if not self.runner.is_killed:
+            self.runner.kill()
+
         super().closeEvent(arg__1)

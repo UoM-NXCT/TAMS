@@ -14,10 +14,10 @@ from client.utils.file import create_dir_if_missing, move_item
 from client.utils.hash import hash_in_chunks
 from client.utils.toml import create_toml, get_dict_from_toml
 
-from .abstract import AbstractJobRunner, WorkerKilledException
+from .generic import Worker, WorkerKilledException
 
 
-class ValidateScansRunner(AbstractJobRunner):
+class ValidateScansRunner(Worker):
     """Runner that validates data in the local library."""
 
     def __init__(
@@ -25,7 +25,9 @@ class ValidateScansRunner(AbstractJobRunner):
     ) -> None:
         """Initialize the runner."""
 
-        super().__init__()
+        super().__init__(fn=self.job)
+
+        # We can only validate.py scans if the libraries exist!
 
         # Check if libraries exist
         if not local.exists():
@@ -41,29 +43,33 @@ class ValidateScansRunner(AbstractJobRunner):
                 f"Permanent library directory {permanent} is not a directory."
             )
 
+        # If the libraries exist, we still need to check if the project exists
+
         # Check project exists in permanent library
         self.permanent_storage_dir: Path = permanent / str(prj_id)
         if (
             not self.permanent_storage_dir.exists()
-            and self.permanent_storage_dir.is_dir()
+            or not self.permanent_storage_dir.is_dir()
         ):
             raise ValueError(
                 f"Project {prj_id} directory does not exist in permanent library."
             )
 
-        # If no scan IDs are provided, check all scans in project
+        # If no scan IDs are provided, save all scans in project
         if not scan_ids:
+            # Assume each directory in the project directory is a scan
             self.scan_ids: tuple[str, ...] = tuple(
                 scan_dir.name
                 for scan_dir in self.permanent_storage_dir.glob("*")
                 if scan_dir.is_dir()
             )
         else:
+            # Convert list to tuple
             self.scan_ids = tuple(str(scan_id) for scan_id in scan_ids)
 
         # Check scan exists in permanent library
         for scan_id in self.scan_ids:
-            scan_dir: Path = self.permanent_storage_dir / str(scan_id)
+            scan_dir: Path = self.permanent_storage_dir / Path(scan_id)
             if not scan_dir.exists() and scan_dir.is_dir():
                 raise ValueError(
                     f"Scan {scan_id} directory does not exist in permanent library."
@@ -77,58 +83,74 @@ class ValidateScansRunner(AbstractJobRunner):
         # Count files to be validated
         total_files: int = 0
         for scan_id in self.scan_ids:
-            total_files += len(tuple(self.permanent_storage_dir.glob(f"{scan_id}/*")))
-        self.max_progress = total_files
+            scan_dir: Path = self.permanent_storage_dir / str(scan_id)
+            total_files += len(tuple(scan_dir.rglob("*")))
+        # Add the scan directories to the total as they are also validated
+        total_files += len(self.scan_ids)
+        self.set_max_progress(total_files)
 
     def job(self) -> None:
         """Save data to local library."""
 
         # Check local scan directories exist
         for scan_dir in self.local_scan_dirs:
+            # Increment progress bar
+            self.signals.progress.emit(1)
             if not scan_dir.exists():
-                self.result(False)
-                self.signals.finished.emit()
+                # If local scan directory does not exist, download is invalid
+                logging.info("Scan directory %s does not exist, validation fail.")
+                self.set_result(False)
+                return
 
+        # Check the contents of each scan directory
         for scan in self.scan_ids:
             target: Path = self.permanent_storage_dir / Path(scan)
-            destination: Path = self.local_prj_dir / Path(scan)
+            local_dir: Path = self.local_prj_dir / Path(scan)
 
             for item in target.rglob("*"):
                 # Increment progress bar
                 self.signals.progress.emit(1)
 
-                # Skip tams metadata
-                if item.is_file() and item.parent.name == "tams_metadata":
-                    continue
-                if item.is_dir() and item.name == "tams_metadata":
-                    continue
+                # Skip directories
+                if not item.is_dir():
+                    # Skip tams metadata
+                    if not (item.is_file() and item.parent.name == "tams_metadata"):
+                        try:
+                            relative_path: Path = item.relative_to(target)
+                            local_file: Path = local_dir / relative_path
 
-                try:
-                    relative_path: Path = item.relative_to(target)
-                    item_destination: Path = destination / relative_path
+                            # Hash the files
+                            target_hash: str = hash_in_chunks(item)
+                            local_hash: str = hash_in_chunks(local_file)
 
-                    # Hash the files
-                    target_hash: str = hash_in_chunks(item)
-                    destination_hash: str = hash_in_chunks(item_destination)
+                            # Compare hashes
+                            if target_hash != local_hash:
+                                logging.info(
+                                    "Hashes do not match: file %s is invalid.", item
+                                )
+                                self.set_result(False)
+                            else:
+                                logging.info("Hashes match: file %s is valid.", item)
 
-                    # Compare hashes
-                    if target_hash != destination_hash:
-                        logging.info("Hashes do not match.")
-                        self.result(False)
-                        self.signals.finished.emit()
+                        except FileNotFoundError:
+                            logging.info("%s not found, validation fail.", item.name)
+                            self.set_result(False)
 
-                except FileNotFoundError:
-                    logging.info("File not found, validation fail.")
-                    self.result(False)
-                    self.signals.finished.emit()
-
-
-
+                # Pause if worker is paused
                 while self.is_paused:
+                    # Keep waiting until resumed
                     time.sleep(0)
+                # Check if worker has been killed
                 if self.is_killed:
                     raise WorkerKilledException
                 if self.is_finished:
                     # Break loop if job is finished
-                    break
-        self.finish()
+                    return
+
+            if not self.is_finished:
+                logging.info("Scan %s validated successfully.", scan)
+
+        # If the job reached the end without finishing, it means it was successful
+        if not self.is_finished:
+            logging.info("Validation successful.")
+            self.set_result(True)

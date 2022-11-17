@@ -25,10 +25,11 @@ from client import settings
 from client.db import DatabaseView, MissingTables, dict_to_conn_str
 from client.dialogues.create_project_dialogue import CreateProjectWindow
 from client.dialogues.create_scan_dialogue import CreateScanDialogue
-from client.dialogues.progress import ProgressDialogue
+from client.dialogues.download_scan import SaveFilesDialogue
 from client.dialogues.settings import SettingsWindow
+from client.dialogues.validate import ValidateDialogue
 from client.metadata_panel import MetadataPanel
-from client.runners.save import DownloadScansRunner
+from client.runners.save import DownloadScansWorker
 from client.runners.validate import ValidateScansRunner
 from client.table_widget.model import TableModel
 from client.table_widget.view import TableView
@@ -57,7 +58,7 @@ class MainWindow(QMainWindow):
         self.settings: QWidget
         self.create_prj: QWidget
         self.create_scan_dialogue: QWidget
-        self.progress_dialogue: ProgressDialogue
+        self.progress_dialogue: SaveFilesDialogue
 
         # Set up the application's GUI.
         self.setMinimumSize(1080, 720)
@@ -330,10 +331,10 @@ class MainWindow(QMainWindow):
             logging.info("Downloading data from project ID %s", row_pk)
 
             try:
-                runner = DownloadScansRunner(
+                runner = DownloadScansWorker(
                     Path(local_library), Path(permanent_library), row_pk
                 )
-                self.progress_dialogue = ProgressDialogue(runner)
+                self.progress_dialogue = SaveFilesDialogue(runner)
 
             except Exception:
                 # TODO: specify exceptions
@@ -346,10 +347,10 @@ class MainWindow(QMainWindow):
             project_id: int = self.get_value_from_row(1)
 
             try:
-                runner = DownloadScansRunner(
+                runner = DownloadScansWorker(
                     Path(local_library), Path(permanent_library), project_id, row_pk
                 )
-                self.progress_dialogue = ProgressDialogue(runner)
+                self.progress_dialogue = SaveFilesDialogue(runner)
             except Exception:
                 # TODO: specify exceptions
                 logging.exception("Error downloading data from project ID %s", row_pk)
@@ -448,7 +449,7 @@ class MainWindow(QMainWindow):
                 runner = ValidateScansRunner(
                     Path(local_library), Path(permanent_library), row_pk
                 )
-                self.progress_dialogue = ProgressDialogue(runner)
+                self.progress_dialogue = ValidateDialogue(runner)
 
             except Exception:
                 # TODO: specify exceptions
@@ -464,7 +465,7 @@ class MainWindow(QMainWindow):
                 runner = ValidateScansRunner(
                     Path(local_library), Path(permanent_library), project_id, row_pk
                 )
-                self.progress_dialogue = ProgressDialogue(runner)
+                self.progress_dialogue = ValidateDialogue(runner)
             except Exception:
                 # TODO: specify exceptions
                 logging.exception("Error Validating data from project ID %s", row_pk)
@@ -475,7 +476,7 @@ class MainWindow(QMainWindow):
                 )
 
         else:
-            logging.error("Cannot validate data from table %s", table)
+            logging.error("Cannot validate.py data from table %s", table)
             QMessageBox.critical(
                 self,
                 "Error",
