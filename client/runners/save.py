@@ -13,7 +13,7 @@ from client.db.views import DatabaseView
 from client.utils.file import create_dir_if_missing, move_item
 from client.utils.toml import create_toml, get_dict_from_toml
 
-from .generic import Worker, WorkerKilledException
+from .generic import Worker, WorkerKilledException, WorkerStatus
 
 
 class DownloadScansWorker(Worker):
@@ -124,13 +124,13 @@ class DownloadScansWorker(Worker):
                 self.signals.progress.emit(1)
 
                 # Pause if worker is paused
-                while self.is_paused:
+                while self.worker_status is WorkerStatus.PAUSED:
                     # Keep waiting until resumed
                     time.sleep(0)
 
                 # Check if worker has been killed
-                if self.is_killed:
+                if self.worker_status is WorkerStatus.KILLED:
                     raise WorkerKilledException
-                if self.is_finished:
+                if self.worker_status is WorkerStatus.FINISHED:
                     # Break loop if job is finished
                     break

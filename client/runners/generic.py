@@ -1,6 +1,11 @@
+"""
+Generic worker class for running jobs in a separate thread.
+"""
+
 import logging
 import sys
 import traceback
+from enum import Enum, auto
 from typing import Any, Callable
 
 from PySide6.QtCore import QObject, QRunnable, Signal, Slot
@@ -18,6 +23,15 @@ class WorkerFinishedException(Exception):
 
     def __init__(self, message: str = "Worker has finished."):
         super().__init__(message)
+
+
+class WorkerStatus(Enum):
+    """Enum for worker status flags."""
+
+    RUNNING = auto()
+    PAUSED = auto()
+    KILLED = auto()
+    FINISHED = auto()
 
 
 class WorkerSignals(QObject):
@@ -52,9 +66,9 @@ class Worker(QRunnable):
         self.kwargs: dict[str, Any] = kwargs
         self.signals: WorkerSignals = WorkerSignals()
 
-        self.is_paused: bool = False
-        self.is_killed: bool = False
-        self.is_finished: bool = False
+        # Status flags
+        self.worker_status: WorkerStatus = WorkerStatus.RUNNING
+
         self.result_value: Any = None
 
         # By default, progress is out of 100
@@ -66,7 +80,7 @@ class Worker(QRunnable):
 
         try:
             result: Any = self.fn(*self.args, **self.kwargs)
-        except Exception:
+        except Exception:  # pylint: disable=broad-except
             traceback.print_exc()
             exc_type, value = sys.exc_info()[:2]
             self.signals.error.emit((exc_type, value, traceback.format_exc()))
@@ -93,30 +107,30 @@ class Worker(QRunnable):
         """Kill the worker."""
 
         logging.info("%s killed.", self.__class__.__name__)
-        self.is_killed = True
+        self.worker_status = WorkerStatus.KILLED
         self.signals.kill.emit()
 
     def pause(self) -> None:
         """Pause the worker."""
 
         logging.info("%s paused.", self.__class__.__name__)
-        self.is_paused = True
+        self.worker_status = WorkerStatus.PAUSED
 
     def resume(self) -> None:
         """Resume the worker."""
 
         logging.info("%s resumed.", self.__class__.__name__)
-        self.is_paused = False
+        self.worker_status = WorkerStatus.RUNNING
 
     def finish(self) -> None:
         """Finish the worker."""
 
         logging.info("%s finished.", self.__class__.__name__)
-        self.is_finished = True
+        self.worker_status = WorkerStatus.FINISHED
         self.signals.finished.emit()
 
     def set_result(self, result: Any) -> None:
-        """Set the result of the worker."""
+        """Set the result of the worker and finish."""
 
         logging.info("%s result set: %s", self.__class__.__name__, result)
         self.result_value = result

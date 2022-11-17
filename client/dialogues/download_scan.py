@@ -13,6 +13,7 @@ from PySide6.QtWidgets import (
     QPushButton,
 )
 
+from client.runners.generic import WorkerStatus
 from client.runners.save import DownloadScansWorker
 
 
@@ -79,10 +80,6 @@ class SaveFilesDialogue(QDialog):
     def job_done(self) -> None:
         """Show a message box when the job is done."""
 
-        # Pause the runner if not paused already
-        if not self.runner.is_paused:
-            self.runner.pause()
-
         # Show a message box
         QMessageBox.information(
             self,
@@ -90,17 +87,6 @@ class SaveFilesDialogue(QDialog):
             "Scans downloaded successfully.",
         )
 
-        # Kill the runner on job done if not killed already
-        if not self.runner.is_killed:
-            self.runner.kill()
-
-        self.runner.pause()
-        if self.runner.result_value:
-            QMessageBox.information(
-                self, "Operation done", "Operation completed successfully."
-            )
-        else:
-            QMessageBox.critical(self, "Operation failed", "Operation failed.")
         self.close()
 
     def closeEvent(self, arg__1: QCloseEvent) -> None:
@@ -112,7 +98,7 @@ class SaveFilesDialogue(QDialog):
         logging.info("Closing %s.", self.__class__.__name__)
 
         # Kill the runner on close if not killed already
-        if not self.runner.is_killed:
+        if not self.runner.worker_status is WorkerStatus.KILLED:
             self.runner.kill()
 
         super().closeEvent(arg__1)

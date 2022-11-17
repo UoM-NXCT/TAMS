@@ -14,7 +14,7 @@ from client.utils.file import create_dir_if_missing, move_item
 from client.utils.hash import hash_in_chunks
 from client.utils.toml import create_toml, get_dict_from_toml
 
-from .generic import Worker, WorkerKilledException
+from .generic import Worker, WorkerKilledException, WorkerStatus
 
 
 class ValidateScansRunner(Worker):
@@ -137,45 +137,20 @@ class ValidateScansRunner(Worker):
                             self.set_result(False)
 
                 # Pause if worker is paused
-                # Skip tams metadata
-                if item.is_file() and item.parent.name == "tams_metadata":
-                    continue
-                if item.is_dir() and item.name == "tams_metadata":
-                    continue
-
-                try:
-                    relative_path: Path = item.relative_to(target)
-                    item_destination: Path = local_dir / relative_path
-
-                    # Hash the files
-                    target_hash: str = hash_in_chunks(item)
-                    destination_hash: str = hash_in_chunks(item_destination)
-
-                    # Compare hashes
-                    if target_hash != destination_hash:
-                        logging.info("Hashes do not match.")
-                        self.result(False)
-                        self.signals.finished.emit()
-
-                except FileNotFoundError:
-                    logging.info("File not found, validation fail.")
-                    self.result(False)
-                    self.signals.finished.emit()
-
-                while self.is_paused:
+                while self.worker_status is WorkerStatus.PAUSED:
                     # Keep waiting until resumed
                     time.sleep(0)
                 # Check if worker has been killed
-                if self.is_killed:
+                if self.worker_status is WorkerStatus.KILLED:
                     raise WorkerKilledException
-                if self.is_finished:
+                if self.worker_status is WorkerStatus.FINISHED:
                     # Break loop if job is finished
                     return
 
-            if not self.is_finished:
+            if self.worker_status is not WorkerStatus.FINISHED:
                 logging.info("Scan %s validated successfully.", scan)
 
         # If the job reached the end without finishing, it means it was successful
-        if not self.is_finished:
+        if self.worker_status is not WorkerStatus.FINISHED:
             logging.info("Validation successful.")
             self.set_result(True)

@@ -13,6 +13,7 @@ from PySide6.QtWidgets import (
     QPushButton,
 )
 
+from client.runners.generic import WorkerStatus
 from client.runners.validate import ValidateScansRunner
 
 
@@ -80,8 +81,7 @@ class ValidateDialogue(QDialog):
         """Show a message box when the job is done."""
 
         # Pause the runner if not paused already
-        if not self.runner.is_paused:
-            self.runner.pause()
+        ...
 
         match self.runner.result_value:
             case True:
@@ -102,10 +102,6 @@ class ValidateDialogue(QDialog):
                 # Show a message box
                 QMessageBox.critical(self, "Error", "An error occurred.")
 
-        # Kill the runner on job done if not killed already
-        if not self.runner.is_killed:
-            self.runner.kill()
-
         self.close()
 
     def closeEvent(self, arg__1: QCloseEvent) -> None:
@@ -117,7 +113,7 @@ class ValidateDialogue(QDialog):
         logging.info("Closing %s.", self.__class__.__name__)
 
         # Kill the runner on close if not killed already
-        if not self.runner.is_killed:
+        if not self.runner.worker_status is WorkerStatus.KILLED:
             self.runner.kill()
 
         super().closeEvent(arg__1)
