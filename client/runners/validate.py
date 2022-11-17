@@ -145,7 +145,7 @@ class ValidateScansRunner(Worker):
 
                 try:
                     relative_path: Path = item.relative_to(target)
-                    item_destination: Path = destination / relative_path
+                    item_destination: Path = local_dir / relative_path
 
                     # Hash the files
                     target_hash: str = hash_in_chunks(item)
