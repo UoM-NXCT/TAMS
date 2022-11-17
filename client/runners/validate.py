@@ -111,6 +111,7 @@ class ValidateScansRunner(Worker):
                 # Increment progress bar
                 self.signals.progress.emit(1)
 
+<<<<<<< Updated upstream
                 # Skip directories
                 if not item.is_dir():
                     # Skip tams metadata
@@ -137,6 +138,33 @@ class ValidateScansRunner(Worker):
                             self.set_result(False)
 
                 # Pause if worker is paused
+=======
+                # Skip tams metadata
+                if item.is_file() and item.parent.name == "tams_metadata":
+                    continue
+                if item.is_dir() and item.name == "tams_metadata":
+                    continue
+
+                try:
+                    relative_path: Path = item.relative_to(target)
+                    item_destination: Path = destination / relative_path
+
+                    # Hash the files
+                    target_hash: str = hash_in_chunks(item)
+                    destination_hash: str = hash_in_chunks(item_destination)
+
+                    # Compare hashes
+                    if target_hash != destination_hash:
+                        logging.info("Hashes do not match.")
+                        self.result(False)
+                        self.signals.finished.emit()
+
+                except FileNotFoundError:
+                    logging.info("File not found, validation fail.")
+                    self.result(False)
+                    self.signals.finished.emit()
+
+>>>>>>> Stashed changes
                 while self.is_paused:
                     # Keep waiting until resumed
                     time.sleep(0)
