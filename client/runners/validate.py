@@ -5,14 +5,8 @@ Runner for dowloading files to the local library.
 import logging
 import time
 from pathlib import Path
-from typing import Any
 
-from client import settings
-from client.db.utils import dict_to_conn_str
-from client.db.views import DatabaseView
-from client.utils.file import create_dir_if_missing, move_item
 from client.utils.hash import hash_in_chunks
-from client.utils.toml import create_toml, get_dict_from_toml
 
 from .generic import Worker, WorkerKilledException, WorkerStatus
 
@@ -69,7 +63,7 @@ class ValidateScansRunner(Worker):
 
         # Check scan exists in permanent library
         for scan_id in self.scan_ids:
-            scan_dir: Path = self.permanent_storage_dir / Path(scan_id)
+            scan_dir: Path = self.permanent_storage_dir / str(scan_id)
             if not scan_dir.exists() and scan_dir.is_dir():
                 raise ValueError(
                     f"Scan {scan_id} directory does not exist in permanent library."
@@ -83,7 +77,7 @@ class ValidateScansRunner(Worker):
         # Count files to be validated
         total_files: int = 0
         for scan_id in self.scan_ids:
-            scan_dir: Path = self.permanent_storage_dir / str(scan_id)
+            scan_dir = self.permanent_storage_dir / str(scan_id)
             total_files += len(tuple(scan_dir.rglob("*")))
         # Add the scan directories to the total as they are also validated
         total_files += len(self.scan_ids)
@@ -111,30 +105,30 @@ class ValidateScansRunner(Worker):
                 # Increment progress bar
                 self.signals.progress.emit(1)
 
-                # Skip directories
-                if not item.is_dir():
-                    # Skip tams metadata
-                    if not (item.is_file() and item.parent.name == "tams_metadata"):
-                        try:
-                            relative_path: Path = item.relative_to(target)
-                            local_file: Path = local_dir / relative_path
+                # Skip directories and tams metadata
+                if not item.is_dir() and not (
+                    item.is_file() and item.parent.name == "tams_metadata"
+                ):
+                    try:
+                        relative_path: Path = item.relative_to(target)
+                        local_file: Path = local_dir / relative_path
 
-                            # Hash the files
-                            target_hash: str = hash_in_chunks(item)
-                            local_hash: str = hash_in_chunks(local_file)
+                        # Hash the files
+                        target_hash: str = hash_in_chunks(item)
+                        local_hash: str = hash_in_chunks(local_file)
 
-                            # Compare hashes
-                            if target_hash != local_hash:
-                                logging.info(
-                                    "Hashes do not match: file %s is invalid.", item
-                                )
-                                self.set_result(False)
-                            else:
-                                logging.info("Hashes match: file %s is valid.", item)
-
-                        except FileNotFoundError:
-                            logging.info("%s not found, validation fail.", item.name)
+                        # Compare hashes
+                        if target_hash != local_hash:
+                            logging.info(
+                                "Hashes do not match: file %s is invalid.", item
+                            )
                             self.set_result(False)
+                        else:
+                            logging.info("Hashes match: file %s is valid.", item)
+
+                    except FileNotFoundError:
+                        logging.info("%s not found, validation fail.", item.name)
+                        self.set_result(False)
 
                 # Pause if worker is paused
                 while self.worker_status is WorkerStatus.PAUSED:

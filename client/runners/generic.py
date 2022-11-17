@@ -6,7 +6,7 @@ import logging
 import sys
 import traceback
 from enum import Enum, auto
-from typing import Any, Callable
+from typing import Any, Callable, Optional
 
 from PySide6.QtCore import QObject, QRunnable, Signal, Slot
 
@@ -55,15 +55,14 @@ class Worker(QRunnable):
     :param kwargs: keyword to pass to callback function.
     """
 
-    def __init__(self, fn: Callable, *args: Any, **kwargs: Any):
+    def __init__(self, fn: Callable[[], Any]):
         """Initialize the worker."""
 
         super().__init__()
 
         # Store constructor arguments (re-used for processing)
-        self.fn: Callable = fn
-        self.args: tuple[Any, ...] = args
-        self.kwargs: dict[str, Any] = kwargs
+        self.fn: Callable[[], Any] = fn
+
         self.signals: WorkerSignals = WorkerSignals()
 
         # Status flags
@@ -79,7 +78,7 @@ class Worker(QRunnable):
         """Initialise the runner function with passed args, kwargs."""
 
         try:
-            result: Any = self.fn(*self.args, **self.kwargs)
+            result: Any = self.fn()
         except Exception:  # pylint: disable=broad-except
             traceback.print_exc()
             exc_type, value = sys.exc_info()[:2]

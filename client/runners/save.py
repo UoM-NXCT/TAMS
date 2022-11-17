@@ -2,7 +2,6 @@
 Runner for dowloading files to the local library.
 """
 
-import logging
 import time
 from pathlib import Path
 from typing import Any
@@ -10,10 +9,9 @@ from typing import Any
 from client import settings
 from client.db.utils import dict_to_conn_str
 from client.db.views import DatabaseView
+from client.runners.generic import Worker, WorkerKilledException, WorkerStatus
 from client.utils.file import create_dir_if_missing, move_item
 from client.utils.toml import create_toml, get_dict_from_toml
-
-from .generic import Worker, WorkerKilledException, WorkerStatus
 
 
 class DownloadScansWorker(Worker):
