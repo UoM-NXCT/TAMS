@@ -111,7 +111,6 @@ class ValidateScansRunner(Worker):
                 # Increment progress bar
                 self.signals.progress.emit(1)
 
-<<<<<<< Updated upstream
                 # Skip directories
                 if not item.is_dir():
                     # Skip tams metadata
@@ -138,7 +137,6 @@ class ValidateScansRunner(Worker):
                             self.set_result(False)
 
                 # Pause if worker is paused
-=======
                 # Skip tams metadata
                 if item.is_file() and item.parent.name == "tams_metadata":
                     continue
@@ -164,7 +162,6 @@ class ValidateScansRunner(Worker):
                     self.result(False)
                     self.signals.finished.emit()
 
->>>>>>> Stashed changes
                 while self.is_paused:
                     # Keep waiting until resumed
                     time.sleep(0)

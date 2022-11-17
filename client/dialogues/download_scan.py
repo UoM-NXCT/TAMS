@@ -79,7 +79,6 @@ class SaveFilesDialogue(QDialog):
     def job_done(self) -> None:
         """Show a message box when the job is done."""
 
-<<<<<<< Updated upstream:client/dialogues/download_scan.py
         # Pause the runner if not paused already
         if not self.runner.is_paused:
             self.runner.pause()
@@ -95,7 +94,6 @@ class SaveFilesDialogue(QDialog):
         if not self.runner.is_killed:
             self.runner.kill()
 
-=======
         self.runner.pause()
         if self.runner.result_value:
             QMessageBox.information(
@@ -103,7 +101,6 @@ class SaveFilesDialogue(QDialog):
             )
         else:
             QMessageBox.critical(self, "Operation failed", "Operation failed.")
->>>>>>> Stashed changes:client/dialogues/progress.py
         self.close()
 
     def closeEvent(self, arg__1: QCloseEvent) -> None:

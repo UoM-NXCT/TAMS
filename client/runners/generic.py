@@ -75,7 +75,6 @@ class Worker(QRunnable):
             self.signals.result.emit(result)
         finally:
             self.signals.finished.emit()  # Done
-<<<<<<< Updated upstream
 
     def set_max_progress(self, max_progress: int) -> None:
         """Set the max progress of the worker."""
@@ -123,5 +122,3 @@ class Worker(QRunnable):
         self.result_value = result
         self.signals.result.emit(result)
         self.finish()
-=======
->>>>>>> Stashed changes

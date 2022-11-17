@@ -96,7 +96,7 @@ class ValidateDialogue(QDialog):
                 QMessageBox.critical(
                     self,
                     "Data invalid",
-                    "Data on server does not match local. Data is either missing or corrupted."
+                    "Data on server does not match local. Data is either missing or corrupted.",
                 )
             case _:
                 # Show a message box
