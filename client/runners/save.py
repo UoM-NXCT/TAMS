@@ -84,7 +84,7 @@ class DownloadScansWorker(Worker):
         # Count files to be moved for progress bar
         total_files: int = 0
         for scan_id in self.scan_ids:
-            total_files += len(tuple(self.permanent_storage_dir.glob(f"{scan_id}/*")))
+            total_files += len(tuple(self.permanent_storage_dir.rglob(f"{scan_id}/*")))
         self.set_max_progress(total_files)
 
     def get_scan_form_data(self, scan_id: int) -> dict[str, dict[str, Any]]:

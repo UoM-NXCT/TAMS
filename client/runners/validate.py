@@ -123,8 +123,6 @@ class ValidateScansRunner(Worker):
                                 "Hashes do not match: file %s is invalid.", item
                             )
                             self.set_result(False)
-                        else:
-                            logging.info("Hashes match: file %s is valid.", item)
 
                     except FileNotFoundError:
                         logging.info("%s not found, validation fail.", item.name)
