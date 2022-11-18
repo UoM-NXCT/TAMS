@@ -57,7 +57,7 @@ class DownloadScansWorker(Worker):
             # Assume each directory in the project directory is a scan
             self.scan_ids: tuple[str, ...] = tuple(
                 scan_dir.name
-                for scan_dir in self.permanent_storage_dir.glob("*")
+                for scan_dir in self.permanent_storage_dir.glob("**/*")
                 if scan_dir.is_dir()
             )
         else:
@@ -83,9 +83,18 @@ class DownloadScansWorker(Worker):
 
         # Count files to be moved for progress bar
         total_files: int = 0
+        size_in_bytes: int = 0
         for scan_id in self.scan_ids:
-            total_files += len(tuple(self.permanent_storage_dir.rglob(f"{scan_id}/*")))
-        self.set_max_progress(total_files)
+            scan_dir: Path = self.permanent_storage_dir / str(scan_id)
+            for item in tuple(scan_dir.rglob("*")):
+                if not item.is_dir():
+                    total_files += 1
+                    size_in_bytes += item.stat().st_size
+        self.size_in_bytes: int = size_in_bytes
+        try:
+            self.set_max_progress(total_files - 1)
+        except TypeError:
+            raise ValueError("No files to download.")
 
     def get_scan_form_data(self, scan_id: int) -> dict[str, dict[str, Any]]:
         """Get the metadata for a scan."""
@@ -113,10 +122,14 @@ class DownloadScansWorker(Worker):
             create_toml(user_form, scan_form_data)
 
             # Move files
-            for item in target.glob("*"):
+            for item in target.rglob("*"):
 
                 # Move item
-                move_item(item, destination, keep_original=True)
+                if not item.is_file():
+                    # Skip directories
+                    continue
+
+                move_item(item, destination / "raw", keep_original=True)
 
                 # Increment progress bar
                 self.signals.progress.emit(1)

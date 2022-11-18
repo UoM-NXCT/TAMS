@@ -103,3 +103,15 @@ def find_and_move(
                     shutil.rmtree(item)
     else:
         logging.warning("No %s files found.", glob_arg)
+
+
+def size_fmt(num_of_bytes: int, dec_places: int = 2) -> str:
+    """Function that formats a size in bytes to a human-readable format."""
+
+    selected_unit: str = "Err"
+    for unit in ("B", "KB", "MB", "TB", "PB"):
+        if num_of_bytes < 1024 or unit == "PB":
+            selected_unit = unit
+            break
+        num_of_bytes /= 1024
+    return f"{num_of_bytes:.{dec_places}f} {selected_unit}"
