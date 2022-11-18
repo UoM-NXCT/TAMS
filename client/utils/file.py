@@ -108,6 +108,9 @@ def find_and_move(
 def size_fmt(num_of_bytes: int | float, dec_places: int = 2) -> str:
     """Function that formats a size in bytes to a human-readable format."""
 
+    if num_of_bytes < 0:
+        raise ValueError("Number of bytes must be positive.")
+
     selected_unit: str = "Err"
     for unit in ("B", "KB", "MB", "TB", "PB"):
         if num_of_bytes < 1024 or unit == "PB":

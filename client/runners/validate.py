@@ -3,8 +3,11 @@ Runner for dowloading files to the local library.
 """
 
 import logging
+import os
 import time
 from pathlib import Path
+
+from PySide6.QtWidgets import QMessageBox, QWidget
 
 from client.utils.hash import hash_in_chunks
 
@@ -74,14 +77,34 @@ class ValidateScansRunner(Worker):
             self.local_prj_dir / str(scan_id) for scan_id in self.scan_ids
         )
 
-        # Count files to be validated
+        # Count files to be moved for progress bar
+        dlg: QWidget = QWidget()
+        msg: QMessageBox = QMessageBox.information(
+            dlg,
+            "Indexing files",
+            "Depending on the size of the data, this may take a long time. Are you sure you would like to continue?",
+            QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel,
+        )
+        if msg == QMessageBox.StandardButton.Cancel:
+            raise ValueError("User cancelled indexing files.")
+
+        logging.info("Indexing files, this may take a while...")
         total_files: int = 0
+        size_in_bytes: int = 0
         for scan_id in self.scan_ids:
             scan_dir = self.permanent_storage_dir / str(scan_id)
-            total_files += len(tuple(scan_dir.rglob("*")))
-        # Add the scan directories to the total as they are also validated
-        total_files += len(self.scan_ids)
-        self.set_max_progress(total_files)
+            # Note: the os.walk method is much faster than Path.rglob
+            for root, _, files in os.walk(scan_dir):
+                for file in files:
+                    total_files += 1
+                    file_path = os.path.join(root, file)
+                    size_in_bytes += os.stat(file_path).st_size
+        self.size_in_bytes: int = size_in_bytes
+        try:
+            self.set_max_progress(total_files - 1)
+        except TypeError as exc:
+            # If negative, total_files is 0 and no files are found
+            raise ValueError("No files to validate.") from exc
 
     def job(self) -> None:
         """Save data to local library."""
@@ -111,7 +134,7 @@ class ValidateScansRunner(Worker):
                 ):
                     try:
                         relative_path: Path = item.relative_to(target)
-                        local_file: Path = local_dir / relative_path
+                        local_file: Path = local_dir / "raw" / relative_path
 
                         # Hash the files
                         target_hash: str = hash_in_chunks(item)

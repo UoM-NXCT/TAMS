@@ -1,10 +1,13 @@
 """
 Runner for dowloading files to the local library.
 """
-
+import logging
+import os
 import time
 from pathlib import Path
 from typing import Any
+
+from PySide6.QtWidgets import QMessageBox, QWidget
 
 from client import settings
 from client.db.utils import dict_to_conn_str
@@ -25,7 +28,6 @@ class DownloadScansWorker(Worker):
         super().__init__(fn=self.job)
 
         # We can only download scans if the libraries exist!
-
         # Check if libraries exist
         if not local.exists():
             raise ValueError(f"Local library directory {local} does not exist.")
@@ -41,7 +43,6 @@ class DownloadScansWorker(Worker):
             )
 
         # If the libraries exist, we still need to check if the project exists
-
         # Check project exists in permanent library
         self.permanent_storage_dir: Path = permanent / str(prj_id)
         if (
@@ -51,19 +52,17 @@ class DownloadScansWorker(Worker):
             raise ValueError(
                 f"Project {prj_id} directory does not exist in permanent library."
             )
-
         # If no scan IDs are provided, save all scans in project
         if not scan_ids:
             # Assume each directory in the project directory is a scan
             self.scan_ids: tuple[str, ...] = tuple(
                 scan_dir.name
-                for scan_dir in self.permanent_storage_dir.glob("**/*")
+                for scan_dir in self.permanent_storage_dir.glob("*")
                 if scan_dir.is_dir()
             )
         else:
             # Convert list to tuple
             self.scan_ids = tuple(str(scan_id) for scan_id in scan_ids)
-
         # Check scan exists in permanent library
         for scan_id in self.scan_ids:
             scan_dir: Path = self.permanent_storage_dir / str(scan_id)
@@ -71,7 +70,6 @@ class DownloadScansWorker(Worker):
                 raise ValueError(
                     f"Scan {scan_id} directory does not exist in permanent library."
                 )
-
         # Create directories if they do not already exist
         self.local_prj_dir: Path = local / str(prj_id)
         local_scan_dirs: tuple[Path, ...] = tuple(
@@ -82,19 +80,33 @@ class DownloadScansWorker(Worker):
             create_dir_if_missing(local_scan_dir)
 
         # Count files to be moved for progress bar
+        dlg: QWidget = QWidget()
+        msg: QMessageBox = QMessageBox.information(
+            dlg,
+            "Indexing files",
+            "Depending on the size of the data, this may take a long time. Are you sure you would like to continue?",
+            QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel,
+        )
+        if msg == QMessageBox.StandardButton.Cancel:
+            raise ValueError("User cancelled indexing files.")
+
+        logging.info("Indexing files, this may take a while...")
         total_files: int = 0
         size_in_bytes: int = 0
         for scan_id in self.scan_ids:
             scan_dir = self.permanent_storage_dir / str(scan_id)
-            for item in tuple(scan_dir.rglob("*")):
-                if not item.is_dir():
+            # Note: the os.walk method is much faster than Path.rglob
+            for root, _, files in os.walk(scan_dir):
+                for file in files:
                     total_files += 1
-                    size_in_bytes += item.stat().st_size
+                    file_path = os.path.join(root, file)
+                    size_in_bytes += os.stat(file_path).st_size
         self.size_in_bytes: int = size_in_bytes
         try:
             self.set_max_progress(total_files - 1)
-        except TypeError:
-            raise ValueError("No files to download.")
+        except TypeError as exc:
+            # If negative, total_files is 0 and no files are found
+            raise ValueError("No files to download.") from exc
 
     def get_scan_form_data(self, scan_id: int) -> dict[str, dict[str, Any]]:
         """Get the metadata for a scan."""

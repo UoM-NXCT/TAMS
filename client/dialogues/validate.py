@@ -8,13 +8,16 @@ from PySide6.QtGui import QCloseEvent
 from PySide6.QtWidgets import (
     QDialog,
     QHBoxLayout,
+    QLabel,
     QMessageBox,
     QProgressBar,
     QPushButton,
+    QVBoxLayout,
 )
 
 from client.runners.generic import WorkerStatus
 from client.runners.validate import ValidateScansRunner
+from client.utils.file import size_fmt
 
 
 class ValidateDialogue(QDialog):
@@ -32,21 +35,31 @@ class ValidateDialogue(QDialog):
         self.setWindowTitle("Validating data...")
 
         # Create the layout
-        layout: QHBoxLayout = QHBoxLayout()
+        layout: QVBoxLayout = QVBoxLayout()
+        bar_layout: QHBoxLayout = QHBoxLayout()
+
+        # Create label
+        label = QLabel(
+            f"Validating {runner.get_max_progress() + 1} items... ({size_fmt(runner.size_in_bytes)})"
+        )
+        layout.addWidget(label)
 
         # Create buttons
         btn_stop: QPushButton = QPushButton("Stop")
         btn_pause: QPushButton = QPushButton("Pause")
         btn_resume: QPushButton = QPushButton("Resume")
-        layout.addWidget(btn_stop)
-        layout.addWidget(btn_pause)
-        layout.addWidget(btn_resume)
+        bar_layout.addWidget(btn_stop)
+        bar_layout.addWidget(btn_pause)
+        bar_layout.addWidget(btn_resume)
 
         # Create the progress bar
         self.progress: QProgressBar = QProgressBar()
-        layout.addWidget(self.progress)
+        bar_layout.addWidget(self.progress)
+
+        layout.addLayout(bar_layout)
 
         # Set the layout
+        self.setLayout(layout)
         self.setLayout(layout)
 
         # Thread runner
