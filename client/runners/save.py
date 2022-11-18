@@ -81,7 +81,7 @@ class DownloadScansWorker(Worker):
 
         # Count files to be moved for progress bar
         dlg: QWidget = QWidget()
-        msg: QMessageBox = QMessageBox.information(
+        msg: QMessageBox.StandardButton = QMessageBox.information(
             dlg,
             "Indexing files",
             "Depending on the size of the data, this may take a long time. Are you sure you would like to continue?",
