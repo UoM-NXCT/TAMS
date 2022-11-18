@@ -6,21 +6,21 @@ Please answer the following questions for yourself before submitting an issue.
 - [ ] I checked the documentation and found no answer
 - [ ] I checked to make sure this issue has not already been filed
 
-# Expected Behavior
+# Expected behaviour
 
 Please describe the behavior you are expecting.
 
-# Current Behavior
+# Current behaviour
 
 What is the current behavior?
 
-# Failure Information (for bugs)
+# Failure information (for bugs)
 
 Please help provide information about the failure if this is a bug.
 
 **If it is not a bug, please remove the rest of this template.**
 
-## Steps to Reproduce
+## Steps to reproduce
 
 Please provide detailed steps for reproducing the issue.
 
@@ -38,6 +38,6 @@ Please provide any relevant information about your setup. This is important if t
 - PostgreSQL version:
 - Anything else that may be relevant: ...
 
-## Failure Logs
+## Failure logs
 
 Please include any relevant log snippets or files here.
