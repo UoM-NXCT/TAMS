@@ -85,7 +85,7 @@ class DownloadScansWorker(Worker):
         total_files: int = 0
         size_in_bytes: int = 0
         for scan_id in self.scan_ids:
-            scan_dir: Path = self.permanent_storage_dir / str(scan_id)
+            scan_dir = self.permanent_storage_dir / str(scan_id)
             for item in tuple(scan_dir.rglob("*")):
                 if not item.is_dir():
                     total_files += 1

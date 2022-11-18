@@ -46,3 +46,4 @@ jobs:
       - name: Test with mypy
         run: |
           poetry run mypy client/runners --strict
+          poetry run mypy client/utils --strict
