@@ -1,12 +1,12 @@
 """
 File hashing algorithms.
 """
-
+import os
 from hashlib import sha3_384
 from pathlib import Path
 
 
-def hash_in_chunks(file: Path) -> str:
+def hash_in_chunks(file: os.path) -> str:
     """Hash a file using SHA-384."""
 
     # Read files in 64kb chunks to save memory

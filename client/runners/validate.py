@@ -1,7 +1,9 @@
 """
 Runner for dowloading files to the local library.
-"""
 
+Note: file validation is very slow, so it uses os instead of pathlib.
+"""
+import glob
 import logging
 import os
 import time
@@ -18,7 +20,7 @@ from .generic import Worker, WorkerKilledException, WorkerStatus
 
 def has_differences(comparison: dircmp) -> bool:
     """Check if two directories have differences."""
-    print("pulse")
+
     differences: list[str] = (
         comparison.left_only + comparison.right_only + comparison.diff_files
     )
@@ -59,8 +61,8 @@ class ValidateScansRunner(Worker):
         # If the libraries exist, we still need to check if the project exists
 
         # Check project exists in permanent library
-        self.perm_storage_dir: Path = permanent / str(prj_id)
-        if not self.perm_storage_dir.exists() or not self.perm_storage_dir.is_dir():
+        self.perm_storage_dir: os.path = os.path.join(permanent, str(prj_id))
+        if not os.path.exists(self.perm_storage_dir) or not os.path.isdir(self.perm_storage_dir):
             raise ValueError(
                 f"Project {prj_id} directory does not exist in permanent library."
             )
@@ -69,9 +71,9 @@ class ValidateScansRunner(Worker):
         if not scan_ids:
             # Assume each directory in the project directory is a scan
             self.scan_ids: tuple[str, ...] = tuple(
-                scan_dir.name
-                for scan_dir in self.perm_storage_dir.glob("*")
-                if scan_dir.is_dir()
+                os.path.basename(scan_dir)
+                for scan_dir in glob.glob(os.path.join(self.perm_storage_dir, "*"))
+                if os.path.isdir(scan_dir)
             )
         else:
             # Convert list to tuple
@@ -79,15 +81,15 @@ class ValidateScansRunner(Worker):
 
         # Check scan exists in permanent library
         for scan_id in self.scan_ids:
-            scan_dir: Path = self.perm_storage_dir / str(scan_id)
-            if not scan_dir.exists() and scan_dir.is_dir():
+            scan_dir: os.path = os.path.join(self.perm_storage_dir, str(scan_id))
+            if not os.path.exists(scan_dir) and os.path.isdir(scan_dir):
                 raise ValueError(
                     f"Scan {scan_id} directory does not exist in permanent library."
                 )
 
-        self.local_prj_dir: Path = local / str(prj_id)
-        self.local_scan_dirs: tuple[Path, ...] = tuple(
-            self.local_prj_dir / str(scan_id) for scan_id in self.scan_ids
+        self.local_prj_dir: os.path = os.path.join(local, str(prj_id))
+        self.local_scan_dirs: tuple[os.path, ...] = tuple(
+            os.path.join(self.local_prj_dir, scan_id) for scan_id in self.scan_ids
         )
 
         # Count files to be moved for progress bar
@@ -104,7 +106,7 @@ class ValidateScansRunner(Worker):
         total_files: int = 0
         size_in_bytes: int = 0
         for scan_id in self.scan_ids:
-            scan_dir = self.perm_storage_dir / str(scan_id)
+            scan_dir = os.path.join(self.perm_storage_dir, str(scan_id))
             # Note: the os.walk method is much faster than Path.rglob
             for root, _, files in os.walk(scan_dir):
                 for file in files:
@@ -125,20 +127,16 @@ class ValidateScansRunner(Worker):
         for scan_dir in self.local_scan_dirs:
             # Increment progress bar
             self.signals.progress.emit(1)
-            if not scan_dir.exists():
+            if not os.path.exists(scan_dir) or not os.path.isdir(scan_dir):
                 # If local scan directory does not exist, download is invalid
-                logging.info("Scan directory %s does not exist, validation fail.")
+                logging.info("Scan directory %s does not exist, validation fail.", scan_dir)
                 self.set_result(False)
                 return
 
         # Check the contents of each scan directory
         for scan in self.scan_ids:
-            target: Path = (
-                self.perm_storage_dir / Path(scan)
-            )
-            local_dir: Path = (
-                self.local_prj_dir / Path(scan) / settings.perm_storage_dir_name
-            )
+            target: os.path = os.path.join(self.perm_storage_dir, scan)
+            local_dir: os.path = os.path.join(self.local_prj_dir, str(scan), settings.perm_storage_dir_name)
 
             # Do a shallow identity check (e.g., names and metadata)
             # This doesn't check the contents of the files, but if we catch a difference
@@ -153,43 +151,40 @@ class ValidateScansRunner(Worker):
 
             # Do a deep identity check (e.g., contents of files)
             logging.info("Performing deep identity check.")
-            for item in target.rglob("*"):
-                # Increment progress bar
-                self.signals.progress.emit(1)
+            for root, _, files in os.walk(target):
+                for file in files:
+                    # Increment progress bar
+                    self.signals.progress.emit(1)
 
-                # Skip directories and tams metadata
-                if not item.is_dir() and not (
-                    item.is_file() and item.parent.name == "tams_metadata"
-                ):
                     try:
-                        relative_path: Path = item.relative_to(target)
-                        local_file: Path = local_dir / relative_path
+                        relative_path: os.path = file # Should be of the form "/..." where "/" is the root of the scan
+                        local_file: os.path = os.path.join(local_dir, relative_path)
 
                         # Hash the files
-                        target_hash: str = hash_in_chunks(item)
+                        target_hash: str = hash_in_chunks(os.path.join(root, relative_path))
                         local_hash: str = hash_in_chunks(local_file)
 
                         # Compare hashes
                         if target_hash != local_hash:
                             logging.info(
-                                "Hashes do not match: file %s is invalid.", item
+                                "Hashes do not match: file %s is invalid.", file
                             )
                             self.set_result(False)
 
                     except FileNotFoundError:
-                        logging.info("%s not found, validation fail.", item.name)
+                        logging.info("%s not found, validation fail.", os.path.basename(file))
                         self.set_result(False)
 
-                # Pause if worker is paused
-                while self.worker_status is WorkerStatus.PAUSED:
-                    # Keep waiting until resumed
-                    time.sleep(0)
-                # Check if worker has been killed
-                if self.worker_status is WorkerStatus.KILLED:
-                    raise WorkerKilledException
-                if self.worker_status is WorkerStatus.FINISHED:
-                    # Break loop if job is finished
-                    return
+                    # Pause if worker is paused
+                    while self.worker_status is WorkerStatus.PAUSED:
+                        # Keep waiting until resumed
+                        time.sleep(0)
+                    # Check if worker has been killed
+                    if self.worker_status is WorkerStatus.KILLED:
+                        raise WorkerKilledException
+                    if self.worker_status is WorkerStatus.FINISHED:
+                        # Break loop if job is finished
+                        return
 
             if self.worker_status is not WorkerStatus.FINISHED:
                 logging.info("Scan %s validated successfully.", scan)
