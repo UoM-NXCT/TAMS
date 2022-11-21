@@ -22,35 +22,6 @@ class Database:
         self.conn: Connection[Any] | None = None  # The Psycopg connection
         self.cur: Cursor[Any] | None = None  # The connection cursor
 
-    def __repr__(self) -> str:
-        """Return database version when class is repr() or str() is called."""
-
-        if self.cur is not None:
-            self.cur.execute("select version();")
-            row: Optional[Any] = self.cur.fetchone()
-            if not isinstance(row, tuple):
-                raise TypeError("Pyscopg row is not a tuple. This is very bad!")
-            return str(row[0])
-
-        # If the cursor is None, the database is not connected.
-        return str(None)
-
-    def __enter__(self) -> Database:
-        """The runtime context of the database class (connecting to the database)."""
-
-        self.conn = connect(self.conn_str)
-        self.cur = self.conn.cursor()
-
-        # The 'with' statement binds the object to its 'as' clause (if specified).
-        return self
-
-    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
-        """Close the database connection upon exiting its runtime context."""
-        if self.cur is not None:
-            self.cur.close()
-        if self.conn is not None:
-            self.conn.close()
-
     @staticmethod
     def attempt_sql_command(func: Callable[..., Any]) -> Callable[..., Any]:
         """Decorates sql commands with exception handling methods."""
@@ -81,14 +52,38 @@ class Database:
         else:
             logging.error("Connection does not exist.")
 
+    def __enter__(self) -> Database:
+        """The runtime context of the database class (connecting to the database)."""
+
+        self.conn = connect(self.conn_str)
+        self.cur = self.conn.cursor()
+
+        # The 'with' statement binds the object to its 'as' clause (if specified).
+        return self
+
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+        """Close the database connection upon exiting its runtime context."""
+        if self.cur is not None:
+            self.cur.close()
+        if self.conn is not None:
+            self.conn.close()
+
+    def __repr__(self) -> str:
+        """Return database version when class is repr() or str() is called."""
+
+        if self.cur is not None:
+            self.cur.execute("select version();")
+            row: Optional[Any] = self.cur.fetchone()
+            if not isinstance(row, tuple):
+                raise TypeError("Pyscopg row is not a tuple. This is very bad!")
+            return str(row[0])
+
+        # If the cursor is None, the database is not connected.
+        return str(None)
+
 
 class DatabaseInitialiser(Database):
     """Initialise a database."""
-
-    def __enter__(self) -> DatabaseInitialiser:
-        """The runtime context of the database initialization class"""
-        super().__enter__()
-        return self
 
     def __init__(self, conn_str: str) -> None:
         super().__init__(conn_str)
@@ -115,6 +110,11 @@ class DatabaseInitialiser(Database):
         dummy_data_instructions: Path = self.base_dir / "dummy_data.sql"
         with open(dummy_data_instructions, encoding="utf8") as sql_file:
             self.exec(sql_file.read())
+
+    def __enter__(self) -> DatabaseInitialiser:
+        """The runtime context of the database initialization class"""
+        super().__enter__()
+        return self
 
 
 def init_database() -> None:
