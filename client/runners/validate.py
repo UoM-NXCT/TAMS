@@ -5,13 +5,29 @@ Runner for dowloading files to the local library.
 import logging
 import os
 import time
+from filecmp import dircmp
 from pathlib import Path
 
 from PySide6.QtWidgets import QMessageBox, QWidget
 
+from client import settings
 from client.utils.hash import hash_in_chunks
 
 from .generic import Worker, WorkerKilledException, WorkerStatus
+
+
+def has_differences(comparison: dircmp) -> bool:
+    """Check if two directories have differences."""
+    print("pulse")
+    differences: list[str] = (
+        comparison.left_only + comparison.right_only + comparison.diff_files
+    )
+    if differences:
+        return True
+    for sub_dir in comparison.subdirs.values():
+        if has_differences(sub_dir):
+            return True
+    return False
 
 
 class ValidateScansRunner(Worker):
@@ -43,11 +59,8 @@ class ValidateScansRunner(Worker):
         # If the libraries exist, we still need to check if the project exists
 
         # Check project exists in permanent library
-        self.permanent_storage_dir: Path = permanent / str(prj_id)
-        if (
-            not self.permanent_storage_dir.exists()
-            or not self.permanent_storage_dir.is_dir()
-        ):
+        self.perm_storage_dir: Path = permanent / str(prj_id)
+        if not self.perm_storage_dir.exists() or not self.perm_storage_dir.is_dir():
             raise ValueError(
                 f"Project {prj_id} directory does not exist in permanent library."
             )
@@ -57,7 +70,7 @@ class ValidateScansRunner(Worker):
             # Assume each directory in the project directory is a scan
             self.scan_ids: tuple[str, ...] = tuple(
                 scan_dir.name
-                for scan_dir in self.permanent_storage_dir.glob("*")
+                for scan_dir in self.perm_storage_dir.glob("*")
                 if scan_dir.is_dir()
             )
         else:
@@ -66,7 +79,7 @@ class ValidateScansRunner(Worker):
 
         # Check scan exists in permanent library
         for scan_id in self.scan_ids:
-            scan_dir: Path = self.permanent_storage_dir / str(scan_id)
+            scan_dir: Path = self.perm_storage_dir / str(scan_id)
             if not scan_dir.exists() and scan_dir.is_dir():
                 raise ValueError(
                     f"Scan {scan_id} directory does not exist in permanent library."
@@ -88,11 +101,10 @@ class ValidateScansRunner(Worker):
         if msg == QMessageBox.StandardButton.Cancel:
             raise ValueError("User cancelled indexing files.")
 
-        logging.info("Indexing files, this may take a while...")
         total_files: int = 0
         size_in_bytes: int = 0
         for scan_id in self.scan_ids:
-            scan_dir = self.permanent_storage_dir / str(scan_id)
+            scan_dir = self.perm_storage_dir / str(scan_id)
             # Note: the os.walk method is much faster than Path.rglob
             for root, _, files in os.walk(scan_dir):
                 for file in files:
@@ -121,9 +133,26 @@ class ValidateScansRunner(Worker):
 
         # Check the contents of each scan directory
         for scan in self.scan_ids:
-            target: Path = self.permanent_storage_dir / Path(scan)
-            local_dir: Path = self.local_prj_dir / Path(scan)
+            target: Path = (
+                self.perm_storage_dir / Path(scan)
+            )
+            local_dir: Path = (
+                self.local_prj_dir / Path(scan) / settings.perm_storage_dir_name
+            )
 
+            # Do a shallow identity check (e.g., names and metadata)
+            # This doesn't check the contents of the files, but if we catch a difference
+            # here, we can be sure that the files are different and skip the lengthy
+            # hashing process.
+            logging.info("Performing shallow identity check.")
+            comparison = dircmp(target, local_dir)
+            same = not has_differences(comparison)
+            if not same:
+                self.set_result(False)
+                return
+
+            # Do a deep identity check (e.g., contents of files)
+            logging.info("Performing deep identity check.")
             for item in target.rglob("*"):
                 # Increment progress bar
                 self.signals.progress.emit(1)
@@ -134,7 +163,7 @@ class ValidateScansRunner(Worker):
                 ):
                     try:
                         relative_path: Path = item.relative_to(target)
-                        local_file: Path = local_dir / "raw" / relative_path
+                        local_file: Path = local_dir / relative_path
 
                         # Hash the files
                         target_hash: str = hash_in_chunks(item)
