@@ -62,7 +62,9 @@ class ValidateScansRunner(Worker):
 
         # Check project exists in permanent library
         self.perm_storage_dir: os.path = os.path.join(permanent, str(prj_id))
-        if not os.path.exists(self.perm_storage_dir) or not os.path.isdir(self.perm_storage_dir):
+        if not os.path.exists(self.perm_storage_dir) or not os.path.isdir(
+            self.perm_storage_dir
+        ):
             raise ValueError(
                 f"Project {prj_id} directory does not exist in permanent library."
             )
@@ -129,14 +131,18 @@ class ValidateScansRunner(Worker):
             self.signals.progress.emit(1)
             if not os.path.exists(scan_dir) or not os.path.isdir(scan_dir):
                 # If local scan directory does not exist, download is invalid
-                logging.info("Scan directory %s does not exist, validation fail.", scan_dir)
+                logging.info(
+                    "Scan directory %s does not exist, validation fail.", scan_dir
+                )
                 self.set_result(False)
                 return
 
         # Check the contents of each scan directory
         for scan in self.scan_ids:
             target: os.path = os.path.join(self.perm_storage_dir, scan)
-            local_dir: os.path = os.path.join(self.local_prj_dir, str(scan), settings.perm_storage_dir_name)
+            local_dir: os.path = os.path.join(
+                self.local_prj_dir, str(scan), settings.perm_storage_dir_name
+            )
 
             # Do a shallow identity check (e.g., names and metadata)
             # This doesn't check the contents of the files, but if we catch a difference
@@ -157,11 +163,13 @@ class ValidateScansRunner(Worker):
                     self.signals.progress.emit(1)
 
                     try:
-                        relative_path: os.path = file # Should be of the form "/..." where "/" is the root of the scan
+                        relative_path: os.path = file  # Should be of the form "/..." where "/" is the root of the scan
                         local_file: os.path = os.path.join(local_dir, relative_path)
 
                         # Hash the files
-                        target_hash: str = hash_in_chunks(os.path.join(root, relative_path))
+                        target_hash: str = hash_in_chunks(
+                            os.path.join(root, relative_path)
+                        )
                         local_hash: str = hash_in_chunks(local_file)
 
                         # Compare hashes
@@ -172,7 +180,9 @@ class ValidateScansRunner(Worker):
                             self.set_result(False)
 
                     except FileNotFoundError:
-                        logging.info("%s not found, validation fail.", os.path.basename(file))
+                        logging.info(
+                            "%s not found, validation fail.", os.path.basename(file)
+                        )
                         self.set_result(False)
 
                     # Pause if worker is paused
