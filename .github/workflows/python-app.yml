@@ -39,6 +39,12 @@ jobs:
       - name: Lint with black
         run: |
           poetry run black --check .
+      - name: Lint with isort
+        run: |
+          poetry run isort --check-only --profile black .
+      - name: Lint with ssort
+        run: |
+          poetry run ssort --check .
       - name: Test with pytest
         run: |
           # GitHub Actions can't run GUI tests and it's not worth my time to fix it

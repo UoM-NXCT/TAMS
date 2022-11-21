@@ -18,7 +18,7 @@ from client.utils.hash import hash_in_chunks
 from .generic import Worker, WorkerKilledException, WorkerStatus
 
 
-def has_differences(comparison: dircmp) -> bool:
+def has_differences(comparison: dircmp[str]) -> bool:
     """Check if two directories have differences."""
 
     differences: list[str] = (
@@ -61,7 +61,7 @@ class ValidateScansRunner(Worker):
         # If the libraries exist, we still need to check if the project exists
 
         # Check project exists in permanent library
-        self.perm_storage_dir: os.path = os.path.join(permanent, str(prj_id))
+        self.perm_storage_dir: str = os.path.join(permanent, str(prj_id))
         if not os.path.exists(self.perm_storage_dir) or not os.path.isdir(
             self.perm_storage_dir
         ):
@@ -83,14 +83,14 @@ class ValidateScansRunner(Worker):
 
         # Check scan exists in permanent library
         for scan_id in self.scan_ids:
-            scan_dir: os.path = os.path.join(self.perm_storage_dir, str(scan_id))
+            scan_dir: str = os.path.join(self.perm_storage_dir, str(scan_id))
             if not os.path.exists(scan_dir) and os.path.isdir(scan_dir):
                 raise ValueError(
                     f"Scan {scan_id} directory does not exist in permanent library."
                 )
 
-        self.local_prj_dir: os.path = os.path.join(local, str(prj_id))
-        self.local_scan_dirs: tuple[os.path, ...] = tuple(
+        self.local_prj_dir: str = os.path.join(local, str(prj_id))
+        self.local_scan_dirs: tuple[str, ...] = tuple(
             os.path.join(self.local_prj_dir, scan_id) for scan_id in self.scan_ids
         )
 
@@ -139,8 +139,8 @@ class ValidateScansRunner(Worker):
 
         # Check the contents of each scan directory
         for scan in self.scan_ids:
-            target: os.path = os.path.join(self.perm_storage_dir, scan)
-            local_dir: os.path = os.path.join(
+            target: str = os.path.join(self.perm_storage_dir, scan)
+            local_dir: str = os.path.join(
                 self.local_prj_dir, str(scan), settings.perm_storage_dir_name
             )
 
@@ -163,8 +163,8 @@ class ValidateScansRunner(Worker):
                     self.signals.progress.emit(1)
 
                     try:
-                        relative_path: os.path = file  # Should be of the form "/..." where "/" is the root of the scan
-                        local_file: os.path = os.path.join(local_dir, relative_path)
+                        relative_path: str = file  # Should be of the form "/..." where "/" is the root of the scan
+                        local_file: str = os.path.join(local_dir, relative_path)
 
                         # Hash the files
                         target_hash: str = hash_in_chunks(
