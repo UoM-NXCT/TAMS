@@ -199,6 +199,12 @@ To run mypy, run:
 
     poetry run mypy . --strict
 
+When running mypy on the code above, it will report the following error:
+
+.. code-block:: bash
+
+    error: Argument 1 to "greet" has incompatible type "str"; expected "int"
+
 pylint
 ^^^^^^
 
