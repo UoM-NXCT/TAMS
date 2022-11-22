@@ -23,7 +23,7 @@ from PySide6.QtWidgets import (
 
 from client import settings
 from client.db import DatabaseView, MissingTables, dict_to_conn_str
-from client.dialogues.create_project_dialogue import CreateProjectWindow
+from client.dialogues.create_project_dialogue import CreatePrj
 from client.dialogues.create_scan import CreateScanDlg
 from client.dialogues.download_scan import SaveFilesDialogue
 from client.dialogues.settings import SettingsWindow
@@ -241,7 +241,7 @@ class MainWindow(QMainWindow):
         the window can access the database.
         """
 
-        self.create_prj = CreateProjectWindow(self.connection_string)
+        self.create_prj = CreatePrj(self.connection_string)
 
     def open_create_scan(self) -> None:
         """
