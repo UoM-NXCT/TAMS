@@ -40,7 +40,7 @@ class TableModel(QAbstractTableModel):
             # .row() indexes the outer list; .column() indexes the sub-list
             value = self._data[index.row()][index.column()]
 
-            # Perform per-type checks and render accordingly.
+            # Perform per-type run_checks and render accordingly.
             if isinstance(value, (datetime, date)):
                 # Render time to YYY-MM-DD
                 return f"{value:%Y-%m-%d}"
