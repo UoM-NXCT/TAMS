@@ -191,6 +191,13 @@ class MainWindow(QMainWindow):
         self.download_act.setToolTip("Download selected data")
         self.download_act.triggered.connect(self.download_data)
 
+        pixmap = QStyle.StandardPixmap.SP_ArrowUp
+        upload_icon = self.style().standardIcon(pixmap)
+        self.upload_act = QAction(upload_icon, "Upload data")
+        self.upload_act.setShortcut("Ctrl+U")
+        self.upload_act.setToolTip("Upload selected data")
+        self.upload_act.triggered.connect(self.upload_data)
+
         pixmap = QStyle.StandardPixmap.SP_DialogOpenButton
         open_icon = self.style().standardIcon(pixmap)
         self.open_act = QAction(open_icon, "Open data")
@@ -231,6 +238,10 @@ class MainWindow(QMainWindow):
         else:
             self.showNormal()
 
+    def upload_data(self) -> None:
+        """Upload data to the database."""
+        print("Upload data")
+
     def open_settings(self):
         """Open the settings window."""
         self.settings = SettingsWindow()
@@ -256,18 +267,25 @@ class MainWindow(QMainWindow):
 
         # Due to macOS guidelines, the menu bar will not appear in the GUI.
         self.menuBar().setNativeMenuBar(True)
+
+        # Create the File menu
         file_menu = self.menuBar().addMenu("File")
         file_menu.addAction(self.settings_act)
         file_menu.addAction(self.reload_table_act)
         file_menu.addSeparator()
         file_menu.addAction(self.download_act)
+        file_menu.addAction(self.upload_act)
         file_menu.addAction(self.open_act)
         file_menu.addAction(self.validate_act)
         file_menu.addSeparator()
         file_menu.addAction(self.quit_act)
+
+        # Create the View menu
         view_menu = self.menuBar().addMenu("View")
         appearance_submenu = view_menu.addMenu("Appearance")
         appearance_submenu.addAction(self.full_screen_act)
+
+        # Create the Help menu
         help_menu = self.menuBar().addMenu("Help")
         help_menu.addAction(self.about_act)
 
@@ -283,6 +301,7 @@ class MainWindow(QMainWindow):
         # File actions
         toolbar.addAction(self.reload_table_act)
         toolbar.addAction(self.download_act)
+        toolbar.addAction(self.upload_act)
         toolbar.addAction(self.open_act)
         toolbar.addAction(self.validate_act)
 
