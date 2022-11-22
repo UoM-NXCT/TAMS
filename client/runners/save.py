@@ -1,5 +1,5 @@
 """
-Runner for dowloading files to the local library.
+Runner for uploading and downloading files to the permanent or local library, respectively.
 """
 import logging
 import os
@@ -44,8 +44,8 @@ class DownloadScansWorker(Worker):
             self.dest_lib: Path = local
         else:
             # If uploading, the source is the local library
-            self.source_lib: Path = local
-            self.dest_lib: Path = permanent
+            self.source_lib = local
+            self.dest_lib = permanent
 
         # Store the source and destination project directories
         self.source_prj_dir: Path = self.source_lib / str(self.prj_id)
@@ -58,7 +58,7 @@ class DownloadScansWorker(Worker):
         else:
             # If no scans are specified, save all scans
             # Assume each directory in the project directory is a scan
-            self.scan_ids: tuple[str, ...] = tuple(
+            self.scan_ids = tuple(
                 scan_dir.name
                 for scan_dir in self.source_prj_dir.glob("*")
                 if scan_dir.is_dir()
