@@ -55,10 +55,10 @@ class MainWindow(QMainWindow):
         self.current_metadata: tuple | None = None
 
         # Define empty widgets for use later
-        self.settings: QWidget
+        self.settings_dlg: QWidget
         self.create_prj: QWidget
-        self.create_scan_dialogue: QWidget
-        self.progress_dialogue: DownloadScansDlg
+        self.create_scan_dlg: QWidget
+        self.download_dlg: DownloadScansDlg
 
         # Set up the application's GUI.
         self.setMinimumSize(1080, 720)
@@ -238,13 +238,9 @@ class MainWindow(QMainWindow):
         else:
             self.showNormal()
 
-    def upload_data(self) -> None:
-        """Upload data to the database."""
-        print("Upload data")
-
     def open_settings(self):
         """Open the settings window."""
-        self.settings = SettingsWindow()
+        self.settings_dlg = SettingsWindow()
 
     def open_create_project(self) -> None:
         """
@@ -260,7 +256,7 @@ class MainWindow(QMainWindow):
         the window can access the database.
         """
 
-        self.create_scan_dialogue = CreateScanDlg(self.connection_string)
+        self.create_scan_dlg = CreateScanDlg(self.connection_string)
 
     def create_window(self):
         """Create the application menu bar."""
@@ -327,6 +323,28 @@ class MainWindow(QMainWindow):
 
         return row_value
 
+    def upload_data(self) -> None:
+        """Upload data to the database."""
+
+        # Get the selected table
+        table = self.current_table()
+
+        # Get the primary key of the selected row
+        row_pk: int = self.get_value_from_row(0)
+
+        # TODO: Implement save runner to upload.
+        if table == "project":
+            logging.info("Uploading data from project ID %s", row_pk)
+        elif table == "scan":
+            logging.info("Uploading data from scan ID %s", row_pk)
+        else:
+            logging.error("Cannot upload data from table %s", table)
+            QMessageBox.critical(
+                self,
+                "Error",
+                f"Cannot upload data from table {table}",
+            )
+
     def download_data(self):
         """Download selected data."""
 
@@ -336,34 +354,20 @@ class MainWindow(QMainWindow):
         # Get the primary key of the selected row
         row_pk: int = self.get_value_from_row(0)
 
-        # Get the path to the local data directory
-        local_library: str = get_value_from_toml(
-            settings.general, "storage", "local_library"
-        )
-
-        # Get the path to the remote data directory
-        permanent_library: str = get_value_from_toml(
-            settings.general, "storage", "permanent_library"
-        )
-
         if table == "project":
             logging.info("Downloading data from project ID %s", row_pk)
 
-            runner = DownloadScansWorker(
-                Path(local_library), Path(permanent_library), row_pk
-            )
-            self.progress_dialogue = DownloadScansDlg(runner)
+            runner = DownloadScansWorker(row_pk)
+            self.download_dlg = DownloadScansDlg(runner)
 
         elif table == "scan":
             logging.info("Downloading data from scan ID %s", row_pk)
 
             # Get the path of the local scan directory
-            project_id: int = self.get_value_from_row(1)
+            prj_id: int = self.get_value_from_row(1)
 
-            runner = DownloadScansWorker(
-                Path(local_library), Path(permanent_library), project_id, row_pk
-            )
-            self.progress_dialogue = DownloadScansDlg(runner)
+            runner = DownloadScansWorker(prj_id, row_pk)
+            self.download_dlg = DownloadScansDlg(runner)
 
         else:
             logging.error("Cannot download data from table %s", table)
@@ -439,12 +443,12 @@ class MainWindow(QMainWindow):
 
         # Get the path to the local data directory
         local_library: str = get_value_from_toml(
-            Path("settings/general.toml"), "storage", "local_library"
+            settings.general, "storage", "local_library"
         )
 
         # Get the path to the remote data directory
         permanent_library: str = get_value_from_toml(
-            Path("settings/general.toml"), "storage", "permanent_library"
+            settings.general, "storage", "permanent_library"
         )
 
         if table == "project":
@@ -453,7 +457,7 @@ class MainWindow(QMainWindow):
             runner = ValidateScansRunner(
                 Path(local_library), Path(permanent_library), row_pk
             )
-            self.progress_dialogue = ValidateDialogue(runner)
+            self.download_dlg = ValidateDialogue(runner)
 
         elif table == "scan":
             logging.info("Validating data from scan ID %s", row_pk)
@@ -464,7 +468,7 @@ class MainWindow(QMainWindow):
             runner = ValidateScansRunner(
                 Path(local_library), Path(permanent_library), project_id, row_pk
             )
-            self.progress_dialogue = ValidateDialogue(runner)
+            self.download_dlg = ValidateDialogue(runner)
 
         else:
             logging.error("Cannot validate.py data from table %s", table)

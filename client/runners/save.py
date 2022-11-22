@@ -22,8 +22,6 @@ class DownloadScansWorker(Worker):
 
     def __init__(
         self,
-        local: Path,
-        permanent: Path,
         prj_id: int,
         *scan_ids: int,
         download: bool = True,
@@ -38,14 +36,21 @@ class DownloadScansWorker(Worker):
         # Store the project ID
         self.prj_id: int = prj_id
 
+        perm_lib: Path = Path(
+            get_value_from_toml(settings.general, "storage", "permanent_library")
+        )
+        local_lib: Path = Path(
+            get_value_from_toml(settings.general, "storage", "local_library")
+        )
+
         if self.download:
             # If downloading, the source is the permanent library
-            self.source_lib: Path = permanent
-            self.dest_lib: Path = local
+            self.source_lib: Path = perm_lib
+            self.dest_lib: Path = local_lib
         else:
             # If uploading, the source is the local library
-            self.source_lib = local
-            self.dest_lib = permanent
+            self.source_lib = local_lib
+            self.dest_lib = perm_lib
 
         # Store the source and destination project directories
         self.source_prj_dir: Path = self.source_lib / str(self.prj_id)
