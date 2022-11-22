@@ -379,7 +379,7 @@ class MainWindow(QMainWindow):
 
         # Get the path of the local library
         local_library: str = get_value_from_toml(
-            Path("settings/general.toml"), "storage", "local_library"
+            settings.general, "storage", "local_library"
         )
 
         if table == "project":

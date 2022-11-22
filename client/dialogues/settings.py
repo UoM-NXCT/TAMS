@@ -265,13 +265,13 @@ class SettingsWindow(QDialog):
             initial_directory: str = self.get_library(lib_title)
         else:
             # Use current directory if no library is set
-            initial_directory: str = ""
+            initial_directory = ""
 
         library = QFileDialog.getExistingDirectory(
             self,
             caption=f"Select {lib_title} library directory",
             dir=initial_directory,
-            options=QFileDialog.ShowDirsOnly,
+            options=QFileDialog.Option.ShowDirsOnly,
         )
         if library:
             update_toml(

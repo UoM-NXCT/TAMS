@@ -52,5 +52,6 @@ jobs:
           poetry run pytest --ignore=client/tests/test_pyside.py --ignore=client/tests/test_utils.py --ignore=client/tests/gui_base_test.py
       - name: Test with mypy
         run: |
+          poetry run mypy client/db --strict
           poetry run mypy client/runners --strict
           poetry run mypy client/utils --strict

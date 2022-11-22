@@ -154,6 +154,8 @@ To sort your imports with isort, run:
 
     poetry run isort . --profile black
 
+Use the Black profile to ensure that isort and Black do not conflict.
+
 mypy
 ^^^^
 

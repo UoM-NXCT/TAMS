@@ -47,22 +47,23 @@ extension-pkg-whitelist = "PySide6"
 
 [tool.pylint."MESSAGES CONTROL"]
 max-line-length = 88
-# Qt uses camelCase for its methods; tell pylint to ignore invalid-name
 disable = """
     invalid-name
 """
 
 [[tool.mypy.overrides]]
-module = ["tomllib"]
+module = "tomllib"
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "PySide6"
+ignore_errors = true
 
 [tool.isort]
 profile = "black"
 
 [tool.sqlfluff.core]
 dialect = "postgres"
-
-
 
 [build-system]
 requires = ["poetry-core"]
