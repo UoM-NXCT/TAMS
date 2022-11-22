@@ -349,35 +349,21 @@ class MainWindow(QMainWindow):
         if table == "project":
             logging.info("Downloading data from project ID %s", row_pk)
 
-            try:
-                runner = DownloadScansWorker(
-                    Path(local_library), Path(permanent_library), row_pk
-                )
-                self.progress_dialogue = DownloadScansDlg(runner)
+            runner = DownloadScansWorker(
+                Path(local_library), Path(permanent_library), row_pk
+            )
+            self.progress_dialogue = DownloadScansDlg(runner)
 
-            except Exception:
-                # TODO: specify exceptions
-                logging.exception("Error downloading data from project ID %s", row_pk)
-                raise Exception
         elif table == "scan":
             logging.info("Downloading data from scan ID %s", row_pk)
 
             # Get the path of the local scan directory
             project_id: int = self.get_value_from_row(1)
 
-            try:
-                runner = DownloadScansWorker(
-                    Path(local_library), Path(permanent_library), project_id, row_pk
-                )
-                self.progress_dialogue = DownloadScansDlg(runner)
-            except Exception:
-                # TODO: specify exceptions
-                logging.exception("Error downloading data from project ID %s", row_pk)
-                QMessageBox.critical(
-                    self,
-                    "Error",
-                    f"Error downloading data from project ID {row_pk}, see log for details",
-                )
+            runner = DownloadScansWorker(
+                Path(local_library), Path(permanent_library), project_id, row_pk
+            )
+            self.progress_dialogue = DownloadScansDlg(runner)
 
         else:
             logging.error("Cannot download data from table %s", table)
@@ -464,35 +450,21 @@ class MainWindow(QMainWindow):
         if table == "project":
             logging.info("Validating data from project ID %s", row_pk)
 
-            try:
-                runner = ValidateScansRunner(
-                    Path(local_library), Path(permanent_library), row_pk
-                )
-                self.progress_dialogue = ValidateDialogue(runner)
+            runner = ValidateScansRunner(
+                Path(local_library), Path(permanent_library), row_pk
+            )
+            self.progress_dialogue = ValidateDialogue(runner)
 
-            except Exception:
-                # TODO: specify exceptions
-                logging.exception("Error validating data from project ID %s", row_pk)
-                raise Exception
         elif table == "scan":
             logging.info("Validating data from scan ID %s", row_pk)
 
             # Get the path of the local scan directory
             project_id: int = self.get_value_from_row(1)
 
-            try:
-                runner = ValidateScansRunner(
-                    Path(local_library), Path(permanent_library), project_id, row_pk
-                )
-                self.progress_dialogue = ValidateDialogue(runner)
-            except Exception:
-                # TODO: specify exceptions
-                logging.exception("Error Validating data from project ID %s", row_pk)
-                QMessageBox.critical(
-                    self,
-                    "Error",
-                    f"Error validating data from project ID {row_pk}, see log for details",
-                )
+            runner = ValidateScansRunner(
+                Path(local_library), Path(permanent_library), project_id, row_pk
+            )
+            self.progress_dialogue = ValidateDialogue(runner)
 
         else:
             logging.error("Cannot validate.py data from table %s", table)
