@@ -14,99 +14,138 @@ from client.db.utils import dict_to_conn_str
 from client.db.views import DatabaseView
 from client.runners.generic import Worker, WorkerKilledException, WorkerStatus
 from client.utils.file import create_dir_if_missing, move_item
-from client.utils.toml import create_toml, get_dict_from_toml
+from client.utils.toml import create_toml, get_dict_from_toml, get_value_from_toml
 
 
 class DownloadScansWorker(Worker):
     """Runner that downloads data to the local library."""
 
     def __init__(
-        self, local: Path, permanent: Path, prj_id: int, *scan_ids: int
+        self,
+        local: Path,
+        permanent: Path,
+        prj_id: int,
+        *scan_ids: int,
+        download: bool = True,
     ) -> None:
         """Initialize the runner."""
 
         super().__init__(fn=self.job)
 
-        # We can only download scans if the libraries exist!
-        # Check if libraries exist
-        if not local.exists():
-            raise ValueError(f"Local library directory {local} does not exist.")
-        if not permanent.exists():
-            raise ValueError(f"Permanent library directory {permanent} does not exist.")
+        # Store if the save function is a download or upload
+        self.download: bool = download  # If true, download. If false, upload.
 
-        # Check if library directories are actually directories
-        if not local.is_dir():
-            raise ValueError(f"Local library directory {local} is not a directory.")
-        if not permanent.is_dir():
-            raise ValueError(
-                f"Permanent library directory {permanent} is not a directory."
-            )
+        # Store the project ID
+        self.prj_id: int = prj_id
 
-        # If the libraries exist, we still need to check if the project exists
-        # Check project exists in permanent library
-        self.permanent_storage_dir: Path = permanent / str(prj_id)
-        if (
-            not self.permanent_storage_dir.exists()
-            or not self.permanent_storage_dir.is_dir()
-        ):
-            raise ValueError(
-                f"Project {prj_id} directory does not exist in permanent library."
-            )
-        # If no scan IDs are provided, save all scans in project
-        if not scan_ids:
+        if self.download:
+            # If downloading, the source is the permanent library
+            self.source_lib: Path = permanent
+            self.dest_lib: Path = local
+        else:
+            # If uploading, the source is the local library
+            self.source_lib: Path = local
+            self.dest_lib: Path = permanent
+
+        # Store the source and destination project directories
+        self.source_prj_dir: Path = self.source_lib / str(self.prj_id)
+        self.dest_prj_dir: Path = self.dest_lib / str(prj_id)
+
+        # Store the scan IDs of the scans to be saved
+        if scan_ids:
+            # Convert list to tuple
+            self.scan_ids: tuple[str, ...] = tuple(str(scan_id) for scan_id in scan_ids)
+        else:
+            # If no scans are specified, save all scans
             # Assume each directory in the project directory is a scan
             self.scan_ids: tuple[str, ...] = tuple(
                 scan_dir.name
-                for scan_dir in self.permanent_storage_dir.glob("*")
+                for scan_dir in self.source_prj_dir.glob("*")
                 if scan_dir.is_dir()
             )
-        else:
-            # Convert list to tuple
-            self.scan_ids = tuple(str(scan_id) for scan_id in scan_ids)
-        # Check scan exists in permanent library
+
+        # Check required directories exist
+        self.run_checks()
+
+        # Create directories in destination library if they do not already exist
+        create_dir_if_missing(self.dest_prj_dir)
         for scan_id in self.scan_ids:
-            scan_dir: Path = self.permanent_storage_dir / str(scan_id)
-            if not scan_dir.exists() and scan_dir.is_dir():
-                raise ValueError(
-                    f"Scan {scan_id} directory does not exist in permanent library."
-                )
-        # Create directories if they do not already exist
-        self.local_prj_dir: Path = local / str(prj_id)
-        local_scan_dirs: tuple[Path, ...] = tuple(
-            self.local_prj_dir / str(scan_id) for scan_id in self.scan_ids
-        )
-        create_dir_if_missing(self.local_prj_dir)
-        for local_scan_dir in local_scan_dirs:
-            create_dir_if_missing(local_scan_dir)
+            create_dir_if_missing(self.dest_prj_dir / str(scan_id))
 
         # Count files to be moved for progress bar
+        # This can take a long time, so ask user if they want to continue
         dlg: QWidget = QWidget()
-        msg: QMessageBox.StandardButton = QMessageBox.information(
+        response: QMessageBox.StandardButton = QMessageBox.information(
             dlg,
             "Indexing files",
             "Depending on the size of the data, this may take a long time. Are you sure you would like to continue?",
             QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel,
         )
-        if msg == QMessageBox.StandardButton.Cancel:
+        if response == QMessageBox.StandardButton.Cancel:
             raise ValueError("User cancelled indexing files.")
+        dlg.close()
 
-        logging.info("Indexing files, this may take a while...")
+        logging.info(
+            "Indexing files in %s, this may take a while...", self.source_prj_dir
+        )
         total_files: int = 0
         size_in_bytes: int = 0
         for scan_id in self.scan_ids:
-            scan_dir = self.permanent_storage_dir / str(scan_id)
+            scan_dir = self.source_prj_dir / str(scan_id)
             # Note: the os.walk method is much faster than Path.rglob
             for root, _, files in os.walk(scan_dir):
+                # Add number of files in directory to total
+                total_files += len(files)
+                # Add size of files in directory to total
                 for file in files:
-                    total_files += 1
                     file_path = os.path.join(root, file)
                     size_in_bytes += os.stat(file_path).st_size
+        if not total_files or not size_in_bytes:
+            raise ValueError("No files to save.")
         self.size_in_bytes: int = size_in_bytes
-        try:
-            self.set_max_progress(total_files - 1)
-        except TypeError as exc:
-            # If negative, total_files is 0 and no files are found
-            raise ValueError("No files to download.") from exc
+        self.set_max_progress(total_files - 1)
+
+    def run_checks(self) -> None:
+        """Check if the directories exist before saving files."""
+
+        # Saving from one library to another is only possible if the libraries exist
+        local_lib: Path = Path(
+            get_value_from_toml(settings.general, "storage", "local_library")
+        )
+        perm_lib: Path = Path(
+            get_value_from_toml(settings.general, "storage", "permanent_library")
+        )
+
+        # Check if libraries exist
+        if not local_lib.exists():
+            raise ValueError(f"Local library directory {local_lib} does not exist.")
+        if not perm_lib.exists():
+            raise ValueError(f"Permanent library directory {perm_lib} does not exist.")
+
+        # Check if libraries are directories
+        if not local_lib.is_dir():
+            raise ValueError(f"Local library directory {local_lib} is not a directory.")
+        if not perm_lib.is_dir():
+            raise ValueError(
+                f"Permanent library directory {perm_lib} is not a directory."
+            )
+
+        # If the libraries exist, we still need to check if the project exists
+        # Check project exists in source library
+        if not self.source_prj_dir.exists() or not self.source_prj_dir.is_dir():
+            raise ValueError(
+                f"Project {self.prj_id} directory does not exist in {self.source_lib}."
+            )
+
+        # Check scan directories exist in source library
+        for scan_id in self.scan_ids:
+            scan_dir: Path = self.source_lib / str(scan_id)
+            if not scan_dir.exists() and scan_dir.is_dir():
+                raise ValueError(
+                    f"Scan {scan_id} directory does not exist in {self.source_lib}."
+                )
+
+        # Note: we don't check if the project or scans exist in the destination library as they will be created if not
 
     def get_scan_form_data(self, scan_id: int) -> dict[str, dict[str, Any]]:
         """Get the metadata for a scan."""
@@ -116,32 +155,37 @@ class DownloadScansWorker(Worker):
         return db.get_scan_form_data(scan_id)
 
     def job(self) -> None:
-        """Save data to local library."""
+        """Save data from source to destination library."""
+
+        # Store the permanent storage directory name
+        perm_dir_name: str = get_value_from_toml(
+            settings.general, "structure", "perm_dir_name"
+        )
 
         # Save each scan in scan list
         for scan in self.scan_ids:
 
-            # Target the scan directory in the permanent library
-            target: Path = self.permanent_storage_dir / Path(scan)
+            # Target the scan directory in the source library
+            source_scan_dir: Path = self.source_prj_dir / Path(scan)
 
             # Save to local library
-            destination: Path = self.local_prj_dir / Path(scan)
+            dest_scan_dir: Path = self.dest_prj_dir / Path(scan)
 
             # Create user form
-            create_dir_if_missing(destination / "tams_meta")
-            user_form: Path = destination / "tams_meta" / "user_form.toml"
+            create_dir_if_missing(dest_scan_dir / "tams_meta")
+            user_form: Path = dest_scan_dir / "tams_meta" / "user_form.toml"
             scan_form_data: dict[str, Any] = self.get_scan_form_data(int(scan))
             create_toml(user_form, scan_form_data)
 
             # Move files
-            for item in target.rglob("*"):
+            for item in source_scan_dir.rglob("*"):
 
                 # Move item
                 if not item.is_file():
                     # Skip directories
                     continue
 
-                move_item(item, destination / "raw", keep_original=True)
+                move_item(item, dest_scan_dir / perm_dir_name, keep_original=True)
 
                 # Increment progress bar
                 self.signals.progress.emit(1)

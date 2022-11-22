@@ -20,7 +20,7 @@ from client.runners.save import DownloadScansWorker
 from client.utils.file import size_fmt
 
 
-class SaveFilesDialogue(QDialog):
+class DownloadScansDlg(QDialog):
     """Progress dialogue."""
 
     def __init__(

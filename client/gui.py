@@ -25,7 +25,7 @@ from client import settings
 from client.db import DatabaseView, MissingTables, dict_to_conn_str
 from client.dialogues.create_project_dialogue import CreatePrj
 from client.dialogues.create_scan import CreateScanDlg
-from client.dialogues.download_scan import SaveFilesDialogue
+from client.dialogues.download_scan import DownloadScansDlg
 from client.dialogues.settings import SettingsWindow
 from client.dialogues.validate import ValidateDialogue
 from client.metadata_panel import MetadataPanel
@@ -58,7 +58,7 @@ class MainWindow(QMainWindow):
         self.settings: QWidget
         self.create_prj: QWidget
         self.create_scan_dialogue: QWidget
-        self.progress_dialogue: SaveFilesDialogue
+        self.progress_dialogue: DownloadScansDlg
 
         # Set up the application's GUI.
         self.setMinimumSize(1080, 720)
@@ -338,12 +338,12 @@ class MainWindow(QMainWindow):
 
         # Get the path to the local data directory
         local_library: str = get_value_from_toml(
-            Path("settings/general.toml"), "storage", "local_library"
+            settings.general, "storage", "local_library"
         )
 
         # Get the path to the remote data directory
         permanent_library: str = get_value_from_toml(
-            Path("settings/general.toml"), "storage", "permanent_library"
+            settings.general, "storage", "permanent_library"
         )
 
         if table == "project":
@@ -353,7 +353,7 @@ class MainWindow(QMainWindow):
                 runner = DownloadScansWorker(
                     Path(local_library), Path(permanent_library), row_pk
                 )
-                self.progress_dialogue = SaveFilesDialogue(runner)
+                self.progress_dialogue = DownloadScansDlg(runner)
 
             except Exception:
                 # TODO: specify exceptions
@@ -369,7 +369,7 @@ class MainWindow(QMainWindow):
                 runner = DownloadScansWorker(
                     Path(local_library), Path(permanent_library), project_id, row_pk
                 )
-                self.progress_dialogue = SaveFilesDialogue(runner)
+                self.progress_dialogue = DownloadScansDlg(runner)
             except Exception:
                 # TODO: specify exceptions
                 logging.exception("Error downloading data from project ID %s", row_pk)
