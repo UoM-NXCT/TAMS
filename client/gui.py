@@ -24,7 +24,7 @@ from PySide6.QtWidgets import (
 from client import settings
 from client.db import DatabaseView, MissingTables, dict_to_conn_str
 from client.dialogues.create_project_dialogue import CreateProjectWindow
-from client.dialogues.create_scan_dialogue import CreateScanDialogue
+from client.dialogues.create_scan import CreateScanDlg
 from client.dialogues.download_scan import SaveFilesDialogue
 from client.dialogues.settings import SettingsWindow
 from client.dialogues.validate import ValidateDialogue
@@ -249,7 +249,7 @@ class MainWindow(QMainWindow):
         the window can access the database.
         """
 
-        self.create_scan_dialogue = CreateScanDialogue(self.connection_string)
+        self.create_scan_dialogue = CreateScanDlg(self.connection_string)
 
     def create_window(self):
         """Create the application menu bar."""

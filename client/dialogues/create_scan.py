@@ -4,6 +4,7 @@ specified by the input connection string.
 """
 
 import logging
+from pathlib import Path
 from typing import Any
 
 import psycopg
@@ -18,31 +19,34 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
 )
 
+from client import settings
+from client.utils import file, toml
 
-class CreateScanDialogue(QDialog):
+
+class CreateScanDlg(QDialog):
     """
     Window that takes project information and create and commits that project to the
     database specified by the connection string.
     """
 
-    def __init__(self, connection_string: str) -> None:
+    def __init__(self, conn_str: str) -> None:
         super().__init__()
-        self.connection_string: str = connection_string
+        self.conn_str: str = conn_str
 
         # Set up the settings window GUI.
         self.setMinimumSize(400, 300)
         self.setWindowTitle("Create new scan")
-        self.set_up_scan_dialogue()
+        self.set_up_scan_dlg()
         self.show()
 
-    def set_up_scan_dialogue(self) -> None:
+    def set_up_scan_dlg(self) -> None:
         """Create and arrange widgets in the project creation window."""
 
         header_label: QLabel = QLabel("Create new scan")
 
         # Get project ID options
         self.new_scan_project_id_entry = QComboBox()
-        with psycopg.connect(self.connection_string) as conn:
+        with psycopg.connect(self.conn_str) as conn:
             with conn.cursor() as cur:
                 cur.execute("select project_id, title from project;")
                 raw_project_ids: list[tuple[int, str]] = cur.fetchall()
@@ -55,7 +59,7 @@ class CreateScanDialogue(QDialog):
 
         # Get instrument ID options
         self.new_scan_instrument_id_entry = QComboBox()
-        with psycopg.connect(self.connection_string) as conn:
+        with psycopg.connect(self.conn_str) as conn:
             with conn.cursor() as cur:
                 cur.execute("select instrument_id, name from instrument;")
                 raw_instrument_ids: list[tuple[int, str]] = cur.fetchall()
@@ -93,7 +97,7 @@ class CreateScanDialogue(QDialog):
         def project_id_exists(project_id: int) -> bool:
             """Check if a project with a given project id exists in the database."""
 
-            with psycopg.connect(self.connection_string) as conn:
+            with psycopg.connect(self.conn_str) as conn:
                 with conn.cursor() as cur:
                     cur.execute(
                         f"select project_id from project where project_id={project_id}"
@@ -111,7 +115,7 @@ class CreateScanDialogue(QDialog):
         def instrument_id_exists(instrument_id: int) -> bool:
             """Check if a project with a given instrument ID exists in the database."""
 
-            with psycopg.connect(self.connection_string) as conn:
+            with psycopg.connect(self.conn_str) as conn:
                 with conn.cursor() as cur:
                     cur.execute(
                         f"select instrument_id from instrument where instrument_id={instrument_id}"
@@ -155,12 +159,31 @@ class CreateScanDialogue(QDialog):
                 QMessageBox.StandardButton.Ok,
             )
         else:
-            with psycopg.connect(self.connection_string) as conn:
+            with psycopg.connect(self.conn_str) as conn:
                 with conn.cursor() as cur:
                     cur.execute(
-                        f"insert into scan (project_id, instrument_id) values ({selected_project_id}, {selected_instrument_id});"
+                        f"insert into scan (project_id, instrument_id) values ({selected_project_id}, {selected_instrument_id}) returning scan_id;"
                     )
                     conn.commit()
+                    scan_id: int = cur.fetchone()[0]
+                    # Check to see if the newly created scan exists in the local library and create it if not
+                    local_lib: Path = Path(
+                        toml.get_value_from_toml(
+                            settings.general, "storage", "local_library"
+                        )
+                    )
+                    file.create_dir_if_missing(
+                        local_lib / str(selected_project_id) / str(scan_id)
+                    )
+                    perm_dir_name = toml.get_value_from_toml(
+                        settings.general, "structure", "perm_dir_name"
+                    )
+                    file.create_dir_if_missing(
+                        local_lib
+                        / str(selected_project_id)
+                        / str(scan_id)
+                        / perm_dir_name
+                    )
                     logging.info("Created and committed scan to database.")
                     QMessageBox.information(
                         self,
