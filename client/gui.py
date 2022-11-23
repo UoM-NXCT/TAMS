@@ -2,9 +2,12 @@
 Main window for the GUI.
 """
 
+from __future__ import annotations
+
 import logging
+from functools import wraps
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 from psycopg.errors import ConnectionFailure, OperationalError
 from PySide6.QtCore import QModelIndex, QSize, QSortFilterProxyModel, Qt, QUrl
@@ -72,6 +75,26 @@ class MainWindow(QMainWindow):
 
         self.show()
 
+    @staticmethod
+    def attempt_file_io(func: Callable[..., Any]) -> Callable[..., Any]:
+        """Decorates file operation methods with exception handling methods."""
+
+        @wraps(func)
+        def wrapper(self: MainWindow, *args: Any, **kwargs: Any) -> None:
+            """Attempt to execute the sql command, and handle any exceptions."""
+            try:
+                func(self, *args, **kwargs)
+            except FileNotFoundError as exc:
+                logging.exception("Exception raised")
+                QMessageBox.critical(
+                    self,
+                    "Error: file not found",
+                    f"File {exc.filename} not found. "
+                    "Check that the file exists and is accessible.",
+                )
+
+        return wrapper
+
     def update_table(self) -> None:
         """Update table model using SQL command."""
 
@@ -86,7 +109,7 @@ class MainWindow(QMainWindow):
                     select_value, from_value
                 )
         else:
-            data = list()
+            data = []
             column_headers = tuple()
         self.table_model = TableModel(data, column_headers)
         self.proxy_model = QSortFilterProxyModel()
@@ -94,7 +117,9 @@ class MainWindow(QMainWindow):
         self.table_view.setModel(self.proxy_model)
 
         # Make table look pretty
-        self.table_view.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.table_view.horizontalHeader().setSectionResizeMode(
+            QHeaderView.ResizeMode.Stretch
+        )
 
         # Make the table react to selection changes
         self.table_view.selectionModel().selectionChanged.connect(
@@ -234,6 +259,7 @@ class MainWindow(QMainWindow):
 
     def toggle_full_screen(self, state) -> None:
         """Toggle full screen mode."""
+
         if state:
             self.showFullScreen()
         else:
@@ -241,6 +267,7 @@ class MainWindow(QMainWindow):
 
     def open_settings(self):
         """Open the settings window."""
+
         self.settings_dlg = SettingsWindow()
 
     def open_create_project(self) -> None:
@@ -324,6 +351,7 @@ class MainWindow(QMainWindow):
 
         return row_value
 
+    @attempt_file_io
     def upload_data(self) -> None:
         """Upload data to the database."""
 
@@ -333,7 +361,6 @@ class MainWindow(QMainWindow):
         # Get the primary key of the selected row
         row_pk: int = self.get_value_from_row(0)
 
-        # TODO: Implement save runner to upload.
         if table == "project":
             logging.info("Uploading data from project ID %s", row_pk)
             runner = SaveScansWorker(row_pk, download=False)
@@ -351,6 +378,7 @@ class MainWindow(QMainWindow):
                 f"Cannot upload data from table {table}",
             )
 
+    @attempt_file_io
     def download_data(self):
         """Download selected data."""
 
@@ -383,6 +411,7 @@ class MainWindow(QMainWindow):
                 f"Cannot download data from table {table}",
             )
 
+    @attempt_file_io
     def open_data(self) -> None:
         """Open selected data."""
 
@@ -438,6 +467,7 @@ class MainWindow(QMainWindow):
                 f"Cannot open data from table {table}",
             )
 
+    @attempt_file_io
     def validate_data(self):
         """Download selected data."""
 
@@ -460,9 +490,7 @@ class MainWindow(QMainWindow):
         if table == "project":
             logging.info("Validating data from project ID %s", row_pk)
 
-            runner = ValidateScansRunner(
-                Path(local_library), Path(permanent_library), row_pk
-            )
+            runner = ValidateScansRunner(row_pk)
             self.download_dlg = ValidateDialogue(runner)
 
         elif table == "scan":
@@ -471,9 +499,7 @@ class MainWindow(QMainWindow):
             # Get the path of the local scan directory
             project_id: int = self.get_value_from_row(1)
 
-            runner = ValidateScansRunner(
-                Path(local_library), Path(permanent_library), project_id, row_pk
-            )
+            runner = ValidateScansRunner(project_id, row_pk)
             self.download_dlg = ValidateDialogue(runner)
 
         else:

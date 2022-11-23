@@ -1,6 +1,7 @@
 """
 Runner for uploading and downloading files to the permanent or local library.
 """
+import errno
 import logging
 import os
 import time
@@ -120,7 +121,9 @@ class SaveScansWorker(Worker):
                     file_path = os.path.join(root, file)
                     self.size_in_bytes += os.stat(file_path).st_size
         if not total_files or not self.size_in_bytes:
-            raise ValueError("No files to save.")
+            raise FileNotFoundError(
+                errno.ENOENT, os.strerror(errno.ENOENT), self.local_prj_dir
+            )
         self.set_max_progress(total_files - 1)  # Count from 0
 
     def run_checks(self) -> None:
@@ -136,31 +139,37 @@ class SaveScansWorker(Worker):
 
         # Check if libraries exist
         if not local_lib.exists():
-            raise ValueError(f"Local library directory {local_lib} does not exist.")
+            raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), local_lib)
         if not perm_lib.exists():
-            raise ValueError(f"Permanent library directory {perm_lib} does not exist.")
+            raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), perm_lib)
 
         # Check if libraries are directories
         if not local_lib.is_dir():
-            raise ValueError(f"Local library directory {local_lib} is not a directory.")
+            raise NotADirectoryError(
+                errno.ENOTDIR, os.strerror(errno.ENOTDIR), local_lib
+            )
         if not perm_lib.is_dir():
-            raise ValueError(
-                f"Permanent library directory {perm_lib} is not a directory."
+            raise NotADirectoryError(
+                errno.ENOTDIR, os.strerror(errno.ENOTDIR), perm_lib
             )
 
         # If the libraries exist, we still need to check if the project exists
         # Check project exists in source library
-        if not self.source_prj_dir.exists() or not self.source_prj_dir.is_dir():
-            raise ValueError(
-                f"Project {self.prj_id} directory does not exist in {self.source_lib}."
+        if not self.source_prj_dir.exists():
+            raise FileNotFoundError(
+                errno.ENOENT, os.strerror(errno.ENOENT), self.source_prj_dir
+            )
+        if not self.source_prj_dir.is_dir():
+            raise NotADirectoryError(
+                errno.ENOTDIR, os.strerror(errno.ENOTDIR), self.source_prj_dir
             )
 
         # Check scan directories exist in source library
         for scan_id in self.scan_ids:
             scan_dir: Path = self.source_lib / str(scan_id)
             if not scan_dir.exists() and scan_dir.is_dir():
-                raise ValueError(
-                    f"Scan {scan_id} directory does not exist in {self.source_lib}."
+                raise FileNotFoundError(
+                    errno.ENOENT, os.strerror(errno.ENOENT), scan_dir
                 )
 
         # Don't check if dirs exist in the destination lib; they will be created if not
@@ -168,6 +177,7 @@ class SaveScansWorker(Worker):
     @staticmethod
     def get_scan_form_data(scan_id: int) -> dict[str, dict[str, Any]]:
         """Get the metadata for a scan."""
+
         conn_dict: dict[str, dict[str, Any]] = get_dict_from_toml(settings.database)
         conn_str: str = dict_to_conn_str(conn_dict)
         db = DatabaseView(conn_str)
@@ -186,10 +196,11 @@ class SaveScansWorker(Worker):
             dest_scan_dir: Path = self.dest_prj_dir / Path(scan)
 
             # Create user form
-            create_dir_if_missing(dest_scan_dir / "tams_meta")
-            user_form: Path = dest_scan_dir / "tams_meta" / "user_form.toml"
-            scan_form_data: dict[str, Any] = self.get_scan_form_data(int(scan))
-            create_toml(user_form, scan_form_data)
+            if self.download:
+                create_dir_if_missing(dest_scan_dir / "tams_meta")
+                user_form: Path = dest_scan_dir / "tams_meta" / "user_form.toml"
+                scan_form_data: dict[str, Any] = self.get_scan_form_data(int(scan))
+                create_toml(user_form, scan_form_data)
 
             # Move files
             for item in source_scan_dir.rglob(self.glob_arg):
@@ -198,8 +209,11 @@ class SaveScansWorker(Worker):
                 if not item.is_file():
                     # Skip directories
                     continue
-
-                move_item(item, dest_scan_dir / self.perm_dir_name, keep_original=True)
+                if self.download:
+                    dest = dest_scan_dir / self.perm_dir_name
+                else:
+                    dest = dest_scan_dir
+                move_item(item, dest, keep_original=True)
 
                 # Increment progress bar
                 self.signals.progress.emit(1)
