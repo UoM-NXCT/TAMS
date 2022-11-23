@@ -16,7 +16,7 @@ from PySide6.QtWidgets import (
 )
 
 from client.runners.generic import WorkerStatus
-from client.runners.save import DownloadScansWorker
+from client.runners.save import SaveScansWorker
 from client.utils.file import size_fmt
 
 
@@ -25,7 +25,7 @@ class DownloadScansDlg(QDialog):
 
     def __init__(
         self,
-        runner: DownloadScansWorker,
+        runner: SaveScansWorker,
         hide: bool = False,
     ) -> None:
         """Initialize the dialogue."""
@@ -48,6 +48,8 @@ class DownloadScansDlg(QDialog):
         btn_stop: QPushButton = QPushButton("Stop")
         btn_pause: QPushButton = QPushButton("Pause")
         btn_resume: QPushButton = QPushButton("Resume")
+
+        # Add buttons to layout
         bar_layout.addWidget(btn_stop)
         bar_layout.addWidget(btn_pause)
         bar_layout.addWidget(btn_resume)
@@ -65,7 +67,7 @@ class DownloadScansDlg(QDialog):
         self.threadpool: QThreadPool = QThreadPool()
 
         # Create a runner
-        self.runner: DownloadScansWorker = runner
+        self.runner: SaveScansWorker = runner
         self.runner.signals.progress.connect(self.update_progress)
         self.runner.signals.finished.connect(self.job_done)
         self.runner.signals.kill.connect(self.close)

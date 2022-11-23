@@ -17,14 +17,14 @@ from client.utils.file import create_dir_if_missing, move_item
 from client.utils.toml import create_toml, get_dict_from_toml, get_value_from_toml
 
 
-class DownloadScansWorker(Worker):
+class SaveScansWorker(Worker):
     """Runner that downloads data to the local library."""
 
     def __init__(
         self,
         prj_id: int,
         *scan_ids: int,
-        download: bool = True,
+        download: bool,
     ) -> None:
         """Initialize the runner."""
 
@@ -33,6 +33,20 @@ class DownloadScansWorker(Worker):
         # Store the project ID
         self.prj_id: int = prj_id
 
+        # Store download flag
+        self.download: bool = download
+
+        # Store the permanent storage directory name
+        self.perm_dir_name: str = get_value_from_toml(
+            settings.general, "structure", "perm_dir_name"
+        )
+
+        if not self.download:
+            # If uploading, the source is the raw scans dir in the root scan dir
+            self.glob_arg: str = f"{self.perm_dir_name}/*"
+        else:
+            self.glob_arg: str = "*"
+
         perm_lib: Path = Path(
             get_value_from_toml(settings.general, "storage", "permanent_library")
         )
@@ -40,7 +54,7 @@ class DownloadScansWorker(Worker):
             get_value_from_toml(settings.general, "storage", "local_library")
         )
 
-        if download:
+        if self.download:
             # If downloading, the source is the permanent library
             self.source_lib: Path = perm_lib
             self.dest_lib: Path = local_lib
@@ -95,6 +109,8 @@ class DownloadScansWorker(Worker):
         self.size_in_bytes: int = 0
         for scan_id in self.scan_ids:
             scan_dir = self.source_prj_dir / str(scan_id)
+            if not self.download:
+                scan_dir = scan_dir / self.perm_dir_name
             # Note: the os.walk method is much faster than Path.rglob
             for root, _, files in os.walk(scan_dir):
                 # Add number of files in the directory to total
@@ -105,7 +121,7 @@ class DownloadScansWorker(Worker):
                     self.size_in_bytes += os.stat(file_path).st_size
         if not total_files or not self.size_in_bytes:
             raise ValueError("No files to save.")
-        self.set_max_progress(total_files - 1)
+        self.set_max_progress(total_files - 1)  # Count from 0
 
     def run_checks(self) -> None:
         """Check if the directories exist before saving files."""
@@ -160,11 +176,6 @@ class DownloadScansWorker(Worker):
     def job(self) -> None:
         """Save data from source to destination library."""
 
-        # Store the permanent storage directory name
-        perm_dir_name: str = get_value_from_toml(
-            settings.general, "structure", "perm_dir_name"
-        )
-
         # Save each scan in scan list
         for scan in self.scan_ids:
 
@@ -181,14 +192,14 @@ class DownloadScansWorker(Worker):
             create_toml(user_form, scan_form_data)
 
             # Move files
-            for item in source_scan_dir.rglob("*"):
+            for item in source_scan_dir.rglob(self.glob_arg):
 
                 # Move item
                 if not item.is_file():
                     # Skip directories
                     continue
 
-                move_item(item, dest_scan_dir / perm_dir_name, keep_original=True)
+                move_item(item, dest_scan_dir / self.perm_dir_name, keep_original=True)
 
                 # Increment progress bar
                 self.signals.progress.emit(1)
