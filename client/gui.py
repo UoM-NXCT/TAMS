@@ -7,7 +7,8 @@ from __future__ import annotations
 import logging
 from functools import wraps
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
+from collections.abc import Callable
 
 from psycopg.errors import ConnectionFailure, OperationalError
 from PySide6.QtCore import QModelIndex, QSize, QSortFilterProxyModel, Qt, QUrl

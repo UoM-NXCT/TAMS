@@ -8,7 +8,7 @@ import logging
 from collections.abc import Callable
 from functools import wraps
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from psycopg import Connection, Cursor, connect, errors
 
@@ -73,7 +73,7 @@ class Database:
 
         if self.cur is not None:
             self.cur.execute("select version();")
-            row: Optional[Any] = self.cur.fetchone()
+            row: Any | None = self.cur.fetchone()
             if not isinstance(row, tuple):
                 raise TypeError("Pyscopg row is not a tuple. This is very bad!")
             return str(row[0])
