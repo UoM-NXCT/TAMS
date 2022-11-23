@@ -5,9 +5,9 @@ Generic worker class for running jobs in a separate thread.
 import logging
 import sys
 import traceback
+from collections.abc import Callable
 from enum import Enum, auto
 from typing import Any, Optional
-from collections.abc import Callable
 
 from PySide6.QtCore import QObject, QRunnable, Signal, Slot
 

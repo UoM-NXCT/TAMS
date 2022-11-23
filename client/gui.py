@@ -5,10 +5,10 @@ Main window for the GUI.
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 from functools import wraps
 from pathlib import Path
 from typing import Any
-from collections.abc import Callable
 
 from psycopg.errors import ConnectionFailure, OperationalError
 from PySide6.QtCore import QModelIndex, QSize, QSortFilterProxyModel, Qt, QUrl
