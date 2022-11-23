@@ -27,9 +27,10 @@ from client.dialogues.create_project_dialogue import CreatePrj
 from client.dialogues.create_scan import CreateScanDlg
 from client.dialogues.download_scan import DownloadScansDlg
 from client.dialogues.settings import SettingsWindow
+from client.dialogues.upload_scan import UploadScansDlg
 from client.dialogues.validate import ValidateDialogue
 from client.metadata_panel import MetadataPanel
-from client.runners.save import DownloadScansWorker
+from client.runners.save import SaveScansWorker
 from client.runners.validate import ValidateScansRunner
 from client.table_widget.model import TableModel
 from client.table_widget.view import TableView
@@ -335,8 +336,13 @@ class MainWindow(QMainWindow):
         # TODO: Implement save runner to upload.
         if table == "project":
             logging.info("Uploading data from project ID %s", row_pk)
+            runner = SaveScansWorker(row_pk, download=False)
+            self.upload_dlg = UploadScansDlg(runner)
         elif table == "scan":
             logging.info("Uploading data from scan ID %s", row_pk)
+            prj_id: int = self.get_value_from_row(1)
+            runner = SaveScansWorker(prj_id, row_pk, download=False)
+            self.upload_dlg = UploadScansDlg(runner)
         else:
             logging.error("Cannot upload data from table %s", table)
             QMessageBox.critical(
@@ -357,7 +363,7 @@ class MainWindow(QMainWindow):
         if table == "project":
             logging.info("Downloading data from project ID %s", row_pk)
 
-            runner = DownloadScansWorker(row_pk)
+            runner = SaveScansWorker(row_pk, download=True)
             self.download_dlg = DownloadScansDlg(runner)
 
         elif table == "scan":
@@ -366,7 +372,7 @@ class MainWindow(QMainWindow):
             # Get the path of the local scan directory
             prj_id: int = self.get_value_from_row(1)
 
-            runner = DownloadScansWorker(prj_id, row_pk)
+            runner = SaveScansWorker(prj_id, row_pk, download=True)
             self.download_dlg = DownloadScansDlg(runner)
 
         else:
@@ -512,6 +518,14 @@ class MainWindow(QMainWindow):
                 f"Check if config file is missing! Exception: {exc}",
                 QMessageBox.StandardButton.Ok,
             )
+        except ConnectionFailure as exc:
+            logging.exception("Exception raised.")
+            QMessageBox.warning(
+                self,
+                "Unable to connect to database",
+                f"Exception: {exc}",
+                QMessageBox.StandardButton.Ok,
+            )
         except OperationalError as exc:
             # Raised on invalid connection string
             logging.exception("Exception raised. Is config file invalid?")
@@ -519,14 +533,6 @@ class MainWindow(QMainWindow):
                 self,
                 "Unable to connect; exception raised.",
                 f"Check if config file is invalid! Exception: {exc}",
-                QMessageBox.StandardButton.Ok,
-            )
-        except ConnectionFailure as exc:
-            logging.exception("Exception raised.")
-            QMessageBox.warning(
-                self,
-                "Unable to connect to database",
-                f"Exception: {exc}",
                 QMessageBox.StandardButton.Ok,
             )
         except MissingTables as exc:

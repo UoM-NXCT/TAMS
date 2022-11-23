@@ -1,5 +1,5 @@
 """
-Runner for uploading and downloading files to the permanent or local library, respectively.
+Runner for uploading and downloading files to the permanent or local library.
 """
 import logging
 import os
@@ -17,24 +17,35 @@ from client.utils.file import create_dir_if_missing, move_item
 from client.utils.toml import create_toml, get_dict_from_toml, get_value_from_toml
 
 
-class DownloadScansWorker(Worker):
+class SaveScansWorker(Worker):
     """Runner that downloads data to the local library."""
 
     def __init__(
         self,
         prj_id: int,
         *scan_ids: int,
-        download: bool = True,
+        download: bool,
     ) -> None:
         """Initialize the runner."""
 
         super().__init__(fn=self.job)
 
-        # Store if the save function is a download or upload
-        self.download: bool = download  # If true, download. If false, upload.
-
         # Store the project ID
         self.prj_id: int = prj_id
+
+        # Store download flag
+        self.download: bool = download
+
+        # Store the permanent storage directory name
+        self.perm_dir_name: str = get_value_from_toml(
+            settings.general, "structure", "perm_dir_name"
+        )
+
+        if not self.download:
+            # If uploading, the source is the raw scans dir in the root scan dir
+            self.glob_arg: str = f"{self.perm_dir_name}/*"
+        else:
+            self.glob_arg = "*"
 
         perm_lib: Path = Path(
             get_value_from_toml(settings.general, "storage", "permanent_library")
@@ -83,7 +94,8 @@ class DownloadScansWorker(Worker):
         response: QMessageBox.StandardButton = QMessageBox.information(
             dlg,
             "Indexing files",
-            "Depending on the size of the data, this may take a long time. Are you sure you would like to continue?",
+            "Depending on the size of the data, this may take a long time."
+            "Are you sure you would like to continue?",
             QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel,
         )
         if response == QMessageBox.StandardButton.Cancel:
@@ -94,21 +106,22 @@ class DownloadScansWorker(Worker):
             "Indexing files in %s, this may take a while...", self.source_prj_dir
         )
         total_files: int = 0
-        size_in_bytes: int = 0
+        self.size_in_bytes: int = 0
         for scan_id in self.scan_ids:
             scan_dir = self.source_prj_dir / str(scan_id)
+            if not self.download:
+                scan_dir = scan_dir / self.perm_dir_name
             # Note: the os.walk method is much faster than Path.rglob
             for root, _, files in os.walk(scan_dir):
-                # Add number of files in directory to total
+                # Add number of files in the directory to total
                 total_files += len(files)
-                # Add size of files in directory to total
+                # Add size of files in the directory to total
                 for file in files:
                     file_path = os.path.join(root, file)
-                    size_in_bytes += os.stat(file_path).st_size
-        if not total_files or not size_in_bytes:
+                    self.size_in_bytes += os.stat(file_path).st_size
+        if not total_files or not self.size_in_bytes:
             raise ValueError("No files to save.")
-        self.size_in_bytes: int = size_in_bytes
-        self.set_max_progress(total_files - 1)
+        self.set_max_progress(total_files - 1)  # Count from 0
 
     def run_checks(self) -> None:
         """Check if the directories exist before saving files."""
@@ -150,9 +163,10 @@ class DownloadScansWorker(Worker):
                     f"Scan {scan_id} directory does not exist in {self.source_lib}."
                 )
 
-        # Note: we don't check if the project or scans exist in the destination library as they will be created if not
+        # Don't check if dirs exist in the destination lib; they will be created if not
 
-    def get_scan_form_data(self, scan_id: int) -> dict[str, dict[str, Any]]:
+    @staticmethod
+    def get_scan_form_data(scan_id: int) -> dict[str, dict[str, Any]]:
         """Get the metadata for a scan."""
         conn_dict: dict[str, dict[str, Any]] = get_dict_from_toml(settings.database)
         conn_str: str = dict_to_conn_str(conn_dict)
@@ -161,11 +175,6 @@ class DownloadScansWorker(Worker):
 
     def job(self) -> None:
         """Save data from source to destination library."""
-
-        # Store the permanent storage directory name
-        perm_dir_name: str = get_value_from_toml(
-            settings.general, "structure", "perm_dir_name"
-        )
 
         # Save each scan in scan list
         for scan in self.scan_ids:
@@ -183,14 +192,14 @@ class DownloadScansWorker(Worker):
             create_toml(user_form, scan_form_data)
 
             # Move files
-            for item in source_scan_dir.rglob("*"):
+            for item in source_scan_dir.rglob(self.glob_arg):
 
                 # Move item
                 if not item.is_file():
                     # Skip directories
                     continue
 
-                move_item(item, dest_scan_dir / perm_dir_name, keep_original=True)
+                move_item(item, dest_scan_dir / self.perm_dir_name, keep_original=True)
 
                 # Increment progress bar
                 self.signals.progress.emit(1)
