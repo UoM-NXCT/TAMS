@@ -1,5 +1,5 @@
 """
-Runner for uploading and downloading files to the permanent or local library, respectively.
+Runner for uploading and downloading files to the permanent or local library.
 """
 import logging
 import os
@@ -30,9 +30,6 @@ class DownloadScansWorker(Worker):
 
         super().__init__(fn=self.job)
 
-        # Store if the save function is a download or upload
-        self.download: bool = download  # If true, download. If false, upload.
-
         # Store the project ID
         self.prj_id: int = prj_id
 
@@ -43,7 +40,7 @@ class DownloadScansWorker(Worker):
             get_value_from_toml(settings.general, "storage", "local_library")
         )
 
-        if self.download:
+        if download:
             # If downloading, the source is the permanent library
             self.source_lib: Path = perm_lib
             self.dest_lib: Path = local_lib
@@ -83,7 +80,8 @@ class DownloadScansWorker(Worker):
         response: QMessageBox.StandardButton = QMessageBox.information(
             dlg,
             "Indexing files",
-            "Depending on the size of the data, this may take a long time. Are you sure you would like to continue?",
+            "Depending on the size of the data, this may take a long time."
+            "Are you sure you would like to continue?",
             QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel,
         )
         if response == QMessageBox.StandardButton.Cancel:
@@ -94,20 +92,19 @@ class DownloadScansWorker(Worker):
             "Indexing files in %s, this may take a while...", self.source_prj_dir
         )
         total_files: int = 0
-        size_in_bytes: int = 0
+        self.size_in_bytes: int = 0
         for scan_id in self.scan_ids:
             scan_dir = self.source_prj_dir / str(scan_id)
             # Note: the os.walk method is much faster than Path.rglob
             for root, _, files in os.walk(scan_dir):
-                # Add number of files in directory to total
+                # Add number of files in the directory to total
                 total_files += len(files)
-                # Add size of files in directory to total
+                # Add size of files in the directory to total
                 for file in files:
                     file_path = os.path.join(root, file)
-                    size_in_bytes += os.stat(file_path).st_size
-        if not total_files or not size_in_bytes:
+                    self.size_in_bytes += os.stat(file_path).st_size
+        if not total_files or not self.size_in_bytes:
             raise ValueError("No files to save.")
-        self.size_in_bytes: int = size_in_bytes
         self.set_max_progress(total_files - 1)
 
     def run_checks(self) -> None:
@@ -150,9 +147,10 @@ class DownloadScansWorker(Worker):
                     f"Scan {scan_id} directory does not exist in {self.source_lib}."
                 )
 
-        # Note: we don't check if the project or scans exist in the destination library as they will be created if not
+        # Don't check if dirs exist in the destination lib; they will be created if not
 
-    def get_scan_form_data(self, scan_id: int) -> dict[str, dict[str, Any]]:
+    @staticmethod
+    def get_scan_form_data(scan_id: int) -> dict[str, dict[str, Any]]:
         """Get the metadata for a scan."""
         conn_dict: dict[str, dict[str, Any]] = get_dict_from_toml(settings.database)
         conn_str: str = dict_to_conn_str(conn_dict)
