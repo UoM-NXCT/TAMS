@@ -122,7 +122,7 @@ class SaveScansWorker(Worker):
                     self.size_in_bytes += os.stat(file_path).st_size
         if not total_files or not self.size_in_bytes:
             raise FileNotFoundError(
-                errno.ENOENT, os.strerror(errno.ENOENT), self.local_prj_dir
+                errno.ENOENT, os.strerror(errno.ENOENT), self.source_prj_dir
             )
         self.set_max_progress(total_files - 1)  # Count from 0
 

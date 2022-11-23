@@ -80,7 +80,7 @@ class ValidateScansRunner(Worker):
                 return
         else:
             # Convert list to tuple
-            self.scan_ids = tuple(str(scan_id) for scan_id in scan_ids)
+            self.scan_ids = tuple(scan_id for scan_id in scan_ids)
 
             # Check scan exists in both libraries
             for scan_id in self.scan_ids:
