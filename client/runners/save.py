@@ -45,7 +45,7 @@ class SaveScansWorker(Worker):
             # If uploading, the source is the raw scans dir in the root scan dir
             self.glob_arg: str = f"{self.perm_dir_name}/*"
         else:
-            self.glob_arg: str = "*"
+            self.glob_arg = "*"
 
         perm_lib: Path = Path(
             get_value_from_toml(settings.general, "storage", "permanent_library")
