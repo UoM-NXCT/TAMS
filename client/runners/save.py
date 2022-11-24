@@ -195,13 +195,22 @@ class SaveScansWorker(Worker):
             # Save to local library
             dest_scan_dir: Path = self.dest_prj_dir / Path(scan)
 
-            # Create user form
             if self.download:
+                # Create form
                 create_dir_if_missing(dest_scan_dir / "tams_meta")
                 user_form: Path = dest_scan_dir / "tams_meta" / "user_form.toml"
-                scan_form_data: dict[str, Any] = self.get_scan_form_data(int(scan))
+                immutable_fields: dict[str, Any] = self.get_scan_form_data(int(scan))
+                mutable_fields: dict[str, Any] = {
+                    "mutable": {
+                        "example": "",
+                    }
+                }
+                scan_form_data: dict[str, Any] = immutable_fields | mutable_fields
                 create_toml(user_form, scan_form_data)
-
+                # Create README.txt
+                readme: Path = dest_scan_dir / "tams_meta" / "README.txt"
+                with open(readme, "w") as f:
+                    f.write("Placeholder file for README.txt")
             # Move files
             for item in source_scan_dir.rglob(self.glob_arg):
 

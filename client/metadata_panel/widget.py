@@ -9,7 +9,9 @@ from typing import Any
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
+    QLabel,
     QLayout,
+    QPushButton,
     QSplitter,
     QTreeWidget,
     QTreeWidgetItem,
@@ -51,6 +53,19 @@ class MetadataPanel(QWidget):
         # Add the tree to the layout
         splitter.addWidget(self.metadata_tree)
 
+        # Create README.txt widget
+        readme_widget: QWidget = QWidget()
+        readme_layout = QVBoxLayout()
+        self.readme_label = QLabel()
+        readme_layout.addWidget(self.readme_label)
+        self.open_readme_btn = QPushButton("Open README.txt")
+        readme_layout.addWidget(self.open_readme_btn)
+        readme_widget.setLayout(readme_layout)
+
+        # Add the README.txt widget to the layout
+        splitter.addWidget(readme_widget)
+
+        # Add the splitter to the layout
         metadata_layout.addWidget(splitter)
 
         # Set the layout
@@ -103,43 +118,56 @@ class MetadataPanel(QWidget):
             # Expand the tree to show all items by default
             self.metadata_tree.expandAll()
 
+    def get_project_id(self):
+        """Get the project ID from the metadata."""
+        try:
+            project_id: int | str | None = self._data[
+                self._column_headers.index("project_id")
+            ]
+            if isinstance(project_id, str):
+                # If the project ID is a string, it is of tge form "project_id (title)"
+                # Get the first word and convert it to an integer to get the project ID
+                project_id = int(project_id.split()[0])
+        except ValueError:
+            project_id = None
+
+        return project_id
+
+    def get_scan_id(self):
+        """Get the scan ID from the metadata."""
+        try:
+            scan_id: int | str | None = self._data[
+                self._column_headers.index("scan_id")
+            ]
+            if isinstance(scan_id, str):
+                # If the scan ID is a string, it is of tge form "scan_id (title)"
+                # Get the first word and convert it to an integer to get the scan ID
+                scan_id = int(scan_id.split()[0])
+        except ValueError:
+            scan_id = None
+
+        return scan_id
+
     def update_thumbnail(self) -> None:
         """Update the thumbnail widget."""
 
         if self._data and self._column_headers:
 
             # Get the project ID
-            try:
-                project_id: int | str | None = self._data[
-                    self._column_headers.index("project_id")
-                ]
-                if isinstance(project_id, str):
-                    # If the project ID is a string, it is of tge form "project_id (title)"
-                    # Get the first word and convert it to an integer to get the project ID
-                    project_id = int(project_id.split()[0])
-            except ValueError:
-                # If the project ID is not found, set it to None
-                project_id = None
+            project_id: int | None = self.get_project_id()
 
             # Get the scan ID
-            try:
-                scan_id: int | str | None = self._data[
-                    self._column_headers.index("scan_id")
-                ]
-                if isinstance(scan_id, str):
-                    # If the scan ID is a string, it is of tge form "scan_id (title)"
-                    # Get the first word and convert it to an integer to get the scan ID
-                    scan_id = int(scan_id.split()[0])
-            except ValueError:
-                # If the scan ID is not found, set it to None
-                scan_id = None
+            scan_id: int | None = self.get_scan_id()
 
             if project_id:
-                # If both the project ID and scan ID are found, load the thumbnail
+                # If the project ID is found, load the thumbnail
                 thumbnail: Path = get_thumbnail(project_id, scan_id)
                 self.thumbnail_widget.load(thumbnail)
             else:
                 self.thumbnail_widget.load(settings.placeholder_image)
+
+    def update_readme(self, readme: str) -> None:
+        ...
 
     def update_metadata(self, metadata: tuple[tuple[Any], list[str]]) -> None:
         """Update metadata variables and tell panel to update itself."""
