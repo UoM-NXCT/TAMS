@@ -27,7 +27,7 @@ from PySide6.QtWidgets import (
 
 from client import settings
 from client.db import DatabaseView, MissingTables, dict_to_conn_str
-from client.dialogues.create_project_dialogue import CreatePrj
+from client.dialogues.create_prj import CreatePrj
 from client.dialogues.create_scan import CreateScanDlg
 from client.dialogues.download_scan import DownloadScansDlg
 from client.dialogues.settings import SettingsWindow

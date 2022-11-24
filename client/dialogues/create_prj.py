@@ -22,6 +22,7 @@ from PySide6.QtWidgets import (
 )
 
 from client import settings
+from client.db.exceptions import exc_gui
 from client.utils import file, toml
 
 
@@ -72,6 +73,7 @@ class CreatePrj(QDialog):
         create_prj_v_box.addStretch()
         self.setLayout(create_prj_v_box)
 
+    @exc_gui
     def accept_prj_info(self) -> None:
         """Read input data and save to database."""
 

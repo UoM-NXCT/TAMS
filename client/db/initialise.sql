@@ -155,10 +155,21 @@ owner to postgres;
  Create roles.
  */
 
+
 /*
 The admin role is used to manage the database. It has superuser privileges.
 */
 
-create role admin
-superuser
-noinherit;
+create role admin inherit;
+grant select on all tables in schema public to admin;
+grant insert on all tables in schema public to admin;
+
+
+/*
+ The operator role has read-only access to the database.
+ Users assigned a role of operator can only read data from the database unless they are
+ explicitly granted write access to a table.
+ */
+
+create role operator inherit;
+grant select on all tables in schema public to operator;
