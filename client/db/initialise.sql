@@ -149,3 +149,16 @@ create table scan_sample
 
 alter table scan_sample
 owner to postgres;
+
+
+/*
+ Create roles.
+ */
+
+/*
+The admin role is used to manage the database. It has superuser privileges.
+*/
+
+create role admin
+superuser
+noinherit;
