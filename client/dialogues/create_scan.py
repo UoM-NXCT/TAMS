@@ -189,8 +189,8 @@ class CreateScanDlg(QDialog):
                         )
                     )
                     scan_dir: Path = local_lib / str(selected_project_id) / str(scan_id)
-                    file.create_dir_if_missing(scan_dir)
-                    file.create_dir_if_missing(scan_dir / "tams_meta")
+                    file.create_dir(scan_dir)
+                    file.create_dir(scan_dir / "tams_meta")
                     form: Path = scan_dir / "tams_meta" / "user_form.toml"
                     immutable_fields: dict[str, Any] = self.get_scan_form_data(scan_id)
                     mutable_fields: dict[str, Any] = {
@@ -207,7 +207,7 @@ class CreateScanDlg(QDialog):
                     perm_dir_name = toml.get_value_from_toml(
                         settings.general, "structure", "perm_dir_name"
                     )
-                    file.create_dir_if_missing(
+                    file.create_dir(
                         local_lib
                         / str(selected_project_id)
                         / str(scan_id)

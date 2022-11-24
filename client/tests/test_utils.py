@@ -14,7 +14,7 @@ try:
 except ModuleNotFoundError:
     import tomli as tomllib
 
-from client.utils.file import create_dir_if_missing, find_and_move, move_item
+from client.utils.file import create_dir, find_and_move, move_item
 from client.utils.hash import hash_in_chunks
 from client.utils.toml import (
     create_toml,
@@ -33,7 +33,7 @@ class TestFile(unittest.TestCase):
         """Test function that creates a directory at a location if it doesn't exist."""
         dir_target = TEST_DIR / Path("new_dir")
         self.assertEqual(False, dir_target.exists())
-        create_dir_if_missing(dir_target)
+        create_dir(dir_target)
         self.assertEqual(True, dir_target.exists())
         # Delete dir after test
         rmtree(dir_target)

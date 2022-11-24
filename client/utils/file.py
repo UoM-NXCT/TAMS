@@ -8,7 +8,7 @@ import shutil
 from pathlib import Path
 
 
-def create_dir_if_missing(path: Path) -> None:
+def create_dir(path: Path) -> None:
     """Create a directory if one does not exist.
 
     :param path: target directory
@@ -40,7 +40,7 @@ def move_item(
         destination_directory,
     )
 
-    create_dir_if_missing(destination_directory)
+    create_dir(destination_directory)
 
     try:
 

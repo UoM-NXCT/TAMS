@@ -14,7 +14,7 @@ from client import settings
 from client.db.utils import dict_to_conn_str
 from client.db.views import DatabaseView
 from client.runners.generic import Worker, WorkerKilledException, WorkerStatus
-from client.utils.file import create_dir_if_missing, move_item
+from client.utils.file import create_dir, move_item
 from client.utils.toml import create_toml, get_dict_from_toml, get_value_from_toml
 
 
@@ -85,9 +85,9 @@ class SaveScansWorker(Worker):
         self.run_checks()
 
         # Create directories in destination library if they do not already exist
-        create_dir_if_missing(self.dest_prj_dir)
+        create_dir(self.dest_prj_dir)
         for scan_id in self.scan_ids:
-            create_dir_if_missing(self.dest_prj_dir / str(scan_id))
+            create_dir(self.dest_prj_dir / str(scan_id))
 
         # Count files to be moved for progress bar
         # This can take a long time, so ask user if they want to continue

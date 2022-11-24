@@ -116,7 +116,13 @@ class CreatePrj(QDialog):
                             settings.general, "storage", "local_library"
                         )
                     )
-                    file.create_dir_if_missing(local_lib / str(new_prj_id))
+                    prj_dir: Path = local_lib / str(new_prj_id)
+                    file.create_dir(prj_dir)
+                    file.create_dir(prj_dir / "tams_meta")
+                    # Create README.txt
+                    readme: Path = prj_dir / "tams_meta" / "README.txt"
+                    with open(readme, "w") as f:
+                        f.write("Placeholder file for README.txt")
                     logging.info("Created and committed project to database.")
                     QMessageBox.information(
                         self,
