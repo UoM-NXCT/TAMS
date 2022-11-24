@@ -6,6 +6,7 @@ specified by the input connection string.
 
 import logging
 from pathlib import Path
+from typing import Any
 
 import psycopg
 from PySide6.QtCore import QDate, Qt
@@ -74,12 +75,14 @@ class CreatePrj(QDialog):
     def accept_prj_info(self) -> None:
         """Read input data and save to database."""
 
+        # Get the input data
         new_prj_title: str = self.new_prj_title_entry.text()
         new_prj_summary: str = self.new_prj_summary_entry.text()
-        # The Qt toPython method specifies an object, not a date; however, it returns a date. Too bad.
-        new_prj_start_date: object = self.new_prj_start_date_entry.date().toPython()
-        new_prj_end_date: object = self.new_prj_end_date_entry.date().toPython()
-        if new_prj_end_date < new_prj_start_date:
+        new_prj_start_date: QDate = self.new_prj_start_date_entry.date()
+        new_prj_end_date: QDate = self.new_prj_end_date_entry.date()
+
+        # Check that the input data is valid
+        if new_prj_end_date.getDate() < new_prj_start_date.getDate():
             QMessageBox.warning(
                 self,
                 "Date warning",
@@ -87,7 +90,9 @@ class CreatePrj(QDialog):
                 QMessageBox.StandardButton.Ok,
             )
             raise ValueError("Project end date is before its start date.")
-        elif new_prj_title == "":
+
+        # Check the project title is not empty
+        if new_prj_title == "":
             QMessageBox.warning(
                 self,
                 "Title warning",
@@ -95,41 +100,49 @@ class CreatePrj(QDialog):
                 QMessageBox.StandardButton.Ok,
             )
             raise ValueError("Project title cannot be empty.")
-        else:
-            with psycopg.connect(self.conn_str) as conn:
-                with conn.cursor() as cur:
-                    cur.execute(
-                        "insert into project (title, summary, start_date, end_date) "
-                        "values (%s, %s, %s, %s) returning project_id;",
-                        (
-                            new_prj_title,
-                            new_prj_summary,
-                            new_prj_start_date,
-                            new_prj_end_date,
-                        ),
+
+        with psycopg.connect(self.conn_str) as conn:
+            with conn.cursor() as cur:
+                # Create project in database
+                cur.execute(
+                    "insert into project (title, summary, start_date, end_date) "
+                    "values (%s, %s, %s, %s) returning project_id;",
+                    (
+                        new_prj_title,
+                        new_prj_summary,
+                        new_prj_start_date.toPython(),
+                        new_prj_end_date.toPython(),
+                    ),
+                )
+                conn.commit()
+
+                # This could raise a TypeError if the query returns no rows
+                row: tuple[Any, ...] | None = cur.fetchone()
+                if row:
+                    new_prj_id: int = row[0]
+                else:
+                    raise TypeError("Query returned no rows.")
+
+                # Check to see if project exists in local library
+                local_lib: Path = Path(
+                    toml.get_value_from_toml(
+                        settings.general, "storage", "local_library"
                     )
-                    conn.commit()
-                    new_prj_id: int = cur.fetchone()[0]
-                    # Check to see if project exists in local library
-                    local_lib: Path = Path(
-                        toml.get_value_from_toml(
-                            settings.general, "storage", "local_library"
-                        )
-                    )
-                    prj_dir: Path = local_lib / str(new_prj_id)
-                    file.create_dir(prj_dir)
-                    file.create_dir(prj_dir / "tams_meta")
-                    # Create README.txt
-                    readme: Path = prj_dir / "tams_meta" / "README.txt"
-                    with open(readme, "w") as f:
-                        f.write("Placeholder file for README.txt")
-                    logging.info("Created and committed project to database.")
-                    QMessageBox.information(
-                        self,
-                        "Success",
-                        "Project committed to database.",
-                        QMessageBox.StandardButton.Ok,
-                    )
+                )
+                prj_dir: Path = local_lib / str(new_prj_id)
+                file.create_dir(prj_dir)
+                file.create_dir(prj_dir / "tams_meta")
+                # Create README.txt
+                readme: Path = prj_dir / "tams_meta" / "README.txt"
+                with open(readme, "w", encoding="utf-8") as f:
+                    f.write("Placeholder text for project README.txt")
+                logging.info("Created and committed project to database.")
+                QMessageBox.information(
+                    self,
+                    "Success",
+                    "Project committed to database.",
+                    QMessageBox.StandardButton.Ok,
+                )
 
             # Close window once done.
             self.close()

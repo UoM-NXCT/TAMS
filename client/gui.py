@@ -96,8 +96,6 @@ class MainWindow(QMainWindow):
 
         return wrapper
 
-
-
     def set_up_main_window(self) -> None:
         """Create and arrange widgets in the main window."""
 
@@ -121,8 +119,6 @@ class MainWindow(QMainWindow):
         self.toolbox.scans_button.clicked.connect(self.update_table_with_scans)
         self.toolbox.create_scan_btn.clicked.connect(self.open_create_scan)
         self.toolbox.users_btn.clicked.connect(self.update_table_with_users)
-
-
 
         # Create layout
         layout: QGridLayout = QGridLayout()

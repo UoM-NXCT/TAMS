@@ -4,6 +4,8 @@ This files classes to represent data from the database to the user.
 
 from typing import Any
 
+from psycopg.errors import DuplicateObject
+
 from .exceptions import MissingTables
 from .models import Database
 
@@ -170,3 +172,25 @@ class DatabaseView:
             "hardcoded": dict(zip(hardcoded_column_headers, hardcoded_data[0])),
         }
         return data
+
+    def prj_exists(self, prj_id: int) -> bool:
+        """Check if a project with a given project ID exists in the database."""
+
+        rows, _ = self.view_select_from_where(
+            "project_id", "project", f"project_id={prj_id}"
+        )
+        if len(rows) > 1:
+            raise DuplicateObject(f"Duplicate project ID {prj_id} found in database")
+        return bool(rows)
+
+    def instrument_exists(self, instrument_id: int) -> bool:
+        """Check if an instrument with a given instrument ID exists in the database."""
+
+        rows, _ = self.view_select_from_where(
+            "instrument_id", "instrument", f"instrument_id={instrument_id}"
+        )
+        if len(rows) > 1:
+            raise DuplicateObject(
+                f"Duplicate instrument ID {instrument_id} found in database"
+            )
+        return bool(rows)
