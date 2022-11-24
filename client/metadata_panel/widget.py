@@ -3,16 +3,20 @@ Custom widget class inherits the Qt built-in QWidget.
 
 Contains the metadata on the current entry; displayed on the right panel.
 """
+import logging
 from datetime import date
 from pathlib import Path
 from typing import Any
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QUrl
+from PySide6.QtGui import QDesktopServices
 from PySide6.QtWidgets import (
+    QHBoxLayout,
     QLabel,
     QLayout,
     QPushButton,
     QSplitter,
+    QTextEdit,
     QTreeWidget,
     QTreeWidgetItem,
     QVBoxLayout,
@@ -22,6 +26,7 @@ from PySide6.QtWidgets import (
 from client import settings
 from client.thumbnail.model import ThumbnailWidget
 
+from ..utils.toml import get_value_from_toml
 from .thumbnail import get_thumbnail
 
 
@@ -54,16 +59,28 @@ class MetadataPanel(QWidget):
         splitter.addWidget(self.metadata_tree)
 
         # Create README.txt widget
-        readme_widget: QWidget = QWidget()
+        self.readme_widget: QWidget = QWidget()
         readme_layout = QVBoxLayout()
-        self.readme_label = QLabel()
-        readme_layout.addWidget(self.readme_label)
-        self.open_readme_btn = QPushButton("Open README.txt")
-        readme_layout.addWidget(self.open_readme_btn)
-        readme_widget.setLayout(readme_layout)
 
-        # Add the README.txt widget to the layout
-        splitter.addWidget(readme_widget)
+        # Create the text edit
+        readme_label: QLabel = QLabel("README.txt")
+        self.readme_text = QTextEdit()
+        self.readme_text.setReadOnly(True)
+        readme_layout.addWidget(readme_label)
+        readme_layout.addWidget(self.readme_text)
+
+        # Create the text edit buttons
+        btn_layout = QHBoxLayout()
+        self.open_readme_btn = QPushButton("Open README.txt")
+        self.open_readme_btn.clicked.connect(self.open_readme)
+        btn_layout.addWidget(self.open_readme_btn)
+        readme_layout.addLayout(btn_layout)
+
+        # Add the layout to the widget
+        self.readme_widget.setLayout(readme_layout)
+
+        # Add the README.txt widget to the splitter
+        splitter.addWidget(self.readme_widget)
 
         # Add the splitter to the layout
         metadata_layout.addWidget(splitter)
@@ -72,7 +89,15 @@ class MetadataPanel(QWidget):
         self.setLayout(metadata_layout)
 
         # Set the initial content
-        self.update_content()
+        self.update_metadata()
+
+    def open_readme(self):
+        """Open the README.txt file."""
+
+        logging.info("Opening README.txt")
+        readme_dir: Path = self.get_readme_dir()
+        readme_file: Path = readme_dir / "README.txt"
+        QDesktopServices.openUrl(QUrl.fromLocalFile(readme_file))
 
     def update_content(self) -> None:
         """Update the metadata panel content."""
@@ -166,12 +191,64 @@ class MetadataPanel(QWidget):
             else:
                 self.thumbnail_widget.load(settings.placeholder_image)
 
-    def update_readme(self, readme: str) -> None:
-        ...
+    def update_readme_text_edit(self, readme_dir: Path) -> None:
+        """Load the README.txt file."""
 
-    def update_metadata(self, metadata: tuple[tuple[Any], list[str]]) -> None:
+        readme_file: Path = readme_dir / "README.txt"
+        if readme_file.exists():
+            with open(readme_file, encoding="utf-8") as f:
+                readme: str = f.read()
+            self.readme_text.setText(readme)
+        else:
+            raise FileNotFoundError(f"README.txt not found in {readme_dir}")
+
+    def get_readme_dir(self) -> Path:
+        """Get the README.txt file."""
+
+        # Get the project ID
+        project_id: int | None = self.get_project_id()
+
+        # Get the scan ID
+        scan_id: int | None = self.get_scan_id()
+
+        local_lib: Path = Path(
+            get_value_from_toml(settings.general, "storage", "local_library")
+        )
+
+        if project_id and scan_id:
+            return local_lib / str(project_id) / str(scan_id) / "tams_meta"
+        elif project_id and not scan_id:
+            return local_lib / str(project_id) / "tams_meta"
+        else:
+            raise ValueError("Project ID not found.")
+
+    def update_readme(self) -> None:
+        """Update the README.txt widget."""
+
+        if self._data and self._column_headers:
+
+            readme_dir: Path = self.get_readme_dir()
+
+            try:
+                self.update_readme_text_edit(readme_dir)
+                self.readme_widget.show()
+            except FileNotFoundError:
+                logging.info(f"README.txt not found in {readme_dir}")
+                self.readme_widget.hide()
+        else:
+            self.readme_widget.hide()
+
+    def update_metadata(
+        self,
+        metadata: tuple[tuple[Any], list[str]]
+        | tuple[None, None] = (
+            None,
+            None,
+        ),
+    ) -> None:
         """Update metadata variables and tell panel to update itself."""
 
         self._data, self._column_headers = metadata
         self.update_content()
         self.update_thumbnail()
+        self.update_readme()

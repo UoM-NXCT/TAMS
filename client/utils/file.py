@@ -33,7 +33,7 @@ def move_item(
     else:
         verb = "Moving"
 
-    logging.info(
+    logging.debug(
         "%s %s to %s...",
         verb,
         item,

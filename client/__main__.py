@@ -14,7 +14,7 @@ from client.gui import MainWindow
 def main() -> None:
     """Main function implements the GUI."""
     # enable logging
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
 
     app: QApplication = QApplication(sys.argv)
     splash = QSplashScreen(QPixmap(settings.splash))

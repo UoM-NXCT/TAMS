@@ -20,6 +20,7 @@ from PySide6.QtWidgets import (
 )
 
 from client import settings
+from client.db import DatabaseView
 from client.utils import file, toml
 
 
@@ -90,6 +91,21 @@ class CreateScanDlg(QDialog):
         create_project_v_box.addWidget(create_scan_button)
         create_project_v_box.addStretch()
         self.setLayout(create_project_v_box)
+
+    def get_scan_form_data(self, scan_id: int) -> dict[str, dict[str, Any]]:
+        """Get scan form data for user_form.toml."""
+
+        # Get hardcoded data (data that should not be changed by the user)
+        db_view: DatabaseView = DatabaseView(self.conn_str)
+        hardcoded_data, hardcoded_column_headers = db_view.view_select_from_where(
+            "scan_id, project_id, instrument_id",
+            "scan",
+            f"scan_id={scan_id}",
+        )
+        data: dict[str, dict[str, Any]] = {
+            "hardcoded": dict(zip(hardcoded_column_headers, hardcoded_data[0])),
+        }
+        return data
 
     def accept_new_scan_info(self) -> None:
         """Read input data and save to database."""
@@ -172,9 +188,22 @@ class CreateScanDlg(QDialog):
                             settings.general, "storage", "local_library"
                         )
                     )
-                    file.create_dir_if_missing(
-                        local_lib / str(selected_project_id) / str(scan_id)
-                    )
+                    scan_dir: Path = local_lib / str(selected_project_id) / str(scan_id)
+                    file.create_dir_if_missing(scan_dir)
+                    file.create_dir_if_missing(scan_dir / "tams_meta")
+                    form: Path = scan_dir / "tams_meta" / "user_form.toml"
+                    immutable_fields: dict[str, Any] = self.get_scan_form_data(scan_id)
+                    mutable_fields: dict[str, Any] = {
+                        "mutable": {
+                            "example": "",
+                        }
+                    }
+                    scan_form_data: dict[str, Any] = immutable_fields | mutable_fields
+                    toml.create_toml(form, scan_form_data)
+                    # Create README.txt
+                    readme: Path = scan_dir / "tams_meta" / "README.txt"
+                    with open(readme, "w") as f:
+                        f.write("Placeholder file for README.txt")
                     perm_dir_name = toml.get_value_from_toml(
                         settings.general, "structure", "perm_dir_name"
                     )

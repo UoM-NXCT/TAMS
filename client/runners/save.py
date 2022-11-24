@@ -109,9 +109,7 @@ class SaveScansWorker(Worker):
         total_files: int = 0
         self.size_in_bytes: int = 0
         for scan_id in self.scan_ids:
-            scan_dir = self.source_prj_dir / str(scan_id)
-            if not self.download:
-                scan_dir = scan_dir / self.perm_dir_name
+            scan_dir = self.source_prj_dir / str(scan_id) / self.perm_dir_name
             # Note: the os.walk method is much faster than Path.rglob
             for root, _, files in os.walk(scan_dir):
                 # Add number of files in the directory to total
@@ -195,9 +193,10 @@ class SaveScansWorker(Worker):
             # Save to local library
             dest_scan_dir: Path = self.dest_prj_dir / Path(scan)
 
-            if self.download:
+            if False:
+                # TODO: Move this to a separate function
                 # Create form
-                create_dir_if_missing(dest_scan_dir / "tams_meta")
+
                 user_form: Path = dest_scan_dir / "tams_meta" / "user_form.toml"
                 immutable_fields: dict[str, Any] = self.get_scan_form_data(int(scan))
                 mutable_fields: dict[str, Any] = {
@@ -218,10 +217,8 @@ class SaveScansWorker(Worker):
                 if not item.is_file():
                     # Skip directories
                     continue
-                if self.download:
-                    dest = dest_scan_dir / self.perm_dir_name
-                else:
-                    dest = dest_scan_dir
+                dest = dest_scan_dir / self.perm_dir_name
+
                 move_item(item, dest, keep_original=True)
 
                 # Increment progress bar
