@@ -96,7 +96,7 @@ class SettingsWindow(QDialog):
 
         open_local_lib_button: QPushButton = QPushButton("Open local library")
         open_local_lib_button.clicked.connect(
-            lambda: self.open_library(self.get_library("local"), "local")
+            lambda: self.open_library(settings.get_lib("local"), "local")
         )
         local_lib_buttons_layout.addWidget(open_local_lib_button)
 
@@ -115,7 +115,7 @@ class SettingsWindow(QDialog):
 
         open_permanent_lib_button: QPushButton = QPushButton("Open permanent library")
         open_permanent_lib_button.clicked.connect(
-            lambda: self.open_library(self.get_library("permanent"), "permanent")
+            lambda: self.open_library(settings.get_lib("permanent"), "permanent")
         )
         permanent_lib_buttons_layout.addWidget(open_permanent_lib_button)
 
@@ -148,8 +148,8 @@ class SettingsWindow(QDialog):
         <p>
         <em>
         Current local library:
-            <samp><a href="{self.get_library("local")}">
-                {self.get_library("local")}
+            <samp><a href="{settings.get_lib("local")}">
+                {settings.get_lib("local")}
             </a></samp>
         </em>
         </p>
@@ -167,8 +167,8 @@ class SettingsWindow(QDialog):
         <p>
         <em>
         Current permanent library:
-            <samp><a href="{self.get_library("permanent")}">
-                {self.get_library("permanent")}
+            <samp><a href="{settings.get_lib("permanent")}">
+                {settings.get_lib("permanent")}
             </a></samp>
         </em>
         </p>
@@ -186,16 +186,6 @@ class SettingsWindow(QDialog):
                 f"No {lib_title} library set",
                 f"No {lib_title} library set. Please set a {lib_title} library first.",
             )
-
-    def get_library(self, library_title: str) -> str | None:
-        """Get the current library to present to the user."""
-
-        current_lib = get_value_from_toml(
-            settings.general, "storage", f"{library_title}_library"
-        )
-        if current_lib:
-            return current_lib
-        return None
 
     def database_settings(self) -> None:
         """Database settings widget to allow the user to set the database connection."""
@@ -261,8 +251,8 @@ class SettingsWindow(QDialog):
     def edit_library(self, lib_title: str) -> None:
         """Open a file dialog to select the library directory."""
 
-        if self.get_library(lib_title):
-            initial_directory: str = self.get_library(lib_title)
+        if settings.get_lib(lib_title):
+            initial_directory: str = settings.get_lib(lib_title)
         else:
             # Use current directory if no library is set
             initial_directory = ""

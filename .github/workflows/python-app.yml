@@ -17,7 +17,7 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.10", "3.11"]
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest] #, macos-latest] - expensive to run, thanks Tim Apple
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -54,5 +54,6 @@ jobs:
         run: |
           poetry run mypy client/db --strict
           poetry run mypy client/runners --strict
+          poetry run mypy client/settings --strict
           poetry run mypy client/thumbnail --strict
           poetry run mypy client/utils --strict

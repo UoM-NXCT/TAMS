@@ -14,7 +14,7 @@ from client import settings
 from client.db.utils import dict_to_conn_str
 from client.db.views import DatabaseView
 from client.runners.generic import Worker, WorkerKilledException, WorkerStatus
-from client.utils.file import create_dir_if_missing, move_item
+from client.utils.file import create_dir, move_item
 from client.utils.toml import create_toml, get_dict_from_toml, get_value_from_toml
 
 
@@ -85,9 +85,9 @@ class SaveScansWorker(Worker):
         self.run_checks()
 
         # Create directories in destination library if they do not already exist
-        create_dir_if_missing(self.dest_prj_dir)
+        create_dir(self.dest_prj_dir)
         for scan_id in self.scan_ids:
-            create_dir_if_missing(self.dest_prj_dir / str(scan_id))
+            create_dir(self.dest_prj_dir / str(scan_id))
 
         # Count files to be moved for progress bar
         # This can take a long time, so ask user if they want to continue
@@ -109,9 +109,7 @@ class SaveScansWorker(Worker):
         total_files: int = 0
         self.size_in_bytes: int = 0
         for scan_id in self.scan_ids:
-            scan_dir = self.source_prj_dir / str(scan_id)
-            if not self.download:
-                scan_dir = scan_dir / self.perm_dir_name
+            scan_dir = self.source_prj_dir / str(scan_id) / self.perm_dir_name
             # Note: the os.walk method is much faster than Path.rglob
             for root, _, files in os.walk(scan_dir):
                 # Add number of files in the directory to total
@@ -195,13 +193,23 @@ class SaveScansWorker(Worker):
             # Save to local library
             dest_scan_dir: Path = self.dest_prj_dir / Path(scan)
 
-            # Create user form
-            if self.download:
-                create_dir_if_missing(dest_scan_dir / "tams_meta")
-                user_form: Path = dest_scan_dir / "tams_meta" / "user_form.toml"
-                scan_form_data: dict[str, Any] = self.get_scan_form_data(int(scan))
-                create_toml(user_form, scan_form_data)
+            if False:
+                # TODO: Move this to a separate function
+                # Create form
 
+                user_form: Path = dest_scan_dir / "tams_meta" / "user_form.toml"
+                immutable_fields: dict[str, Any] = self.get_scan_form_data(int(scan))
+                mutable_fields: dict[str, Any] = {
+                    "mutable": {
+                        "example": "",
+                    }
+                }
+                scan_form_data: dict[str, Any] = immutable_fields | mutable_fields
+                create_toml(user_form, scan_form_data)
+                # Create README.txt
+                readme: Path = dest_scan_dir / "tams_meta" / "README.txt"
+                with open(readme, "w") as f:
+                    f.write("Placeholder file for README.txt")
             # Move files
             for item in source_scan_dir.rglob(self.glob_arg):
 
@@ -209,10 +217,8 @@ class SaveScansWorker(Worker):
                 if not item.is_file():
                     # Skip directories
                     continue
-                if self.download:
-                    dest = dest_scan_dir / self.perm_dir_name
-                else:
-                    dest = dest_scan_dir
+                dest = dest_scan_dir / self.perm_dir_name
+
                 move_item(item, dest, keep_original=True)
 
                 # Increment progress bar

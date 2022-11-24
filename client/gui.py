@@ -96,6 +96,44 @@ class MainWindow(QMainWindow):
 
         return wrapper
 
+    def set_up_main_window(self) -> None:
+        """Create and arrange widgets in the main window."""
+
+        # Create the status bar
+        self.setStatusBar(QStatusBar())
+
+        # Metadata panel
+        self.metadata_panel = MetadataPanel()
+
+        # Create a table; initialize with projects
+        self.table_view = TableView()
+        self.table_view.setSelectionBehavior(TableView.SelectionBehavior.SelectRows)
+        self.update_table_with_projects()
+
+        # Create table toolbox
+        self.toolbox = ToolBox()
+
+        # Link toolbox buttons to functions
+        self.toolbox.projects_button.clicked.connect(self.update_table_with_projects)
+        self.toolbox.create_prj_btn.clicked.connect(self.open_create_project)
+        self.toolbox.scans_button.clicked.connect(self.update_table_with_scans)
+        self.toolbox.create_scan_btn.clicked.connect(self.open_create_scan)
+        self.toolbox.users_btn.clicked.connect(self.update_table_with_users)
+
+        # Create layout
+        layout: QGridLayout = QGridLayout()
+        splitter: QSplitter = QSplitter(Qt.Horizontal)
+        splitter.addWidget(self.toolbox)
+        splitter.addWidget(self.table_view)
+        splitter.addWidget(self.metadata_panel)
+        splitter.setSizes([216, 432, 216])  # 1:4 ratio
+        layout.addWidget(splitter, 0, 0)
+
+        # Set grid as central widget
+        widget = QWidget()
+        widget.setLayout(layout)
+        self.setCentralWidget(widget)
+
     def update_table(self) -> None:
         """Update table model using SQL command."""
 
@@ -130,6 +168,9 @@ class MainWindow(QMainWindow):
         # Let user sort table by column
         self.table_view.setSortingEnabled(True)
 
+        # Update metadata panel
+        self.metadata_panel.update_metadata()
+
     def update_table_with_projects(self) -> None:
         """Update table to display projects."""
 
@@ -155,44 +196,6 @@ class MainWindow(QMainWindow):
 
         self.current_table_query = ("scan_id, project_id, instrument_id", "scan", None)
         self.update_table()
-
-    def set_up_main_window(self) -> None:
-        """Create and arrange widgets in the main window."""
-
-        # Create the status bar
-        self.setStatusBar(QStatusBar())
-
-        # Create a table; initialize with projects
-        self.table_view = TableView()
-        self.table_view.setSelectionBehavior(TableView.SelectionBehavior.SelectRows)
-        self.update_table_with_projects()
-
-        # Create table toolbox
-        self.toolbox = ToolBox()
-
-        # Link toolbox buttons to functions
-        self.toolbox.projects_button.clicked.connect(self.update_table_with_projects)
-        self.toolbox.create_prj_btn.clicked.connect(self.open_create_project)
-        self.toolbox.scans_button.clicked.connect(self.update_table_with_scans)
-        self.toolbox.create_scan_btn.clicked.connect(self.open_create_scan)
-        self.toolbox.users_btn.clicked.connect(self.update_table_with_users)
-
-        # Metadata panel
-        self.metadata_panel = MetadataPanel()
-
-        # Create layout
-        layout: QGridLayout = QGridLayout()
-        splitter: QSplitter = QSplitter(Qt.Horizontal)
-        splitter.addWidget(self.toolbox)
-        splitter.addWidget(self.table_view)
-        splitter.addWidget(self.metadata_panel)
-        splitter.setSizes([216, 432, 216])  # 1:4 ratio
-        layout.addWidget(splitter, 0, 0)
-
-        # Set grid as central widget
-        widget = QWidget()
-        widget.setLayout(layout)
-        self.setCentralWidget(widget)
 
     def create_actions(self):
         """Create the application's menu actions."""
