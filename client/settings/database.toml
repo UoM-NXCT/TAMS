@@ -1,6 +1,6 @@
 [postgresql]
-host = "127.0.0.1"
-port = "5432"
-database = "tams"
-user = "tjkuson"
-password = "hunter2"
+host = ""
+port = ""
+database = ""
+user = ""
+password = ""

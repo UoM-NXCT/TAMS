@@ -4,12 +4,10 @@ Login dialogue to be used to connect to the database on the application startup.
 Will allow user to save login credentials to a file for future use.
 """
 import logging
-import sys
 
 from psycopg import errors
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
-    QApplication,
     QCheckBox,
     QDialog,
     QDialogButtonBox,
@@ -29,7 +27,7 @@ from client.utils import toml
 class Login(QDialog):
     """Login dialogue."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the login dialogue."""
 
         super().__init__(parent=None)
@@ -37,10 +35,30 @@ class Login(QDialog):
         # Set title
         self.setWindowTitle("Login")
 
-        # Load saved settings
-        saved_settings = toml.load_toml(settings.database)
+        self.empty_settings: dict[str, dict[str, str]] = {
+            "postgresql": {
+                "host": "",
+                "port": "",
+                "database": "",
+                "user": "",
+                "password": "",
+            }
+        }
 
-        # Set layout
+        try:
+            # Load saved settings
+            saved_settings = toml.load_toml(settings.database)
+        except FileNotFoundError:
+            # If no settings file exists, create an empty dictionary and save it
+            logging.warning("No settings file found. Creating new settings file.")
+            saved_settings = self.empty_settings
+            toml.create_toml(settings.database, saved_settings)
+
+        # Create the connection string from the saved settings
+        # TODO: connect to the database automatically, if auto-login is enabled
+        self.conn_str: str = utils.dict_to_conn_str(saved_settings)
+
+        # Create layout
         layout = QVBoxLayout()
 
         # Create form
@@ -59,7 +77,8 @@ class Login(QDialog):
         )
 
         # The password line edit widget is the second child of the form layout (item 7)
-        self.form_layout.itemAt(7).widget().setEchoMode(QLineEdit.EchoMode.Password)
+        pwd_edit: QLineEdit = self.form_layout.itemAt(7).widget()
+        pwd_edit.setEchoMode(QLineEdit.EchoMode.Password)
 
         # Add form to layout
         layout.addLayout(self.form_layout)
@@ -89,14 +108,18 @@ class Login(QDialog):
         # Set layout
         self.setLayout(layout)
 
-    def login(self):
+    def login(self) -> None:
         """Attempt to log in using the input settings."""
 
         # Get the text from the line edit widgets in the form layout
-        host: str = self.form_layout.itemAt(1).widget().text()
-        port: str = self.form_layout.itemAt(3).widget().text()
-        user: str = self.form_layout.itemAt(5).widget().text()
-        password: str = self.form_layout.itemAt(7).widget().text()
+        host_edit: QLineEdit = self.form_layout.itemAt(1).widget()
+        host: str = host_edit.text()
+        port_edit: QLineEdit = self.form_layout.itemAt(3).widget()
+        port: str = port_edit.text()
+        user_edit: QLineEdit = self.form_layout.itemAt(5).widget()
+        user: str = user_edit.text()
+        pwd_edit: QLineEdit = self.form_layout.itemAt(7).widget()
+        pwd: str = pwd_edit.text()
 
         # Store the inputs in a dictionary
         data: dict[str, dict[str, str]] = {
@@ -105,12 +128,12 @@ class Login(QDialog):
                 "port": port,
                 "database": "tams",
                 "user": user,
-                "password": password,
+                "password": pwd,
             }
         }
 
         # Create a connection string from the dictionary
-        self.conn_str: str = utils.dict_to_conn_str(data)
+        self.conn_str = utils.dict_to_conn_str(data)
 
         try:
             db = views.DatabaseView(self.conn_str)
@@ -121,26 +144,23 @@ class Login(QDialog):
             QMessageBox.critical(
                 self,
                 "Connection Error",
-                "Failed to connect to database. Please the login details.\n"
+                "Failed to connect to database. Please check the login details.\n"
                 f"Exception raised: {exc}",
             )
             return
 
-        # If the checkbox is checked, save the login information
         if self.checkbox.isChecked():
+            # If user has checked the checkbox, save the login information
             toml.create_toml(settings.database, data)
+        else:
+            # If user has not checked the checkbox, delete any saved login information
+            toml.create_toml(settings.database, self.empty_settings)
 
         # Close the dialogue
         self.close()
 
-    def cancel(self):
+    def cancel(self) -> None:
         """Close the dialogue and exit the application."""
 
         self.close()
         raise SystemExit
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    login = Login()
-    login.show()
-    sys.exit(app.exec())
