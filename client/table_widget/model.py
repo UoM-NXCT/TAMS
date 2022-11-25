@@ -12,7 +12,6 @@ the type hints from the base class even though they are incorrect. This does not
 the runtime behaviour of the code.
 """
 
-import logging
 from datetime import date, datetime
 from typing import Any
 

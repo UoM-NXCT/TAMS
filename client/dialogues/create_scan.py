@@ -153,11 +153,7 @@ class CreateScanDlg(QDialog):
                     0
                 ]  # May raise TypeError if no scan_id rows returned
                 # Check to see if the newly created scan exists in the local library and create it if not
-                local_lib: Path = Path(
-                    toml.get_value_from_toml(
-                        settings.general, "storage", "local_library"
-                    )
-                )
+                local_lib: Path = Path(settings.get_lib("local"))
                 scan_dir: Path = local_lib / str(selected_project_id) / str(scan_id)
                 file.create_dir(scan_dir)
                 file.create_dir(scan_dir / "tams_meta")
@@ -174,9 +170,7 @@ class CreateScanDlg(QDialog):
                 readme: Path = scan_dir / "tams_meta" / "README.txt"
                 with open(readme, "w") as f:
                     f.write("Placeholder file for README.txt")
-                perm_dir_name = toml.get_value_from_toml(
-                    settings.general, "structure", "perm_dir_name"
-                )
+                perm_dir_name = settings.get_perm_dir_name()
                 file.create_dir(
                     local_lib / str(selected_project_id) / str(scan_id) / perm_dir_name
                 )

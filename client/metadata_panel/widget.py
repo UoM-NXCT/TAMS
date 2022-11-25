@@ -26,7 +26,6 @@ from PySide6.QtWidgets import (
 from client import settings
 from client.thumbnail.model import ThumbnailWidget
 
-from ..utils.toml import get_value_from_toml
 from .thumbnail import get_thumbnail
 
 
@@ -213,9 +212,7 @@ class MetadataPanel(QWidget):
         scan_id: int | None = self.get_scan_id()
 
         # Store local library path
-        local_lib: Path = Path(
-            get_value_from_toml(settings.general, "storage", "local_library")
-        )
+        local_lib: Path = Path(settings.get_lib("local"))
 
         if prj_id and scan_id:
             # If scan ID, then get the README.txt file from the scan directory

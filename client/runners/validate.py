@@ -19,7 +19,6 @@ from PySide6.QtWidgets import QMessageBox, QWidget
 from client import settings
 from client.utils.hash import hash_in_chunks
 
-from ..utils.toml import get_value_from_toml
 from .generic import Worker, WorkerKilledException, WorkerStatus
 
 
@@ -35,16 +34,10 @@ class ValidateScansRunner(Worker):
         self.prj_id: int = prj_id
 
         # Store the permanent storage directory name
-        self.perm_dir_name: str = get_value_from_toml(
-            settings.general, "structure", "perm_dir_name"
-        )
+        self.perm_dir_name: str = settings.get_perm_dir_name()
 
-        self.perm_lib: Path = Path(
-            get_value_from_toml(settings.general, "storage", "permanent_library")
-        )
-        self.local_lib: Path = Path(
-            get_value_from_toml(settings.general, "storage", "local_library")
-        )
+        self.perm_lib: Path = Path(settings.get_lib("permanent"))
+        self.local_lib: Path = Path(settings.get_lib("local"))
 
         self.perm_prj_dir: str = os.path.join(self.perm_lib, str(self.prj_id))
         self.local_prj_dir: str = os.path.join(self.local_lib, str(self.prj_id))

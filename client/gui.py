@@ -39,7 +39,7 @@ from client.runners.validate import ValidateScansRunner
 from client.table_widget.model import TableModel
 from client.table_widget.view import TableView
 from client.toolbox.toolbox import ToolBox
-from client.utils.toml import get_dict_from_toml, get_value_from_toml
+from client.utils.toml import load_toml
 
 TAMS_ROOT = Path(__file__).parents[1]
 
@@ -114,9 +114,9 @@ class MainWindow(QMainWindow):
         self.toolbox = ToolBox()
 
         # Link toolbox buttons to functions
-        self.toolbox.projects_button.clicked.connect(self.update_table_with_projects)
+        self.toolbox.prj_btn.clicked.connect(self.update_table_with_projects)
         self.toolbox.create_prj_btn.clicked.connect(self.open_create_project)
-        self.toolbox.scans_button.clicked.connect(self.update_table_with_scans)
+        self.toolbox.scans_btn.clicked.connect(self.update_table_with_scans)
         self.toolbox.create_scan_btn.clicked.connect(self.open_create_scan)
         self.toolbox.users_btn.clicked.connect(self.update_table_with_users)
 
@@ -426,9 +426,7 @@ class MainWindow(QMainWindow):
         row_pk: int = self.get_value_from_row(0)
 
         # Get the path of the local library
-        local_library: str = get_value_from_toml(
-            settings.general, "storage", "local_library"
-        )
+        local_library: str = load_toml(settings.general)["storage"]["local_library"]
 
         if table == "project":
             logging.info("Opening data from project ID %s", row_pk)
@@ -481,16 +479,6 @@ class MainWindow(QMainWindow):
         # Get the primary key of the selected row
         row_pk: int = self.get_value_from_row(0)
 
-        # Get the path to the local data directory
-        local_library: str = get_value_from_toml(
-            settings.general, "storage", "local_library"
-        )
-
-        # Get the path to the remote data directory
-        permanent_library: str = get_value_from_toml(
-            settings.general, "storage", "permanent_library"
-        )
-
         if table == "project":
             logging.info("Validating data from project ID %s", row_pk)
 
@@ -532,7 +520,7 @@ class MainWindow(QMainWindow):
         try:
             # Set up database
             logging.info("Connecting to database")
-            config_dict = get_dict_from_toml(settings.database)
+            config_dict = load_toml(settings.database)
             self.connection_string = dict_to_conn_str(config_dict)
             self.database_view = DatabaseView(self.connection_string)
 

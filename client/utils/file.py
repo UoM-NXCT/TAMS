@@ -8,47 +8,43 @@ import shutil
 from pathlib import Path
 
 
-def create_dir(path: Path) -> None:
+def create_dir(path: Path | str) -> None:
     """Create a directory if one does not exist.
 
     :param path: target directory
     """
-    if not path.exists():
-        os.makedirs(path, exist_ok=True)
-        logging.info("Created directory at %s.", path)
+
+    # If directory exists, do nothing
+    if isinstance(path, Path):
+        if path.exists():
+            return
+    elif isinstance(path, str):
+        if os.path.exists(path):
+            return
+
+    # Create directory
+    os.makedirs(path, exist_ok=True)
+    logging.info("Created directory at %s", path)
 
 
-def move_item(
-    item: Path, destination_directory: Path, keep_original: bool = True
-) -> None:
+def move_item(item: Path, dest_dir: Path, keep_original: bool = True) -> None:
     """Function that copies or moves item to a given location.
 
-    :param item: target item
-    :param destination_directory: destination location
+    :param item: target item (file or directory)
+    :param dest_dir: destination location
     :param keep_original: determines if move or copy
     """
 
-    if keep_original:
-        verb = "Copying"
-    else:
-        verb = "Moving"
-
-    logging.debug(
-        "%s %s to %s...",
-        verb,
-        item,
-        destination_directory,
-    )
-
-    create_dir(destination_directory)
+    # Create destination directory if it does not exist
+    create_dir(dest_dir)
 
     try:
 
         # Check file or directory is a file or directory, respectively
         if item.is_file():
-            shutil.copy(item, destination_directory / item.name)
+            shutil.copy(item, dest_dir / item.name)
         elif item.is_dir():
-            shutil.copytree(item, destination_directory / item.name)
+            shutil.copytree(item, dest_dir / item.name)
 
         # Delete original if not keeping original
         if not keep_original:
@@ -65,9 +61,7 @@ def move_item(
         logging.exception("Exception raised.")
     except FileExistsError:
         # Just move on if the file already exists
-        logging.info(
-            "File already exists at %s, skipping", destination_directory / item.name
-        )
+        logging.info("File already exists at %s, skipping", dest_dir / item.name)
 
 
 def find_and_move(
@@ -87,12 +81,12 @@ def find_and_move(
 
     number_of_counters = len(tuple(search_dir.glob(glob_arg)))
     if number_of_counters:
-        for destination in destinations:
+        for dest in destinations:
             for item in tuple(search_dir.glob(glob_arg)):
                 # Copy file to local reconstructed data directory
                 move_item(
                     item,
-                    Path(search_dir) / Path(destination),
+                    Path(search_dir) / Path(dest),
                 )
 
         if not copy:

@@ -82,7 +82,7 @@ class Database:
         return str(None)
 
 
-class DatabaseInitialiser(Database):
+class DatabaseInitializer(Database):
     """Initialise a database."""
 
     def __init__(self, conn_str: str) -> None:
@@ -111,7 +111,7 @@ class DatabaseInitialiser(Database):
         with open(dummy_data_instructions, encoding="utf8") as sql_file:
             self.exec(sql_file.read())
 
-    def __enter__(self) -> DatabaseInitialiser:
+    def __enter__(self) -> DatabaseInitializer:
         """The runtime context of the database initialization class"""
         super().__enter__()
         return self
@@ -125,7 +125,7 @@ def init_database() -> None:
         "host=127.0.0.1 port=5432 dbname=tams user=postgres password=postgres"
     )
 
-    with DatabaseInitialiser(conn_str) as db:
+    with DatabaseInitializer(conn_str) as db:
         db.init_db()
         db.populate_with_dummy_data()
 

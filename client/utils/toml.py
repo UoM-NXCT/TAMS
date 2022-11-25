@@ -15,60 +15,47 @@ except ModuleNotFoundError:
 import tomli_w
 
 
-def create_toml(toml_file: Path, config: dict[str, Any]) -> None:
-    """Create a new TOML file with given config data
+def create_toml(path: Path | str, data: dict[str, Any]) -> None:
+    """Create a new TOML file with given data
 
-    :param toml_file: path to new TOML file
-    :param config: data to be stored in TOML file
+    :param path: path to new TOML file
+    :param data: data to be stored in TOML file as a dictionary
     """
 
-    with open(toml_file, mode="wb") as file:
-        tomli_w.dump(config, file)
+    with open(path, mode="wb") as f:
+        tomli_w.dump(data, f)
 
 
-def update_toml(toml_file: Path, section: str, key: str, value: object) -> None:
+def update_toml(path: Path | str, section: str, key: str, value: object) -> None:
     """Update or add a value in a given TOML using a section and key index.
 
-    :param toml_file: target TOML file
+    :param path: target TOML file
     :param section: the section of the TOML file that contains the target value
     :param key: the key corresponding to the target value
     :param value: the value to be added or updated
     """
 
-    with open(toml_file, mode="rb") as file:
-        config: dict[str, Any] = tomllib.load(file)
-        if key in config[section]:
-            config[section][key] = value
+    with open(path, mode="rb") as f:
+        # Load the TOML file as a dictionary
+        data: dict[str, Any] = tomllib.load(f)
+        if key in data[section]:
+            # If key exists, update value
+            data[section][key] = value
         else:
-            config[section].update({key: value})
-        file.close()
-    with open(toml_file, mode="wb") as file:
-        tomli_w.dump(config, file)
+            # If key does not exist, add key and value
+            data[section].update({key: value})
+
+    # Write the updated dictionary to the TOML file
+    with open(path, mode="wb") as f:
+        tomli_w.dump(data, f)
 
 
-def get_dict_from_toml(toml_file: Path) -> dict[str, Any]:
+def load_toml(path: Path) -> dict[str, Any]:
     """Return the data from a TOML file as a Python dictionary.
 
-    :param toml_file: target TOML file
-    :return: a Python dictionary of the date from the TOML file or None if the method
-    encounters an exception
+    :param path: target TOML file
     """
 
-    with open(toml_file, mode="rb") as file:
-        config: dict[str, Any] = tomllib.load(file)
-        return config
-
-
-def get_value_from_toml(toml_file: Path, section: str, key: str) -> Any:
-    """Return the value from a given key in a section of a given TOML file.
-
-    :param toml_file: target TOML file
-    :param section: target section
-    :param key: target key
-    :return: the value from the TOML file or None if the method encounters an exception
-    """
-
-    with open(toml_file, mode="rb") as file:
-        config: dict[str, Any] = tomllib.load(file)
-        value: Any = config[section][key]
-        return value
+    with open(path, mode="rb") as f:
+        data: dict[str, Any] = tomllib.load(f)
+        return data
