@@ -15,13 +15,10 @@ logo: Path = TAMS_DIR / "resources" / "tams.png"
 splash: Path = TAMS_DIR / "resources" / "splash.png"
 
 
-def get_lib(lib_title: str) -> str | None:
+def get_lib(lib_title: str) -> str:
     """Get the current library to present to the user."""
 
-    current_lib = str(load_toml(general)["storage"][f"{lib_title}_library"])
-    if current_lib:
-        return current_lib
-    return None
+    return str(load_toml(general)["storage"][f"{lib_title}_library"])
 
 
 def get_perm_dir_name() -> str:

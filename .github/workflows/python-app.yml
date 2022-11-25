@@ -52,4 +52,5 @@ jobs:
           poetry run mypy client/runners --strict
           poetry run mypy client/settings --strict
           poetry run mypy client/thumbnail --strict
+          poetry run mypy client/toolbox --strict
           poetry run mypy client/utils --strict

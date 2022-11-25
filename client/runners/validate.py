@@ -200,7 +200,7 @@ class ValidateScansRunner(Worker):
             perm_dir: str = os.path.join(self.perm_prj_dir, str(scan_id))
             # Local directory appended with subdirectory
             local_dir: str = os.path.join(
-                self.local_prj_dir, str(scan_id), settings.perm_storage_dir_name
+                self.local_prj_dir, str(scan_id), settings.get_perm_dir_name()
             )
 
             # Do a shallow identity check (e.g., names and metadata)
