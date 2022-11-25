@@ -37,8 +37,8 @@ from client.dialogues.validate import ValidateDialogue
 from client.metadata_panel import MetadataPanel
 from client.runners.save import SaveScansWorker
 from client.runners.validate import ValidateScansRunner
-from client.table_widget.model import TableModel
-from client.table_widget.view import TableView
+from client.table.model import TableModel
+from client.table.view import TableView
 from client.toolbox.toolbox import ToolBox
 from client.utils.toml import load_toml
 
