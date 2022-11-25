@@ -35,10 +35,11 @@ class Login(QDialog):
         # Set title
         self.setWindowTitle("Login")
 
+        # Default settings for the database connection; assumes local database
         self.empty_settings: dict[str, dict[str, str]] = {
             "postgresql": {
-                "host": "",
-                "port": "",
+                "host": "127.0.0.1",
+                "port": "5432",
                 "database": "",
                 "user": "",
                 "password": "",
@@ -48,7 +49,12 @@ class Login(QDialog):
         try:
             # Load saved settings
             saved_settings = toml.load_toml(settings.database)
-        except FileNotFoundError:
+            is_empty = tuple(
+                not bool(value) for value in saved_settings["postgresql"].values()
+            )
+            if all(is_empty):
+                raise ValueError
+        except (FileNotFoundError, ValueError):
             # If no settings file exists, create an empty dictionary and save it
             logging.warning("No settings file found. Creating new settings file.")
             saved_settings = self.empty_settings
