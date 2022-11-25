@@ -16,12 +16,7 @@ except ModuleNotFoundError:
 
 from client.utils.file import create_dir, find_and_move, move_item
 from client.utils.hash import hash_in_chunks
-from client.utils.toml import (
-    create_toml,
-    get_dict_from_toml,
-    get_value_from_toml,
-    update_toml,
-)
+from client.utils.toml import create_toml, load_toml, update_toml
 
 TEST_DIR = Path(__file__).parent
 
@@ -112,7 +107,7 @@ class TestTOML(unittest.TestCase):
         create_toml(new_toml_path, dict_to_be_stored)
         self.assertEqual(True, new_toml_path.is_file())
         self.assertEqual("new_toml.toml", new_toml_path.name)
-        stored_dict = get_dict_from_toml(new_toml_path)
+        stored_dict = load_toml(new_toml_path)
         self.assertEqual(dict_to_be_stored, stored_dict)
 
         # Delete the created TOML file after tests have been completed
@@ -122,28 +117,19 @@ class TestTOML(unittest.TestCase):
         """Test function that returns a dictionary from a TOML file."""
 
         path_to_toml = TEST_DIR / Path("test_toml_files/my_cat.toml")
-        toml_dict = get_dict_from_toml(path_to_toml)
+        toml_dict = load_toml(path_to_toml)
         expected_dict = {"cat": {"name": "Dusty", "age": 7}}
         self.assertEqual(expected_dict, toml_dict)
-
-    def test_get_value_from_toml(self) -> None:
-        """Test a function that returns a value from a TOML file."""
-
-        path_to_toml = TEST_DIR / Path("test_toml_files/my_cat.toml")
-        cat_name = get_value_from_toml(path_to_toml, "cat", "name")
-        cat_age = get_value_from_toml(path_to_toml, "cat", "age")
-        self.assertEqual(cat_name, "Dusty")
-        self.assertEqual(cat_age, 7)
 
     def test_update_toml(self) -> None:
         """Test a function that updates a TOML file with given data."""
 
         path_to_toml = TEST_DIR / Path("test_toml_files/my_dog.toml")
         update_toml(path_to_toml, "dog", "age", 12)
-        new_age = get_value_from_toml(path_to_toml, "dog", "age")
+        new_age = load_toml(path_to_toml)["dog"]["age"]
         self.assertEqual(12, new_age)
         update_toml(path_to_toml, "dog", "is_cute", True)
-        cute = get_value_from_toml(path_to_toml, "dog", "is_cute")
+        cute = load_toml(path_to_toml)["dog"]["is_cute"]
         self.assertEqual(True, cute)
 
         # Now reset the TOML file for future testing

@@ -7,7 +7,7 @@ import sys
 import traceback
 from collections.abc import Callable
 from enum import Enum, auto
-from typing import Any, Optional
+from typing import Any
 
 from PySide6.QtCore import QObject, QRunnable, Signal, Slot
 

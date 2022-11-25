@@ -276,3 +276,22 @@ values (
     )
 
 );
+
+
+/*
+ Populate with fake users.
+ */
+
+/*
+ Create a user with admin privileges.
+ */
+
+create user tjkuson with password 'hunter2';
+grant admin to tjkuson;
+
+/*
+ Create a user with read-only privileges.
+ */
+
+create user eve with password 'password123';
+grant operator to eve;

@@ -10,10 +10,10 @@ def dict_to_conn_str(config_dict: dict[str, dict[str, Any]]) -> str:
     the Pyscopg package can use to connect to the database.
     """
 
-    psql_config: dict[str, Any] = config_dict["postgresql"]
-    host: str = psql_config["host"]
-    dbname: str = psql_config["database"]
-    user: str = psql_config["user"]
-    password: str = psql_config["password"]
-    conn_str: str = f"host={host} dbname={dbname} user={user} password" f"={password}"
+    config: dict[str, Any] = config_dict["postgresql"]
+    host: str = config["host"]
+    dbname: str = config["database"]
+    user: str = config["user"]
+    pwd: str = config["password"]
+    conn_str: str = f"host={host} dbname={dbname} user={user} password" f"={pwd}"
     return conn_str

@@ -46,14 +46,11 @@ jobs:
       - name: Lint with ssort
         run: |
           poetry run ssort --check .
-      - name: Test with pytest
-        run: |
-          # GitHub Actions can't run GUI tests and it's not worth my time to fix it
-          poetry run pytest --ignore=client/tests/test_pyside.py --ignore=client/tests/test_utils.py --ignore=client/tests/gui_base_test.py
       - name: Test with mypy
         run: |
           poetry run mypy client/db --strict
           poetry run mypy client/runners --strict
           poetry run mypy client/settings --strict
           poetry run mypy client/thumbnail --strict
+          poetry run mypy client/toolbox --strict
           poetry run mypy client/utils --strict

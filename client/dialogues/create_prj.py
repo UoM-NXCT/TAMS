@@ -22,7 +22,8 @@ from PySide6.QtWidgets import (
 )
 
 from client import settings
-from client.utils import file, toml
+from client.db.exceptions import exc_gui
+from client.utils import file
 
 
 class CreatePrj(QDialog):
@@ -72,6 +73,7 @@ class CreatePrj(QDialog):
         create_prj_v_box.addStretch()
         self.setLayout(create_prj_v_box)
 
+    @exc_gui
     def accept_prj_info(self) -> None:
         """Read input data and save to database."""
 
@@ -124,11 +126,7 @@ class CreatePrj(QDialog):
                     raise TypeError("Query returned no rows.")
 
                 # Check to see if project exists in local library
-                local_lib: Path = Path(
-                    toml.get_value_from_toml(
-                        settings.general, "storage", "local_library"
-                    )
-                )
+                local_lib: Path = Path(settings.get_lib("local"))
                 prj_dir: Path = local_lib / str(new_prj_id)
                 file.create_dir(prj_dir)
                 file.create_dir(prj_dir / "tams_meta")

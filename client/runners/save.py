@@ -15,7 +15,7 @@ from client.db.utils import dict_to_conn_str
 from client.db.views import DatabaseView
 from client.runners.generic import Worker, WorkerKilledException, WorkerStatus
 from client.utils.file import create_dir, move_item
-from client.utils.toml import create_toml, get_dict_from_toml, get_value_from_toml
+from client.utils.toml import load_toml
 
 
 class SaveScansWorker(Worker):
@@ -38,9 +38,7 @@ class SaveScansWorker(Worker):
         self.download: bool = download
 
         # Store the permanent storage directory name
-        self.perm_dir_name: str = get_value_from_toml(
-            settings.general, "structure", "perm_dir_name"
-        )
+        self.perm_dir_name: str = settings.get_perm_dir_name()
 
         if not self.download:
             # If uploading, the source is the raw scans dir in the root scan dir
@@ -48,12 +46,8 @@ class SaveScansWorker(Worker):
         else:
             self.glob_arg = "*"
 
-        perm_lib: Path = Path(
-            get_value_from_toml(settings.general, "storage", "permanent_library")
-        )
-        local_lib: Path = Path(
-            get_value_from_toml(settings.general, "storage", "local_library")
-        )
+        perm_lib: Path = Path(settings.get_lib("permanent"))
+        local_lib: Path = Path(settings.get_lib("local"))
 
         if self.download:
             # If downloading, the source is the permanent library
@@ -65,7 +59,7 @@ class SaveScansWorker(Worker):
             self.dest_lib = perm_lib
 
         # Store the source and destination project directories
-        self.source_prj_dir: Path = self.source_lib / str(self.prj_id)
+        self.source_prj_dir: Path = self.source_lib / str(prj_id)
         self.dest_prj_dir: Path = self.dest_lib / str(prj_id)
 
         # Store the scan IDs of the scans to be saved
@@ -128,12 +122,8 @@ class SaveScansWorker(Worker):
         """Check if the directories exist before saving files."""
 
         # Saving from one library to another is only possible if the libraries exist
-        local_lib: Path = Path(
-            get_value_from_toml(settings.general, "storage", "local_library")
-        )
-        perm_lib: Path = Path(
-            get_value_from_toml(settings.general, "storage", "permanent_library")
-        )
+        local_lib: Path = Path(settings.get_lib("local"))
+        perm_lib: Path = Path(settings.get_lib("permanent"))
 
         # Check if libraries exist
         if not local_lib.exists():
@@ -176,7 +166,7 @@ class SaveScansWorker(Worker):
     def get_scan_form_data(scan_id: int) -> dict[str, dict[str, Any]]:
         """Get the metadata for a scan."""
 
-        conn_dict: dict[str, dict[str, Any]] = get_dict_from_toml(settings.database)
+        conn_dict: dict[str, dict[str, Any]] = load_toml(settings.database)
         conn_str: str = dict_to_conn_str(conn_dict)
         db = DatabaseView(conn_str)
         return db.get_scan_form_data(scan_id)
@@ -193,23 +183,6 @@ class SaveScansWorker(Worker):
             # Save to local library
             dest_scan_dir: Path = self.dest_prj_dir / Path(scan)
 
-            if False:
-                # TODO: Move this to a separate function
-                # Create form
-
-                user_form: Path = dest_scan_dir / "tams_meta" / "user_form.toml"
-                immutable_fields: dict[str, Any] = self.get_scan_form_data(int(scan))
-                mutable_fields: dict[str, Any] = {
-                    "mutable": {
-                        "example": "",
-                    }
-                }
-                scan_form_data: dict[str, Any] = immutable_fields | mutable_fields
-                create_toml(user_form, scan_form_data)
-                # Create README.txt
-                readme: Path = dest_scan_dir / "tams_meta" / "README.txt"
-                with open(readme, "w") as f:
-                    f.write("Placeholder file for README.txt")
             # Move files
             for item in source_scan_dir.rglob(self.glob_arg):
 

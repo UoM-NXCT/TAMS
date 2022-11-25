@@ -5,8 +5,7 @@ Main window for the GUI.
 from __future__ import annotations
 
 import logging
-from collections.abc import Callable
-from functools import wraps
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -27,9 +26,11 @@ from PySide6.QtWidgets import (
 
 from client import settings
 from client.db import DatabaseView, MissingTables, dict_to_conn_str
-from client.dialogues.create_project_dialogue import CreatePrj
+from client.dialogues.create_prj import CreatePrj
 from client.dialogues.create_scan import CreateScanDlg
+from client.dialogues.decorators import attempt_file_io
 from client.dialogues.download_scan import DownloadScansDlg
+from client.dialogues.login import Login
 from client.dialogues.settings import SettingsWindow
 from client.dialogues.upload_scan import UploadScansDlg
 from client.dialogues.validate import ValidateDialogue
@@ -39,7 +40,7 @@ from client.runners.validate import ValidateScansRunner
 from client.table_widget.model import TableModel
 from client.table_widget.view import TableView
 from client.toolbox.toolbox import ToolBox
-from client.utils.toml import get_dict_from_toml, get_value_from_toml
+from client.utils.toml import load_toml
 
 TAMS_ROOT = Path(__file__).parents[1]
 
@@ -76,26 +77,6 @@ class MainWindow(QMainWindow):
 
         self.show()
 
-    @staticmethod
-    def attempt_file_io(func: Callable[..., Any]) -> Callable[..., Any]:
-        """Decorates file operation methods with exception handling methods."""
-
-        @wraps(func)
-        def wrapper(self: MainWindow, *args: Any, **kwargs: Any) -> None:
-            """Attempt to execute the sql command, and handle any exceptions."""
-            try:
-                func(self, *args, **kwargs)
-            except FileNotFoundError as exc:
-                logging.exception("Exception raised")
-                QMessageBox.critical(
-                    self,
-                    "Error: file not found",
-                    f"File {exc.filename} not found. "
-                    "Check that the file exists and is accessible.",
-                )
-
-        return wrapper
-
     def set_up_main_window(self) -> None:
         """Create and arrange widgets in the main window."""
 
@@ -114,9 +95,9 @@ class MainWindow(QMainWindow):
         self.toolbox = ToolBox()
 
         # Link toolbox buttons to functions
-        self.toolbox.projects_button.clicked.connect(self.update_table_with_projects)
+        self.toolbox.prj_btn.clicked.connect(self.update_table_with_projects)
         self.toolbox.create_prj_btn.clicked.connect(self.open_create_project)
-        self.toolbox.scans_button.clicked.connect(self.update_table_with_scans)
+        self.toolbox.scans_btn.clicked.connect(self.update_table_with_scans)
         self.toolbox.create_scan_btn.clicked.connect(self.open_create_scan)
         self.toolbox.users_btn.clicked.connect(self.update_table_with_users)
 
@@ -426,9 +407,7 @@ class MainWindow(QMainWindow):
         row_pk: int = self.get_value_from_row(0)
 
         # Get the path of the local library
-        local_library: str = get_value_from_toml(
-            settings.general, "storage", "local_library"
-        )
+        local_library: str = load_toml(settings.general)["storage"]["local_library"]
 
         if table == "project":
             logging.info("Opening data from project ID %s", row_pk)
@@ -481,16 +460,6 @@ class MainWindow(QMainWindow):
         # Get the primary key of the selected row
         row_pk: int = self.get_value_from_row(0)
 
-        # Get the path to the local data directory
-        local_library: str = get_value_from_toml(
-            settings.general, "storage", "local_library"
-        )
-
-        # Get the path to the remote data directory
-        permanent_library: str = get_value_from_toml(
-            settings.general, "storage", "permanent_library"
-        )
-
         if table == "project":
             logging.info("Validating data from project ID %s", row_pk)
 
@@ -530,49 +499,12 @@ class MainWindow(QMainWindow):
         """Set up the connection to the database."""
 
         try:
-            # Set up database
-            logging.info("Connecting to database")
-            config_dict = get_dict_from_toml(settings.database)
-            self.connection_string = dict_to_conn_str(config_dict)
+            login_dlg = Login()
+            login_dlg.exec()
+            self.connection_string = login_dlg.conn_str
             self.database_view = DatabaseView(self.connection_string)
-
-            # Validate tables
-            self.database_view.validate_tables()  # Raises exception if invalid.
-            logging.info("All connection steps passed")
-        except TypeError as exc:
-            # Possibly raised on missing file due to attempted indexing of None
-            logging.exception("Exception raised. Is config file missing?")
-            QMessageBox.information(
-                self,
-                "Unable to connect; exception raised.",
-                f"Check if config file is missing! Exception: {exc}",
-                QMessageBox.StandardButton.Ok,
-            )
-        except ConnectionFailure as exc:
-            logging.exception("Exception raised.")
-            QMessageBox.warning(
-                self,
-                "Unable to connect to database",
-                f"Exception: {exc}",
-                QMessageBox.StandardButton.Ok,
-            )
-        except OperationalError as exc:
-            # Raised on invalid connection string
-            logging.exception("Exception raised. Is config file invalid?")
-            QMessageBox.information(
-                self,
-                "Unable to connect; exception raised.",
-                f"Check if config file is invalid! Exception: {exc}",
-                QMessageBox.StandardButton.Ok,
-            )
-        except MissingTables as exc:
-            logging.exception("Exception raised.")
-            QMessageBox.warning(
-                self,
-                "Missing tables",
-                f"Exception: {exc}",
-                QMessageBox.StandardButton.Ok,
-            )
+        except SystemExit:
+            sys.exit()
 
     def current_table(self) -> str:
         """Get the current table displayed."""
