@@ -22,7 +22,7 @@ from PySide6.QtWidgets import (
 )
 
 from client import settings
-from client.db import models, utils
+from client.db import utils, views
 from client.utils import toml
 
 
@@ -110,11 +110,12 @@ class Login(QDialog):
         }
 
         # Create a connection string from the dictionary
-        conn_str: str = utils.dict_to_conn_str(data)
+        self.conn_str: str = utils.dict_to_conn_str(data)
 
         try:
-            with models.Database(conn_str) as db:
-                logging.info("Connected to database: %s", db)
+            db = views.DatabaseView(self.conn_str)
+            db.validate_tables()
+            logging.info("Connected to database: %s", db)
         except errors.Error as exc:
             logging.exception("Failed to connect to database.")
             QMessageBox.critical(
@@ -135,4 +136,11 @@ class Login(QDialog):
     def cancel(self):
         """Close the dialogue and exit the application."""
 
-        sys.exit(0)
+        self.close()
+        raise SystemExit
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    login = Login()
+    login.show()
+    sys.exit(app.exec())

@@ -5,6 +5,7 @@ Main window for the GUI.
 from __future__ import annotations
 
 import logging
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -29,6 +30,7 @@ from client.dialogues.create_prj import CreatePrj
 from client.dialogues.create_scan import CreateScanDlg
 from client.dialogues.decorators import attempt_file_io
 from client.dialogues.download_scan import DownloadScansDlg
+from client.dialogues.login import Login
 from client.dialogues.settings import SettingsWindow
 from client.dialogues.upload_scan import UploadScansDlg
 from client.dialogues.validate import ValidateDialogue
@@ -497,49 +499,12 @@ class MainWindow(QMainWindow):
         """Set up the connection to the database."""
 
         try:
-            # Set up database
-            logging.info("Connecting to database")
-            config_dict = load_toml(settings.database)
-            self.connection_string = dict_to_conn_str(config_dict)
+            login_dlg = Login()
+            login_dlg.exec()
+            self.connection_string = login_dlg.conn_str
             self.database_view = DatabaseView(self.connection_string)
-
-            # Validate tables
-            self.database_view.validate_tables()  # Raises exception if invalid.
-            logging.info("All connection steps passed")
-        except TypeError as exc:
-            # Possibly raised on missing file due to attempted indexing of None
-            logging.exception("Exception raised. Is config file missing?")
-            QMessageBox.information(
-                self,
-                "Unable to connect; exception raised.",
-                f"Check if config file is missing! Exception: {exc}",
-                QMessageBox.StandardButton.Ok,
-            )
-        except ConnectionFailure as exc:
-            logging.exception("Exception raised.")
-            QMessageBox.warning(
-                self,
-                "Unable to connect to database",
-                f"Exception: {exc}",
-                QMessageBox.StandardButton.Ok,
-            )
-        except OperationalError as exc:
-            # Raised on invalid connection string
-            logging.exception("Exception raised. Is config file invalid?")
-            QMessageBox.information(
-                self,
-                "Unable to connect; exception raised.",
-                f"Check if config file is invalid! Exception: {exc}",
-                QMessageBox.StandardButton.Ok,
-            )
-        except MissingTables as exc:
-            logging.exception("Exception raised.")
-            QMessageBox.warning(
-                self,
-                "Missing tables",
-                f"Exception: {exc}",
-                QMessageBox.StandardButton.Ok,
-            )
+        except SystemExit:
+            sys.exit()
 
     def current_table(self) -> str:
         """Get the current table displayed."""
