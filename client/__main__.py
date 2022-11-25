@@ -13,15 +13,20 @@ from client.gui import MainWindow
 
 def main() -> None:
     """Main function implements the GUI."""
-    # enable logging
+
+    # Enable logging
     logging.basicConfig(level=logging.INFO)
 
     app: QApplication = QApplication(sys.argv)
+
+    # Create splash screen
     splash = QSplashScreen(QPixmap(settings.splash))
     splash.show()
+
     app.processEvents()
     _window: MainWindow = MainWindow()
     splash.finish(_window)
+
     sys.exit(app.exec())
 
 

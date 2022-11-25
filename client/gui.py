@@ -5,8 +5,6 @@ Main window for the GUI.
 from __future__ import annotations
 
 import logging
-from collections.abc import Callable
-from functools import wraps
 from pathlib import Path
 from typing import Any
 
@@ -29,6 +27,7 @@ from client import settings
 from client.db import DatabaseView, MissingTables, dict_to_conn_str
 from client.dialogues.create_prj import CreatePrj
 from client.dialogues.create_scan import CreateScanDlg
+from client.dialogues.decorators import attempt_file_io
 from client.dialogues.download_scan import DownloadScansDlg
 from client.dialogues.settings import SettingsWindow
 from client.dialogues.upload_scan import UploadScansDlg
@@ -75,26 +74,6 @@ class MainWindow(QMainWindow):
         self.create_tool_bar()
 
         self.show()
-
-    @staticmethod
-    def attempt_file_io(func: Callable[..., Any]) -> Callable[..., Any]:
-        """Decorates file operation methods with exception handling methods."""
-
-        @wraps(func)
-        def wrapper(self: MainWindow, *args: Any, **kwargs: Any) -> None:
-            """Attempt to execute the sql command, and handle any exceptions."""
-            try:
-                func(self, *args, **kwargs)
-            except FileNotFoundError as exc:
-                logging.exception("Exception raised")
-                QMessageBox.critical(
-                    self,
-                    "Error: file not found",
-                    f"File {exc.filename} not found. "
-                    "Check that the file exists and is accessible.",
-                )
-
-        return wrapper
 
     def set_up_main_window(self) -> None:
         """Create and arrange widgets in the main window."""
