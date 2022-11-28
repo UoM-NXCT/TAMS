@@ -24,7 +24,7 @@ from PySide6.QtWidgets import (
 )
 
 from client import settings
-from client.thumbnail.model import ThumbnailWidget
+from client.widgets.thumbnail import Thumbnail
 
 from .thumbnail import get_thumbnail
 
@@ -44,7 +44,7 @@ class MetadataPanel(QWidget):
         splitter: QSplitter = QSplitter(Qt.Orientation.Vertical)
 
         # Create the thumbnail widget
-        self.thumbnail_widget: ThumbnailWidget = ThumbnailWidget()
+        self.thumbnail_widget: Thumbnail = Thumbnail()
         self.thumbnail_widget.load(settings.placeholder_image)
         splitter.addWidget(self.thumbnail_widget)
 
