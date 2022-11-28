@@ -19,16 +19,16 @@ from PySide6.QtWidgets import QMessageBox, QWidget
 from client import settings
 from client.utils.hash import hash_in_chunks
 
-from .generic import Worker, WorkerKilledException, WorkerStatus
+from .generic import GenericRunner, RunnerKilledException, RunnerStatus
 
 
-class ValidateScansRunner(Worker):
+class ValidateScans(GenericRunner):
     """Runner that validates data in the local library."""
 
     def __init__(self, prj_id: int, *scan_ids: int) -> None:
         """Initialize the runner."""
 
-        super().__init__(fn=self.job)
+        super().__init__(func=self.job)
 
         # Store the project ID
         self.prj_id: int = prj_id
@@ -246,20 +246,20 @@ class ValidateScansRunner(Worker):
                         self.set_result(False)
 
                     # Pause if worker is paused
-                    while self.worker_status is WorkerStatus.PAUSED:
+                    while self.worker_status is RunnerStatus.PAUSED:
                         # Keep waiting until resumed
                         time.sleep(0)
                     # Check if worker has been killed
-                    if self.worker_status is WorkerStatus.KILLED:
-                        raise WorkerKilledException
-                    if self.worker_status is WorkerStatus.FINISHED:
+                    if self.worker_status is RunnerStatus.KILLED:
+                        raise RunnerKilledException
+                    if self.worker_status is RunnerStatus.FINISHED:
                         # Break loop if job is finished
                         return
 
-            if self.worker_status is not WorkerStatus.FINISHED:
+            if self.worker_status is not RunnerStatus.FINISHED:
                 logging.info("Scan %s validated successfully.", scan_id)
 
         # If the job reached the end without finishing, it means it was successful
-        if self.worker_status is not WorkerStatus.FINISHED:
+        if self.worker_status is not RunnerStatus.FINISHED:
             logging.info("Validation successful.")
             self.set_result(True)

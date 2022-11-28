@@ -1,7 +1,7 @@
 """
 Define a table model used in the GUI.
 
-The model handles providing the data for display by the view. We write a custom model
+The model handles providing the data for display by the view. We write a custom model,
 which is a subclass of QAbstractTableModel.
 
 The reason for using a custom model over the built-in models is for greater control over
@@ -21,7 +21,7 @@ from PySide6.QtCore import QAbstractTableModel, QModelIndex, QPersistentModelInd
 class TableModel(QAbstractTableModel):
     """Define the custom table model, a subclass of a built-in Qt abstract model."""
 
-    def __init__(self, data: list[tuple], column_headers: tuple[str]) -> None:
+    def __init__(self, data: list[tuple[Any, ...]], column_headers: tuple[str]) -> None:
         super().__init__()
         # Anticipate a list of tuples, as this is what database returns upon select.
         self._data = data or []
@@ -34,7 +34,7 @@ class TableModel(QAbstractTableModel):
     ) -> Any:
         """Returns presentation information for given locations in the table."""
 
-        if role == Qt.DisplayRole:
+        if role == Qt.ItemDataRole.DisplayRole:
             # Get the raw value
             # .row() indexes the outer list; .column() indexes the sub-list
             value = self._data[index.row()][index.column()]
@@ -53,22 +53,22 @@ class TableModel(QAbstractTableModel):
             # If we get here, we have an unhandled type. Return it as-is.
             return value
 
-            # Value was not captured above
-            return f"Unknown value type: {type(value)}"
-
-        if role == Qt.TextAlignmentRole:
-            value: Any = self._data[index.row()][index.column()]
+        if role == Qt.ItemDataRole.TextAlignmentRole:
+            value = self._data[index.row()][index.column()]
 
             if isinstance(value, (int, float)):
                 # Align numbers to the right and vertically centre
-                return Qt.AlignRight | Qt.AlignVCenter
+                return Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
 
-    def rowCount(self, *args, **kwargs) -> int:
+    def rowCount(self, _parent: QModelIndex | QPersistentModelIndex = ...) -> int:
         """Return the length of the outer list."""
 
         return len(self._data)
 
-    def columnCount(self, *args, **kwargs) -> int:
+    def columnCount(
+        self,
+        _parent: QModelIndex | QPersistentModelIndex = ...,
+    ) -> int:
         """Take the first sub-list and return the length.
 
         This only works if all the rows are of equal length!
@@ -84,8 +84,8 @@ class TableModel(QAbstractTableModel):
     ) -> Any:
         """Return the header data."""
 
-        if role == Qt.DisplayRole:
-            if orientation == Qt.Horizontal:
+        if role == Qt.ItemDataRole.DisplayRole:
+            if orientation == Qt.Orientation.Horizontal:
                 header: str = str(self._column_headers[section])
                 return header
 

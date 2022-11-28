@@ -9,7 +9,7 @@ from PySide6.QtGui import QPalette, QPixmap, QResizeEvent
 from PySide6.QtWidgets import QFrame, QLabel, QVBoxLayout
 
 
-class ThumbnailWidget(QFrame):
+class Thumbnail(QFrame):
     """A widget that scales an image to fill a box while maintaining aspect ratio."""
 
     def __init__(self) -> None:

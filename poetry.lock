@@ -182,7 +182,7 @@ toml = ["tomli"]
 
 [[package]]
 name = "diff-cover"
-version = "7.0.2"
+version = "7.1.0"
 description = "Run coverage and linting reports on diffs"
 category = "dev"
 optional = false
@@ -576,6 +576,21 @@ tomli = {version = ">=1.0.0", markers = "python_version < \"3.11\""}
 testing = ["argcomplete", "hypothesis (>=3.56)", "mock", "nose", "pygments (>=2.7.2)", "requests", "xmlschema"]
 
 [[package]]
+name = "pytest-qt"
+version = "4.2.0"
+description = "pytest support for PyQt and PySide applications"
+category = "dev"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+pytest = ">=3.0.0"
+
+[package.extras]
+dev = ["pre-commit", "tox"]
+doc = ["sphinx", "sphinx-rtd-theme"]
+
+[[package]]
 name = "pytz"
 version = "2022.6"
 description = "World timezone definitions, modern and historical"
@@ -915,7 +930,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "<3.12,^3.10,"
-content-hash = "b9806d3d4c2698fe28ab43da08dc1ae5a93b72f1cf05b9c9f125376452109031"
+content-hash = "122a99305283de574385c21f955f5be4198a2791cc35e0bef89b386b2dfd844d"
 
 [metadata.files]
 aiohttp = [
@@ -1135,8 +1150,8 @@ coverage = [
     {file = "coverage-6.5.0.tar.gz", hash = "sha256:f642e90754ee3e06b0e7e51bce3379590e76b7f76b708e1a71ff043f87025c84"},
 ]
 diff-cover = [
-    {file = "diff_cover-7.0.2-py3-none-any.whl", hash = "sha256:c0a08229edca5aa46da061e193d3d163ed9853ba119c6a6dd332c25f874b0ffc"},
-    {file = "diff_cover-7.0.2.tar.gz", hash = "sha256:38435447dad32abb7e01d1c3942539021a522388a3b585d583a6e207cc133497"},
+    {file = "diff_cover-7.1.0-py3-none-any.whl", hash = "sha256:002e0ff7f232f7185acc7652e4aa2f51eb823eff2eb77e122fc53a04472a5771"},
+    {file = "diff_cover-7.1.0.tar.gz", hash = "sha256:ed1aa13522140f7a1f62807bc7552819d24343ee9398b7a74e94a18c78e2e864"},
 ]
 dill = [
     {file = "dill-0.3.6-py3-none-any.whl", hash = "sha256:a07ffd2351b8c678dfc4a856a3005f8067aea51d6ba6c700796a4d9e280f39f0"},
@@ -1546,6 +1561,10 @@ pyside6-essentials = [
 pytest = [
     {file = "pytest-7.2.0-py3-none-any.whl", hash = "sha256:892f933d339f068883b6fd5a459f03d85bfcb355e4981e146d2c7616c21fef71"},
     {file = "pytest-7.2.0.tar.gz", hash = "sha256:c4014eb40e10f11f355ad4e3c2fb2c6c6d1919c73f3b5a433de4708202cade59"},
+]
+pytest-qt = [
+    {file = "pytest-qt-4.2.0.tar.gz", hash = "sha256:00a17b586dd530b6d7a9399923a40489ca4a9a309719011175f55dc6b5dc8f41"},
+    {file = "pytest_qt-4.2.0-py2.py3-none-any.whl", hash = "sha256:a7659960a1ab2af8fc944655a157ff45d714b80ed7a6af96a4b5bb99ecf40a22"},
 ]
 pytz = [
     {file = "pytz-2022.6-py2.py3-none-any.whl", hash = "sha256:222439474e9c98fced559f1709d89e6c9cbf8d79c794ff3eb9f8800064291427"},

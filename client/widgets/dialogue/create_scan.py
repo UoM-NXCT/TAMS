@@ -24,7 +24,7 @@ from client.db.views import DatabaseView
 from client.utils import file, toml
 
 
-class CreateScanDlg(QDialog):
+class CreateScan(QDialog):
     """
     Window that takes project information and create and commits that project to the
     database specified by the connection string.

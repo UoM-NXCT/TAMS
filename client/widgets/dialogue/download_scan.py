@@ -1,5 +1,5 @@
 """
-Progress bar dialogue for validating files.
+Progress bar dialogue for downloading the scan.
 """
 import logging
 
@@ -15,24 +15,24 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
 )
 
-from client.runners.generic import WorkerStatus
-from client.runners.validate import ValidateScansRunner
+from client.runners.generic import RunnerStatus
+from client.runners.save import SaveScans
 from client.utils.file import size_fmt
 
 
-class ValidateDialogue(QDialog):
+class DownloadScans(QDialog):
     """Progress dialogue."""
 
     def __init__(
         self,
-        runner: ValidateScansRunner,
+        runner: SaveScans,
         hide: bool = False,
     ) -> None:
         """Initialize the dialogue."""
 
         super().__init__()
 
-        self.setWindowTitle("Validating data...")
+        self.setWindowTitle("Downloading data...")
 
         # Create the layout
         layout: QVBoxLayout = QVBoxLayout()
@@ -40,7 +40,7 @@ class ValidateDialogue(QDialog):
 
         # Create label
         label = QLabel(
-            f"Validating {runner.get_max_progress() + 1} items... ({size_fmt(runner.size_in_bytes)})"
+            f"Downloading {runner.get_max_progress() + 1} items... ({size_fmt(runner.size_in_bytes)})"
         )
         layout.addWidget(label)
 
@@ -48,6 +48,8 @@ class ValidateDialogue(QDialog):
         btn_stop: QPushButton = QPushButton("Stop")
         btn_pause: QPushButton = QPushButton("Pause")
         btn_resume: QPushButton = QPushButton("Resume")
+
+        # Add buttons to layout
         bar_layout.addWidget(btn_stop)
         bar_layout.addWidget(btn_pause)
         bar_layout.addWidget(btn_resume)
@@ -60,13 +62,12 @@ class ValidateDialogue(QDialog):
 
         # Set the layout
         self.setLayout(layout)
-        self.setLayout(layout)
 
         # Thread runner
         self.threadpool: QThreadPool = QThreadPool()
 
         # Create a runner
-        self.runner: ValidateScansRunner = runner
+        self.runner: SaveScans = runner
         self.runner.signals.progress.connect(self.update_progress)
         self.runner.signals.finished.connect(self.job_done)
         self.runner.signals.kill.connect(self.close)
@@ -93,27 +94,12 @@ class ValidateDialogue(QDialog):
     def job_done(self) -> None:
         """Show a message box when the job is done."""
 
-        # Pause the runner if not paused already
-        ...
-
-        match self.runner.result_value:
-            case True:
-                # Show a message box
-                QMessageBox.information(
-                    self,
-                    "Data validated",
-                    "Data validated successfully.",
-                )
-            case False:
-                # Show a message box
-                QMessageBox.critical(
-                    self,
-                    "Data invalid",
-                    "Data on server does not match local. Data is either missing or corrupted.",
-                )
-            case _:
-                # Show a message box
-                QMessageBox.critical(self, "Error", "An error occurred.")
+        # Show a message box
+        QMessageBox.information(
+            self,
+            "Scans downloaded",
+            "Scans downloaded successfully.",
+        )
 
         self.close()
 
@@ -126,7 +112,7 @@ class ValidateDialogue(QDialog):
         logging.info("Closing %s.", self.__class__.__name__)
 
         # Kill the runner on close if not killed already
-        if not self.runner.worker_status is WorkerStatus.KILLED:
+        if not self.runner.worker_status is RunnerStatus.KILLED:
             self.runner.kill()
 
         super().closeEvent(arg__1)

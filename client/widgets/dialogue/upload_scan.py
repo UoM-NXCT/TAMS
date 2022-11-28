@@ -15,15 +15,15 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
 )
 
-from client.runners.generic import WorkerStatus
-from client.runners.save import SaveScansWorker
+from client.runners.generic import RunnerStatus
+from client.runners.save import SaveScans
 from client.utils.file import size_fmt
 
 
-class UploadScansDlg(QDialog):
+class UploadScans(QDialog):
     """Progress dialogue."""
 
-    def __init__(self, runner: SaveScansWorker, hide: bool = False) -> None:
+    def __init__(self, runner: SaveScans, hide: bool = False) -> None:
         """Initialize the dialogue."""
 
         super().__init__()
@@ -62,7 +62,7 @@ class UploadScansDlg(QDialog):
         self.threadpool: QThreadPool = QThreadPool()
 
         # Create a runner
-        self.runner: SaveScansWorker = runner
+        self.runner: SaveScans = runner
         self.runner.signals.progress.connect(self.update_progress)
         self.runner.signals.finished.connect(self.job_done)
         self.runner.signals.kill.connect(self.close)
@@ -107,7 +107,7 @@ class UploadScansDlg(QDialog):
         logging.info("Closing %s.", self.__class__.__name__)
 
         # Kill the runner on close if not killed already
-        if not self.runner.worker_status is WorkerStatus.KILLED:
+        if not self.runner.worker_status is RunnerStatus.KILLED:
             self.runner.kill()
 
         super().closeEvent(arg__1)
