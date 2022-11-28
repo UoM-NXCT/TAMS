@@ -27,7 +27,7 @@ from client.db import Database, dict_to_conn_str
 from client.utils.toml import create_toml, load_toml, update_toml
 
 
-class SettingsWindow(QDialog):
+class Settings(QDialog):
     """Database settings dialogue allows to set the application settings."""
 
     def __init__(self) -> None:

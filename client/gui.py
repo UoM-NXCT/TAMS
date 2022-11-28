@@ -9,7 +9,6 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from psycopg.errors import ConnectionFailure, OperationalError
 from PySide6.QtCore import QModelIndex, QSize, QSortFilterProxyModel, Qt, QUrl
 from PySide6.QtGui import QAction, QDesktopServices
 from PySide6.QtWidgets import (
@@ -25,22 +24,24 @@ from PySide6.QtWidgets import (
 )
 
 from client import settings
-from client.db import DatabaseView, MissingTables, dict_to_conn_str
-from client.dialogues.create_prj import CreatePrj
-from client.dialogues.create_scan import CreateScanDlg
-from client.dialogues.decorators import attempt_file_io
-from client.dialogues.download_scan import DownloadScansDlg
-from client.dialogues.login import Login
-from client.dialogues.settings import SettingsWindow
-from client.dialogues.upload_scan import UploadScansDlg
-from client.dialogues.validate import ValidateDialogue
-from client.metadata_panel import MetadataPanel
+from client.db import DatabaseView
 from client.runners.save import SaveScansWorker
 from client.runners.validate import ValidateScansRunner
 from client.table.model import TableModel
 from client.table.view import TableView
 from client.toolbox.toolbox import ToolBox
 from client.utils.toml import load_toml
+from client.widgets.dialogues import (
+    CreatePrj,
+    CreateScan,
+    DownloadScans,
+    Login,
+    Settings,
+    UploadScans,
+    Validate,
+    attempt_file_io,
+)
+from client.widgets.metadata_panel import MetadataPanel
 
 TAMS_ROOT = Path(__file__).parents[1]
 
@@ -64,7 +65,7 @@ class MainWindow(QMainWindow):
         self.settings_dlg: QWidget
         self.create_prj: QWidget
         self.create_scan_dlg: QWidget
-        self.download_dlg: DownloadScansDlg
+        self.download_dlg: DownloadScans
 
         # Set up the application's GUI.
         self.setMinimumSize(1080, 720)
@@ -253,7 +254,7 @@ class MainWindow(QMainWindow):
     def open_settings(self):
         """Open the settings window."""
 
-        self.settings_dlg = SettingsWindow()
+        self.settings_dlg = Settings()
 
     def open_create_project(self) -> None:
         """
@@ -269,7 +270,7 @@ class MainWindow(QMainWindow):
         the window can access the database.
         """
 
-        self.create_scan_dlg = CreateScanDlg(self.connection_string)
+        self.create_scan_dlg = CreateScan(self.connection_string)
 
     def create_window(self):
         """Create the application menu bar."""
@@ -349,12 +350,12 @@ class MainWindow(QMainWindow):
         if table == "project":
             logging.info("Uploading data from project ID %s", row_pk)
             runner = SaveScansWorker(row_pk, download=False)
-            self.upload_dlg = UploadScansDlg(runner)
+            self.upload_dlg = UploadScans(runner)
         elif table == "scan":
             logging.info("Uploading data from scan ID %s", row_pk)
             prj_id: int = self.get_value_from_row(1)
             runner = SaveScansWorker(prj_id, row_pk, download=False)
-            self.upload_dlg = UploadScansDlg(runner)
+            self.upload_dlg = UploadScans(runner)
         else:
             logging.error("Cannot upload data from table %s", table)
             QMessageBox.critical(
@@ -377,7 +378,7 @@ class MainWindow(QMainWindow):
             logging.info("Downloading data from project ID %s", row_pk)
 
             runner = SaveScansWorker(row_pk, download=True)
-            self.download_dlg = DownloadScansDlg(runner)
+            self.download_dlg = DownloadScans(runner)
 
         elif table == "scan":
             logging.info("Downloading data from scan ID %s", row_pk)
@@ -386,7 +387,7 @@ class MainWindow(QMainWindow):
             prj_id: int = self.get_value_from_row(1)
 
             runner = SaveScansWorker(prj_id, row_pk, download=True)
-            self.download_dlg = DownloadScansDlg(runner)
+            self.download_dlg = DownloadScans(runner)
 
         else:
             logging.error("Cannot download data from table %s", table)
@@ -464,7 +465,7 @@ class MainWindow(QMainWindow):
             logging.info("Validating data from project ID %s", row_pk)
 
             runner = ValidateScansRunner(row_pk)
-            self.download_dlg = ValidateDialogue(runner)
+            self.download_dlg = Validate(runner)
 
         elif table == "scan":
             logging.info("Validating data from scan ID %s", row_pk)
@@ -473,7 +474,7 @@ class MainWindow(QMainWindow):
             project_id: int = self.get_value_from_row(1)
 
             runner = ValidateScansRunner(project_id, row_pk)
-            self.download_dlg = ValidateDialogue(runner)
+            self.download_dlg = Validate(runner)
 
         else:
             logging.error("Cannot validate.py data from table %s", table)

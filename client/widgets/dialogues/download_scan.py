@@ -1,5 +1,5 @@
 """
-Progress bar dialogue for uploading scans.
+Progress bar dialogue for downloading the scan.
 """
 import logging
 
@@ -20,15 +20,19 @@ from client.runners.save import SaveScansWorker
 from client.utils.file import size_fmt
 
 
-class UploadScansDlg(QDialog):
+class DownloadScans(QDialog):
     """Progress dialogue."""
 
-    def __init__(self, runner: SaveScansWorker, hide: bool = False) -> None:
+    def __init__(
+        self,
+        runner: SaveScansWorker,
+        hide: bool = False,
+    ) -> None:
         """Initialize the dialogue."""
 
         super().__init__()
 
-        self.setWindowTitle("Uploading data...")
+        self.setWindowTitle("Downloading data...")
 
         # Create the layout
         layout: QVBoxLayout = QVBoxLayout()
@@ -36,7 +40,7 @@ class UploadScansDlg(QDialog):
 
         # Create label
         label = QLabel(
-            f"Uploading {runner.get_max_progress() + 1} items... ({size_fmt(runner.size_in_bytes)})"
+            f"Downloading {runner.get_max_progress() + 1} items... ({size_fmt(runner.size_in_bytes)})"
         )
         layout.addWidget(label)
 
@@ -56,6 +60,7 @@ class UploadScansDlg(QDialog):
 
         layout.addLayout(bar_layout)
 
+        # Set the layout
         self.setLayout(layout)
 
         # Thread runner
@@ -92,8 +97,8 @@ class UploadScansDlg(QDialog):
         # Show a message box
         QMessageBox.information(
             self,
-            "Scans uploaded",
-            "Scans uploaded successfully.",
+            "Scans downloaded",
+            "Scans downloaded successfully.",
         )
 
         self.close()

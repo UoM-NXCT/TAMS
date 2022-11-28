@@ -20,7 +20,7 @@ from client.runners.validate import ValidateScansRunner
 from client.utils.file import size_fmt
 
 
-class ValidateDialogue(QDialog):
+class Validate(QDialog):
     """Progress dialogue."""
 
     def __init__(
