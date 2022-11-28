@@ -502,7 +502,6 @@ class MainWindow(QMainWindow):
             <p>Copyright &copy; 2022 National X-ray Computed Tomography.</p>""",
         )
 
-
     def current_table(self) -> str:
         """Get the current table displayed."""
 
