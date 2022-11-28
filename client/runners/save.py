@@ -13,12 +13,13 @@ from PySide6.QtWidgets import QMessageBox, QWidget
 from client import settings
 from client.db.utils import dict_to_conn_str
 from client.db.views import DatabaseView
-from client.runners.generic import Worker, WorkerKilledException, WorkerStatus
 from client.utils.file import create_dir, move_item
 from client.utils.toml import load_toml
 
+from .generic import GenericRunner, RunnerKilledException, RunnerStatus
 
-class SaveScansWorker(Worker):
+
+class SaveScans(GenericRunner):
     """Runner that downloads data to the local library."""
 
     def __init__(
@@ -29,7 +30,7 @@ class SaveScansWorker(Worker):
     ) -> None:
         """Initialize the runner."""
 
-        super().__init__(fn=self.job)
+        super().__init__(func=self.job)
 
         # Store the project ID
         self.prj_id: int = prj_id
@@ -198,13 +199,13 @@ class SaveScansWorker(Worker):
                 self.signals.progress.emit(1)
 
                 # Pause if worker is paused
-                while self.worker_status is WorkerStatus.PAUSED:
+                while self.worker_status is RunnerStatus.PAUSED:
                     # Keep waiting until resumed
                     time.sleep(0)
 
                 # Check if worker has been killed
-                if self.worker_status is WorkerStatus.KILLED:
-                    raise WorkerKilledException
-                if self.worker_status is WorkerStatus.FINISHED:
+                if self.worker_status is RunnerStatus.KILLED:
+                    raise RunnerKilledException
+                if self.worker_status is RunnerStatus.FINISHED:
                     # Break loop if job is finished
                     break

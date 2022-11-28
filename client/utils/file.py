@@ -21,6 +21,8 @@ def create_dir(path: Path | str) -> None:
     elif isinstance(path, str):
         if os.path.exists(path):
             return
+    else:
+        raise TypeError("Path must be a string or a Path object.")
 
     # Create directory
     os.makedirs(path, exist_ok=True)
@@ -38,13 +40,15 @@ def move_item(item: Path, dest_dir: Path, keep_original: bool = True) -> None:
     # Create destination directory if it does not exist
     create_dir(dest_dir)
 
+    item_dest: Path = dest_dir / item.name
+
     try:
 
         # Check file or directory is a file or directory, respectively
         if item.is_file():
-            shutil.copy(item, dest_dir / item.name)
+            shutil.copy(item, item_dest)
         elif item.is_dir():
-            shutil.copytree(item, dest_dir / item.name)
+            shutil.copytree(item, item_dest)
 
         # Delete original if not keeping original
         if not keep_original:
@@ -53,15 +57,9 @@ def move_item(item: Path, dest_dir: Path, keep_original: bool = True) -> None:
             elif item.is_dir():
                 os.rmdir(item)
 
-    # If source and destination are same
-    except shutil.SameFileError:
-        logging.exception("Exception raised.")
-    # If any permission issue
-    except PermissionError:
-        logging.exception("Exception raised.")
     except FileExistsError:
         # Just move on if the file already exists
-        logging.info("File already exists at %s, skipping", dest_dir / item.name)
+        logging.info("File already exists at %s, skipping", item_dest)
 
 
 def find_and_move(
@@ -79,8 +77,8 @@ def find_and_move(
     :param destinations: list of destinations
     """
 
-    number_of_counters = len(tuple(search_dir.glob(glob_arg)))
-    if number_of_counters:
+    num_of_items = len(tuple(search_dir.glob(glob_arg)))
+    if num_of_items:
         for dest in destinations:
             for item in tuple(search_dir.glob(glob_arg)):
                 # Copy file to local reconstructed data directory
@@ -105,10 +103,8 @@ def size_fmt(num_of_bytes: int | float, dec_places: int = 2) -> str:
     if num_of_bytes < 0:
         raise ValueError("Number of bytes must be positive.")
 
-    selected_unit: str = "Err"
     for unit in ("B", "KB", "MB", "TB", "PB"):
         if num_of_bytes < 1024 or unit == "PB":
-            selected_unit = unit
-            break
+            return f"{num_of_bytes:.{dec_places}f} {unit}"
         num_of_bytes /= 1024
-    return f"{num_of_bytes:.{dec_places}f} {selected_unit}"
+    raise RuntimeError("Size format failed. Number of bytes too large?")

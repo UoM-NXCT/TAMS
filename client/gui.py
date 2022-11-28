@@ -25,13 +25,9 @@ from PySide6.QtWidgets import (
 
 from client import settings
 from client.db import DatabaseView
-from client.runners.save import SaveScansWorker
-from client.runners.validate import ValidateScansRunner
-from client.table.model import TableModel
-from client.table.view import TableView
-from client.toolbox.toolbox import ToolBox
+from client.runners import SaveScans, ValidateScans
 from client.utils.toml import load_toml
-from client.widgets.dialogues import (
+from client.widgets.dialogue import (
     CreatePrj,
     CreateScan,
     DownloadScans,
@@ -42,6 +38,8 @@ from client.widgets.dialogues import (
     attempt_file_io,
 )
 from client.widgets.metadata_panel import MetadataPanel
+from client.widgets.table import TableModel, TableView
+from client.widgets.toolbox import ToolBox
 
 TAMS_ROOT = Path(__file__).parents[1]
 
@@ -70,7 +68,15 @@ class MainWindow(QMainWindow):
         # Set up the application's GUI.
         self.setMinimumSize(1080, 720)
         self.setWindowTitle("Tomography Archival Management Software")
-        self.connect_to_database()
+
+        try:
+            login_dlg = Login()
+            login_dlg.exec()
+            self.connection_string = login_dlg.conn_str
+            self.database_view = DatabaseView(self.connection_string)
+        except SystemExit:
+            sys.exit()
+
         self.set_up_main_window()
         self.create_actions()
         self.create_window()
@@ -97,7 +103,7 @@ class MainWindow(QMainWindow):
 
         # Link toolbox buttons to functions
         self.toolbox.prj_btn.clicked.connect(self.update_table_with_projects)
-        self.toolbox.create_prj_btn.clicked.connect(self.open_create_project)
+        self.toolbox.create_prj_btn.clicked.connect(self.open_create_prj)
         self.toolbox.scans_btn.clicked.connect(self.update_table_with_scans)
         self.toolbox.create_scan_btn.clicked.connect(self.open_create_scan)
         self.toolbox.users_btn.clicked.connect(self.update_table_with_users)
@@ -131,7 +137,7 @@ class MainWindow(QMainWindow):
                 )
         else:
             data = []
-            column_headers = tuple()
+            column_headers = ()
         self.table_model = TableModel(data, column_headers)
         self.proxy_model = QSortFilterProxyModel()
         self.proxy_model.setSourceModel(self.table_model)
@@ -256,7 +262,7 @@ class MainWindow(QMainWindow):
 
         self.settings_dlg = Settings()
 
-    def open_create_project(self) -> None:
+    def open_create_prj(self) -> None:
         """
         Open the create project window; pass the database connection string so that
         the window can access the database.
@@ -349,12 +355,12 @@ class MainWindow(QMainWindow):
 
         if table == "project":
             logging.info("Uploading data from project ID %s", row_pk)
-            runner = SaveScansWorker(row_pk, download=False)
+            runner = SaveScans(row_pk, download=False)
             self.upload_dlg = UploadScans(runner)
         elif table == "scan":
             logging.info("Uploading data from scan ID %s", row_pk)
             prj_id: int = self.get_value_from_row(1)
-            runner = SaveScansWorker(prj_id, row_pk, download=False)
+            runner = SaveScans(prj_id, row_pk, download=False)
             self.upload_dlg = UploadScans(runner)
         else:
             logging.error("Cannot upload data from table %s", table)
@@ -377,7 +383,7 @@ class MainWindow(QMainWindow):
         if table == "project":
             logging.info("Downloading data from project ID %s", row_pk)
 
-            runner = SaveScansWorker(row_pk, download=True)
+            runner = SaveScans(row_pk, download=True)
             self.download_dlg = DownloadScans(runner)
 
         elif table == "scan":
@@ -386,7 +392,7 @@ class MainWindow(QMainWindow):
             # Get the path of the local scan directory
             prj_id: int = self.get_value_from_row(1)
 
-            runner = SaveScansWorker(prj_id, row_pk, download=True)
+            runner = SaveScans(prj_id, row_pk, download=True)
             self.download_dlg = DownloadScans(runner)
 
         else:
@@ -464,7 +470,7 @@ class MainWindow(QMainWindow):
         if table == "project":
             logging.info("Validating data from project ID %s", row_pk)
 
-            runner = ValidateScansRunner(row_pk)
+            runner = ValidateScans(row_pk)
             self.download_dlg = Validate(runner)
 
         elif table == "scan":
@@ -473,7 +479,7 @@ class MainWindow(QMainWindow):
             # Get the path of the local scan directory
             project_id: int = self.get_value_from_row(1)
 
-            runner = ValidateScansRunner(project_id, row_pk)
+            runner = ValidateScans(project_id, row_pk)
             self.download_dlg = Validate(runner)
 
         else:
@@ -496,23 +502,11 @@ class MainWindow(QMainWindow):
             <p>Copyright &copy; 2022 National X-ray Computed Tomography.</p>""",
         )
 
-    def connect_to_database(self) -> None:
-        """Set up the connection to the database."""
-
-        try:
-            login_dlg = Login()
-            login_dlg.exec()
-            self.connection_string = login_dlg.conn_str
-            self.database_view = DatabaseView(self.connection_string)
-        except SystemExit:
-            sys.exit()
 
     def current_table(self) -> str:
         """Get the current table displayed."""
 
-        current_table: str
-        _, current_table, _ = self.current_table_query
-        return current_table
+        return self.current_table_query[1]
 
     def on_selection_changed(self) -> None:
         """Update the metadata when a new row is selected."""
@@ -544,4 +538,3 @@ class MainWindow(QMainWindow):
 
         # Update the metadata panel with the new metadata
         self.metadata_panel.update_metadata(metadata)
-        self.metadata_panel.layout().update()

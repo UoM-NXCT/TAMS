@@ -1,5 +1,5 @@
 """
-Progress bar dialogue for downloading the scan.
+Progress bar dialogue for uploading scans.
 """
 import logging
 
@@ -15,24 +15,20 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
 )
 
-from client.runners.generic import WorkerStatus
-from client.runners.save import SaveScansWorker
+from client.runners.generic import RunnerStatus
+from client.runners.save import SaveScans
 from client.utils.file import size_fmt
 
 
-class DownloadScans(QDialog):
+class UploadScans(QDialog):
     """Progress dialogue."""
 
-    def __init__(
-        self,
-        runner: SaveScansWorker,
-        hide: bool = False,
-    ) -> None:
+    def __init__(self, runner: SaveScans, hide: bool = False) -> None:
         """Initialize the dialogue."""
 
         super().__init__()
 
-        self.setWindowTitle("Downloading data...")
+        self.setWindowTitle("Uploading data...")
 
         # Create the layout
         layout: QVBoxLayout = QVBoxLayout()
@@ -40,7 +36,7 @@ class DownloadScans(QDialog):
 
         # Create label
         label = QLabel(
-            f"Downloading {runner.get_max_progress() + 1} items... ({size_fmt(runner.size_in_bytes)})"
+            f"Uploading {runner.get_max_progress() + 1} items... ({size_fmt(runner.size_in_bytes)})"
         )
         layout.addWidget(label)
 
@@ -60,14 +56,13 @@ class DownloadScans(QDialog):
 
         layout.addLayout(bar_layout)
 
-        # Set the layout
         self.setLayout(layout)
 
         # Thread runner
         self.threadpool: QThreadPool = QThreadPool()
 
         # Create a runner
-        self.runner: SaveScansWorker = runner
+        self.runner: SaveScans = runner
         self.runner.signals.progress.connect(self.update_progress)
         self.runner.signals.finished.connect(self.job_done)
         self.runner.signals.kill.connect(self.close)
@@ -97,8 +92,8 @@ class DownloadScans(QDialog):
         # Show a message box
         QMessageBox.information(
             self,
-            "Scans downloaded",
-            "Scans downloaded successfully.",
+            "Scans uploaded",
+            "Scans uploaded successfully.",
         )
 
         self.close()
@@ -112,7 +107,7 @@ class DownloadScans(QDialog):
         logging.info("Closing %s.", self.__class__.__name__)
 
         # Kill the runner on close if not killed already
-        if not self.runner.worker_status is WorkerStatus.KILLED:
+        if not self.runner.worker_status is RunnerStatus.KILLED:
             self.runner.kill()
 
         super().closeEvent(arg__1)

@@ -250,6 +250,7 @@ class MetadataPanel(QWidget):
         self.update_content()
         self.update_thumbnail()
         self.update_readme()
+        self.layout().update()
 
 
 def get_thumbnail(prj_id: int, scan_id: int | None = None) -> Path:

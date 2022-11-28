@@ -1,5 +1,4 @@
-""" Create project dialogue window.
-
+"""
 This window lets a user input and create a new project, which is added to the database
 specified by the input connection string.
 """
