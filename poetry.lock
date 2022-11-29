@@ -182,7 +182,7 @@ toml = ["tomli"]
 
 [[package]]
 name = "diff-cover"
-version = "7.1.0"
+version = "7.1.1"
 description = "Run coverage and linting reports on diffs"
 category = "dev"
 optional = false
@@ -1150,8 +1150,8 @@ coverage = [
     {file = "coverage-6.5.0.tar.gz", hash = "sha256:f642e90754ee3e06b0e7e51bce3379590e76b7f76b708e1a71ff043f87025c84"},
 ]
 diff-cover = [
-    {file = "diff_cover-7.1.0-py3-none-any.whl", hash = "sha256:002e0ff7f232f7185acc7652e4aa2f51eb823eff2eb77e122fc53a04472a5771"},
-    {file = "diff_cover-7.1.0.tar.gz", hash = "sha256:ed1aa13522140f7a1f62807bc7552819d24343ee9398b7a74e94a18c78e2e864"},
+    {file = "diff_cover-7.1.1-py3-none-any.whl", hash = "sha256:f6761f00725a10e0193491ba746d6462bf2c6b443a54fd5af7b6fa99a40126a3"},
+    {file = "diff_cover-7.1.1.tar.gz", hash = "sha256:d4f5ca086ba73dab3df1709500057b9fb8a18ba516923abf42fe65b6681e7ba6"},
 ]
 dill = [
     {file = "dill-0.3.6-py3-none-any.whl", hash = "sha256:a07ffd2351b8c678dfc4a856a3005f8067aea51d6ba6c700796a4d9e280f39f0"},
