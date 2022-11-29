@@ -184,6 +184,11 @@ class SaveScans(GenericRunner):
             # Save to local library
             dest_scan_dir: Path = self.dest_prj_dir / Path(scan)
 
+            # Copy metadata
+            for item in (source_scan_dir / "tams_meta").glob("*"):
+                dest_path: Path = dest_scan_dir / "tams_meta"
+                move_item(item, dest_path, keep_original=True)
+
             # Move files
             for item in source_scan_dir.rglob(self.glob_arg):
 
@@ -209,3 +214,5 @@ class SaveScans(GenericRunner):
                 if self.worker_status is RunnerStatus.FINISHED:
                     # Break loop if job is finished
                     break
+            else:
+                print("shit")

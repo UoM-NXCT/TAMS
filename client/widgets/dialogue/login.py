@@ -43,6 +43,7 @@ class Login(QDialog):
                 "database": "",
                 "user": "",
                 "password": "",
+                "remember": False,
             }
         }
 
@@ -94,6 +95,7 @@ class Login(QDialog):
         checkbox_layout = QHBoxLayout()
         checkbox_layout.setAlignment(Qt.AlignmentFlag.AlignRight)
         self.checkbox = QCheckBox("Remember me")
+        self.checkbox.setChecked(saved_settings["postgresql"]["remember"])
         checkbox_layout.addWidget(self.checkbox)
         checkbox.setLayout(checkbox_layout)
 
@@ -135,6 +137,7 @@ class Login(QDialog):
                 "database": "tams",
                 "user": user,
                 "password": pwd,
+                "remember": self.checkbox.isChecked(),
             }
         }
 

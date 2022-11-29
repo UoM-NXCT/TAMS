@@ -1,6 +1,7 @@
 [postgresql]
 host = "127.0.0.1"
 port = "5432"
-database = ""
-user = ""
-password = ""
+database = "tams"
+user = "postgres"
+password = "postgres"
+remember = true

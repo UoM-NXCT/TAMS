@@ -195,9 +195,54 @@ class ValidateScans(GenericRunner):
                 self.set_result(False)
                 return
 
+        # Check scan meta
+        for scan_id in self.scan_ids:
+            perm_dir: str = os.path.join(self.perm_prj_dir, str(scan_id), "tams_meta")
+            local_dir: str = os.path.join(self.local_prj_dir, str(scan_id), "tams_meta")
+            for root, _, files in os.walk(perm_dir):
+                for file in files:
+                    # Increment progress bar
+                    self.signals.progress.emit(1)
+
+                    try:
+                        relative_path: str = file  # Should be of the form "/..." where "/" is the root of the scan
+                        local_file: str = os.path.join(local_dir, relative_path)
+
+                        # Hash the files
+                        target_hash: str = hash_in_chunks(
+                            os.path.join(root, relative_path)
+                        )
+                        local_hash: str = hash_in_chunks(local_file)
+
+                        # Compare hashes
+                        if target_hash != local_hash:
+                            logging.info(
+                                "Hashes do not match: file %s is invalid.", file
+                            )
+                            self.set_result(False)
+
+                    except FileNotFoundError:
+                        logging.info(
+                            "%s not found, validation fail.", os.path.basename(file)
+                        )
+                        self.set_result(False)
+
+                    # Pause if worker is paused
+                    while self.worker_status is RunnerStatus.PAUSED:
+                        # Keep waiting until resumed
+                        time.sleep(0)
+                    # Check if worker has been killed
+                    if self.worker_status is RunnerStatus.KILLED:
+                        raise RunnerKilledException
+                    if self.worker_status is RunnerStatus.FINISHED:
+                        # Break loop if job is finished
+                        return
+
         # Check the contents of each scan directory
         for scan_id in self.scan_ids:
-            perm_dir: str = os.path.join(self.perm_prj_dir, str(scan_id))
+            perm_dir: str = os.path.join(
+                self.perm_prj_dir, str(scan_id), settings.get_perm_dir_name()
+            )
             # Local directory appended with subdirectory
             local_dir: str = os.path.join(
                 self.local_prj_dir, str(scan_id), settings.get_perm_dir_name()
