@@ -7,6 +7,7 @@ from os import remove
 from pathlib import Path
 from shutil import rmtree
 
+import pytest
 import tomli_w
 
 try:
@@ -21,58 +22,126 @@ from client.utils.toml import create_toml, load_toml, update_toml
 TEST_DIR = Path(__file__).parent
 
 
-class TestFile(unittest.TestCase):
-    """Test functions in file.py utils file."""
+class TestCreateDirectory(unittest.TestCase):
+    """Test create_dir function."""
 
-    def test_create_dir_if_missing(self) -> None:
+    def test_create_dir(self) -> None:
         """Test function that creates a directory at a location if it doesn't exist."""
+
         dir_target = TEST_DIR / Path("new_dir")
-        self.assertEqual(False, dir_target.exists())
+        assert not dir_target.exists()
+
         create_dir(dir_target)
-        self.assertEqual(True, dir_target.exists())
+        assert dir_target.exists()
+
         # Delete dir after test
         rmtree(dir_target)
+        assert not dir_target.exists()
+
+    def test_exc(self) -> None:
+        """Test exception is raised if path is not a string or Path object."""
+
+        with pytest.raises(TypeError):
+            create_dir(1)
+
+        with pytest.raises(TypeError):
+            create_dir(None)
+
+
+class TestMoveItem(unittest.TestCase):
+    """Test the move_item function."""
 
     def test_move_item(self) -> None:
         """Test function that moves or copies an item."""
 
-        # Test move functionality
+        # Check file exists
         file_to_be_moved = TEST_DIR / Path(r"text_files/move_me.txt")
-        self.assertEqual(True, file_to_be_moved.is_file())
+        assert file_to_be_moved.is_file()
+
+        # Check target directory exists
         target_dir_of_file_to_be_moved = TEST_DIR / Path("example_directory")
-        self.assertEqual(True, target_dir_of_file_to_be_moved.is_dir())
+        assert target_dir_of_file_to_be_moved.is_dir()
+
+        # Move file
         move_item(file_to_be_moved, target_dir_of_file_to_be_moved, keep_original=False)
+
         # File should no longer exist at original location, it should be at new location
-        self.assertEqual(False, file_to_be_moved.is_file())
+        assert not file_to_be_moved.is_file()
         location_of_moved_file = target_dir_of_file_to_be_moved / Path("move_me.txt")
-        self.assertEqual(True, location_of_moved_file.is_file())
+        assert location_of_moved_file.is_file()
+
         # Move file back after test
-        original_file_directory = TEST_DIR / Path(r"text_files")
+        original_file_dir = TEST_DIR / Path(r"text_files")
         move_item(
             location_of_moved_file,
-            original_file_directory,
+            original_file_dir,
             keep_original=False,
         )
-        self.assertEqual(False, location_of_moved_file.is_file())
+        assert not location_of_moved_file.is_file()
+        assert file_to_be_moved.is_file()
 
-    def test_copy_item(self) -> None:
+    def test_move_dir(self) -> None:
+        """Test function that moves or copies a directory."""
+
+        # Check dir exists
+        dir_to_be_moved = TEST_DIR / "text_files"
+        member_of_dir_to_be_moved = dir_to_be_moved / "move_me.txt"
+        assert dir_to_be_moved.is_dir()
+        assert member_of_dir_to_be_moved.is_file()
+
+        # Check target directory exists
+        new_location = TEST_DIR / "example_directory"
+        new_path = new_location / "text_files"
+        moved_member_of_dir_to_be_moved = new_path / "move_me.txt"
+        assert not new_path.is_dir()
+        assert not moved_member_of_dir_to_be_moved.is_file()
+
+        # Move file
+        move_item(dir_to_be_moved, new_location, keep_original=False)
+
+        # File should no longer exist at original location, it should be at new location
+        assert not dir_to_be_moved.is_dir()
+        assert not member_of_dir_to_be_moved.is_file()
+        assert new_path.is_dir()
+        assert moved_member_of_dir_to_be_moved.is_file()
+
+        # Move file back after test
+        move_item(
+            new_path,
+            TEST_DIR,
+            keep_original=False,
+        )
+        assert not new_path.is_dir()
+        assert not moved_member_of_dir_to_be_moved.is_file()
+        assert dir_to_be_moved.is_dir()
+        assert member_of_dir_to_be_moved.is_file()
+
+    def test_copy(self) -> None:
         """Test function that moves or copies an item."""
 
-        # Test copy functionality
+        # Check file exists
         file_to_be_copied = TEST_DIR / Path("text_files/copy_me.txt")
-        self.assertEqual(True, file_to_be_copied.is_file())
+        assert file_to_be_copied.is_file()
+
+        # Check target directory exists
         target_dir_of_file_to_be_moved = TEST_DIR / Path("example_directory")
-        self.assertEqual(True, target_dir_of_file_to_be_moved.is_dir())
+        assert target_dir_of_file_to_be_moved.is_dir()
+
+        # Copy file
         move_item(file_to_be_copied, target_dir_of_file_to_be_moved, keep_original=True)
 
         # File should exist at both locations
-        self.assertEqual(True, file_to_be_copied.is_file())
+        assert file_to_be_copied.is_file()
         location_of_copied_file = target_dir_of_file_to_be_moved / Path("copy_me.txt")
-        self.assertEqual(True, location_of_copied_file.is_file())
+        assert location_of_copied_file.is_file()
 
         # Delete file back after test
         location_of_copied_file.unlink()
-        self.assertEqual(False, location_of_copied_file.is_file())
+        assert not location_of_copied_file.is_file()
+
+
+class TestFile(unittest.TestCase):
+    """Test functions in file.py utils file."""
 
     def test_find_and_move(self) -> None:
         """Test function that finds and moves files from one directory to another."""

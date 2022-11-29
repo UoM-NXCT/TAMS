@@ -55,7 +55,7 @@ def move_item(item: Path, dest_dir: Path, keep_original: bool = True) -> None:
             if item.is_file():
                 os.remove(item)
             elif item.is_dir():
-                os.rmdir(item)
+                shutil.rmtree(item)
 
     except FileExistsError:
         # Just move on if the file already exists
