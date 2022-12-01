@@ -182,7 +182,7 @@ toml = ["tomli"]
 
 [[package]]
 name = "diff-cover"
-version = "7.1.1"
+version = "7.2.0"
 description = "Run coverage and linting reports on diffs"
 category = "dev"
 optional = false
@@ -888,7 +888,7 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "tzdata"
-version = "2022.6"
+version = "2022.7"
 description = "Provider of IANA time zone data"
 category = "main"
 optional = false
@@ -1150,8 +1150,8 @@ coverage = [
     {file = "coverage-6.5.0.tar.gz", hash = "sha256:f642e90754ee3e06b0e7e51bce3379590e76b7f76b708e1a71ff043f87025c84"},
 ]
 diff-cover = [
-    {file = "diff_cover-7.1.1-py3-none-any.whl", hash = "sha256:f6761f00725a10e0193491ba746d6462bf2c6b443a54fd5af7b6fa99a40126a3"},
-    {file = "diff_cover-7.1.1.tar.gz", hash = "sha256:d4f5ca086ba73dab3df1709500057b9fb8a18ba516923abf42fe65b6681e7ba6"},
+    {file = "diff_cover-7.2.0-py3-none-any.whl", hash = "sha256:16bd4cb5f90afcc5372b668974a33a560e0030df8c2fef425a82d83b15d4662c"},
+    {file = "diff_cover-7.2.0.tar.gz", hash = "sha256:309bcfddbc13650b121462252f3f6967ac196816f8b91e965a2e0c02ba15cc92"},
 ]
 dill = [
     {file = "dill-0.3.6-py3-none-any.whl", hash = "sha256:a07ffd2351b8c678dfc4a856a3005f8067aea51d6ba6c700796a4d9e280f39f0"},
@@ -1794,8 +1794,8 @@ typing-extensions = [
     {file = "typing_extensions-4.4.0.tar.gz", hash = "sha256:1511434bb92bf8dd198c12b1cc812e800d4181cfcb867674e0f8279cc93087aa"},
 ]
 tzdata = [
-    {file = "tzdata-2022.6-py2.py3-none-any.whl", hash = "sha256:04a680bdc5b15750c39c12a448885a51134a27ec9af83667663f0b3a1bf3f342"},
-    {file = "tzdata-2022.6.tar.gz", hash = "sha256:91f11db4503385928c15598c98573e3af07e7229181bee5375bd30f1695ddcae"},
+    {file = "tzdata-2022.7-py2.py3-none-any.whl", hash = "sha256:2b88858b0e3120792a3c0635c23daf36a7d7eeeca657c323da299d2094402a0d"},
+    {file = "tzdata-2022.7.tar.gz", hash = "sha256:fe5f866eddd8b96e9fcba978f8e503c909b19ea7efda11e52e39494bad3a7bfa"},
 ]
 urllib3 = [
     {file = "urllib3-1.26.13-py2.py3-none-any.whl", hash = "sha256:47cc05d99aaa09c9e72ed5809b60e7ba354e64b59c9c173ac3018642d8bb41fc"},

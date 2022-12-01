@@ -37,6 +37,7 @@ from client.widgets.dialogue import (
     Validate,
     attempt_file_io,
 )
+from client.widgets.dialogue.about import About
 from client.widgets.metadata_panel import MetadataPanel
 from client.widgets.table import TableModel, TableView
 from client.widgets.toolbox import ToolBox
@@ -492,15 +493,7 @@ class MainWindow(QMainWindow):
 
     def about_dialogue(self):
         """Display the About dialog."""
-        QMessageBox.about(
-            self,
-            "About TAMS",
-            """<h3>Tomography Archival and Management Software (TAMS)</h3>
-            <h4>Version 0.1 (Development Build)</h4>
-            <p>Original author: <a href='mailto:tom.kusonsuphanimit@manchester.ac.uk'>Tom Kusonsuphanimit</a> (The \
-            University of Manchester).</p>
-            <p>Copyright &copy; 2022 National X-ray Computed Tomography.</p>""",
-        )
+        _about_dlg = About()
 
     def current_table(self) -> str:
         """Get the current table displayed."""
