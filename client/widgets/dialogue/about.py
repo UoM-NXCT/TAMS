@@ -5,6 +5,8 @@ from datetime import date
 
 from PySide6.QtWidgets import QDialog, QMessageBox
 
+from client import __version__
+
 
 class About(QDialog):
     """About dialogue."""
@@ -20,7 +22,7 @@ class About(QDialog):
 
         msg: str = f"""
             <h3>Tomography Archival and Management Software (TAMS)</h3>
-            <h4>Version 0.1 (Development Build)</h4>
+            <h4>Version {__version__}</h4>
             <p>Original author: Tom Kuson (The University of Manchester).</p>
             <p>
             Copyright &copy; {current_year} National X-ray Computed Tomography et al.

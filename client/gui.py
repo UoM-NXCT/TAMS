@@ -28,6 +28,7 @@ from client.db import DatabaseView
 from client.runners import SaveScans, ValidateScans
 from client.utils.toml import load_toml
 from client.widgets.dialogue import (
+    About,
     CreatePrj,
     CreateScan,
     DownloadScans,
@@ -37,7 +38,6 @@ from client.widgets.dialogue import (
     Validate,
     attempt_file_io,
 )
-from client.widgets.dialogue.about import About
 from client.widgets.metadata_panel import MetadataPanel
 from client.widgets.table import TableModel, TableView
 from client.widgets.toolbox import ToolBox
