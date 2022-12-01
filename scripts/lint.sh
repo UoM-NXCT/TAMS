@@ -16,4 +16,6 @@ poetry run mypy client/settings --strict
 poetry run mypy client/utils --strict
 
 echo "Checking with pylint..."
-poetry run pylint .
+poetry run pylint client
+
+$SHELL
