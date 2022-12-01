@@ -240,11 +240,11 @@ class ValidateScans(GenericRunner):
 
         # Check the contents of each scan directory
         for scan_id in self.scan_ids:
-            perm_dir: str = os.path.join(
+            perm_dir = os.path.join(
                 self.perm_prj_dir, str(scan_id), settings.get_perm_dir_name()
             )
             # Local directory appended with subdirectory
-            local_dir: str = os.path.join(
+            local_dir = os.path.join(
                 self.local_prj_dir, str(scan_id), settings.get_perm_dir_name()
             )
 
@@ -268,14 +268,12 @@ class ValidateScans(GenericRunner):
                     self.signals.progress.emit(1)
 
                     try:
-                        relative_path: str = file  # Should be of the form "/..." where "/" is the root of the scan
-                        local_file: str = os.path.join(local_dir, relative_path)
+                        relative_path = file  # Should be of the form "/..." where "/" is the root of the scan
+                        local_file = os.path.join(local_dir, relative_path)
 
                         # Hash the files
-                        target_hash: str = hash_in_chunks(
-                            os.path.join(root, relative_path)
-                        )
-                        local_hash: str = hash_in_chunks(local_file)
+                        target_hash = hash_in_chunks(os.path.join(root, relative_path))
+                        local_hash = hash_in_chunks(local_file)
 
                         # Compare hashes
                         if target_hash != local_hash:

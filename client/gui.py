@@ -28,6 +28,7 @@ from client.db import DatabaseView
 from client.runners import SaveScans, ValidateScans
 from client.utils.toml import load_toml
 from client.widgets.dialogue import (
+    About,
     CreatePrj,
     CreateScan,
     DownloadScans,
@@ -193,7 +194,9 @@ class MainWindow(QMainWindow):
         self.settings_act = QAction("Settings")
         self.settings_act.setShortcut("Ctrl+Alt+S")
         self.settings_act.setStatusTip("Edit application settings")
-        self.settings_act.triggered.connect(self.open_settings)
+        self.settings_act.triggered.connect(
+            lambda: Settings()  # pylint: disable=unnecessary-lambda
+        )
 
         pixmap = QStyle.StandardPixmap.SP_BrowserReload
         reload_table_icon = self.style().standardIcon(pixmap)
@@ -247,7 +250,9 @@ class MainWindow(QMainWindow):
         about_icon = self.style().standardIcon(pixmap)
         self.about_act = QAction(about_icon, "About")
         self.about_act.setStatusTip("Show information about this software")
-        self.about_act.triggered.connect(self.about_dialogue)
+        self.about_act.triggered.connect(
+            lambda: About()  # pylint: disable=unnecessary-lambda
+        )
 
     def toggle_full_screen(self, state) -> None:
         """Toggle full screen mode."""
@@ -256,11 +261,6 @@ class MainWindow(QMainWindow):
             self.showFullScreen()
         else:
             self.showNormal()
-
-    def open_settings(self):
-        """Open the settings window."""
-
-        self.settings_dlg = Settings()
 
     def open_create_prj(self) -> None:
         """
@@ -272,7 +272,7 @@ class MainWindow(QMainWindow):
 
     def open_create_scan(self) -> None:
         """
-        Open the create scan dialgoue; pass the database connection string so that
+        Open the scan creation dialogue; pass the database connection string so that
         the window can access the database.
         """
 
@@ -430,7 +430,8 @@ class MainWindow(QMainWindow):
                 QMessageBox.critical(
                     self,
                     "Error",
-                    f"Project ID {row_pk} does not exist in the local library. Has the data been downloaded?",
+                    f"Project ID {row_pk} does not exist in the local library. Has the "
+                    "data been downloaded?",
                 )
         elif table == "scan":
             logging.info("Opening data from scan ID %s", row_pk)
@@ -489,18 +490,6 @@ class MainWindow(QMainWindow):
                 "Error",
                 f"Cannot download data from table {table}",
             )
-
-    def about_dialogue(self):
-        """Display the About dialog."""
-        QMessageBox.about(
-            self,
-            "About TAMS",
-            """<h3>Tomography Archival and Management Software (TAMS)</h3>
-            <h4>Version 0.1 (Development Build)</h4>
-            <p>Original author: <a href='mailto:tom.kusonsuphanimit@manchester.ac.uk'>Tom Kusonsuphanimit</a> (The \
-            University of Manchester).</p>
-            <p>Copyright &copy; 2022 National X-ray Computed Tomography.</p>""",
-        )
 
     def current_table(self) -> str:
         """Get the current table displayed."""

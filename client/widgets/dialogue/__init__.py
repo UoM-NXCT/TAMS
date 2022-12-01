@@ -1,3 +1,4 @@
+from .about import About
 from .create_prj import CreatePrj
 from .create_scan import CreateScan
 from .decorators import attempt_file_io
