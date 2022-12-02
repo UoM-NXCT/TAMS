@@ -29,16 +29,6 @@ If you wish to use TAMS regardless, clone this repository, install the dependenc
 poetry run python -m client
 ```
 
-### Windows installation instructions (WIP)
-
-The Qt library depends on Postgres' library, which must be available in the path to load. You can do this by adding your Postgres installation bin folder to your path.
-
-For example, Postgres is installed on my computer under `C:\Program Files\PostgreSQL\14\` (I'm using version 14). We need to add the Postgres `bin` folder to the `PATH` as this contains `libpq.dll` (Postgres Access Library), which Qt needs.
-
-```commandline
-SET PATH=%PATH%;C:\Program Files\PostgreSQL\14\bin
-```
-
 ## Issues
 
 If you have found a bug, you can file it under the 'issues' tab. You can also request new features.
