@@ -10,4 +10,5 @@ It aims to make storing and accessing data easy and quick.
    :caption: Contents:
 
    install
+   usage
    contribute

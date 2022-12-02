@@ -1,11 +1,23 @@
 Usage
 =====
 
-Saving scans
+Actions
 ------------
 
-Validation
-^^^^^^^^^^
+Open
+^^^^
+
+The open action opens a directory corresponding to the current selection (for example,
+a project or scan). The action will open the local directory and wil raise an exception
+if the local directory does not exist (for example, if it has not been downloaded).
+
+To open a directory:
+
+1. Select a project or scan in the table
+2. Click the Open button in the toolbar or file menu, or double click the selection
+
+Validate scan
+^^^^^^^^^^^^^
 
 It is important to validate scan data after saving it. This is to make sure that the
 data was not corrupted and is identical to the original data.
