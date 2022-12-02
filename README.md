@@ -29,6 +29,10 @@ If you wish to use TAMS regardless, clone this repository, install the dependenc
 poetry run python -m client
 ```
 
+## Documentation
+
+The documentation is hosted on [ReadTheDocs](https://tams-nxct.readthedocs.io/en/latest/).
+
 ## Issues
 
 If you have found a bug, you can file it under the 'issues' tab. You can also request new features.
