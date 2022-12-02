@@ -97,6 +97,7 @@ class MainWindow(QMainWindow):
         # Create a table; initialize with projects
         self.table_view = TableView()
         self.table_view.setSelectionBehavior(TableView.SelectionBehavior.SelectRows)
+        self.table_view.doubleClicked.connect(self.on_double_click)
         self.update_table_with_projects()
 
         # Create table toolbox
@@ -495,6 +496,11 @@ class MainWindow(QMainWindow):
         """Get the current table displayed."""
 
         return self.current_table_query[1]
+
+    def on_double_click(self) -> None:
+        """Open the selected data when double-clicking a row."""
+
+        self.open_data()
 
     def on_selection_changed(self) -> None:
         """Update the metadata when a new row is selected."""

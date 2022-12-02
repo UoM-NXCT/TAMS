@@ -8,3 +8,5 @@ poetry run isort . --profile black
 
 echo "Formatting with black..."
 poetry run black .
+
+$SHELL
