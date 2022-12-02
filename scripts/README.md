@@ -4,7 +4,7 @@ general use.
 - [compile.sh](compile.sh): compiles the project as a binary executable using [PyInstaller](https://pyinstaller.org/en/stable/)
 - [format.sh](format.sh): formats the code to be consisted and easy to read using:
   - [ssort](https://github.com/bwhmather/ssort)
-  - [isort](https://pycqa.github.io/isort/)
+  - [isort](https://pycqa.github.io/isort/) (with `--profile black`)
   - [black](https://black.readthedocs.io/en/stable/)
 - [lint.sh](lint.sh): checks the code for errors using:
   - [ssort](https://github.com/bwhmather/ssort)

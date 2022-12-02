@@ -10,8 +10,8 @@ import sphinx_rtd_theme  # pylint: disable=import-error
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "TAMS"
-copyright = "2022, Tom Kusonsuphanimit"
-author = "Tom Kusonsuphanimit"
+copyright = "2022, NXCT et al."
+author = "NXCT et al."
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

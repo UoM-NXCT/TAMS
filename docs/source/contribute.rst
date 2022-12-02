@@ -121,9 +121,11 @@ To run the type checker, run:
 Compile
 ^^^^^^^
 
-Python is an interpreted language. This means that the Python interpreter reads the source code and executes it. This is a powerful feature, but it can also lead to performance issues. It can also make it difficult to distribute the code.
+Python is an interpreted language (`technically, it is both compiled and interpreted <https://realpython.com/cpython-source-code-guide/>`_). This is a powerful feature, but it can also lead to performance issues. It can also make it difficult to distribute the code.
 
 To help with this, TAMS uses `PyInstaller <https://www.pyinstaller.org/>`_ to compile the code into a single executable file. This means that the code is compiled into machine code before it is run.
+
+To compile the code, execute the ``compile.sh`` script in the scripts directory. The compiled code will be placed in the ``dist`` directory.
 
 Code style
 ----------
