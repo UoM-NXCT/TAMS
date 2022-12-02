@@ -2,6 +2,7 @@
 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
+[![ReadTheDocs](https://img.shields.io/readthedocs/tams-nxct)](https://tams-nxct.readthedocs.io/en/latest/)
 
 TAMS is an open-source tomography archival and management application released by the National X-ray Computed Tomography (NXCT), the UK's national lab-based X-ray computed tomography research facility.
 

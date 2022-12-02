@@ -1,13 +1,14 @@
 [tool.poetry]
 name = "Tomography Archival Management System"
 version = "0.1.0"
-description = ""
+description = "Makes storing and accessing tomographic data easy and quick."
 license = "MIT"
 authors = [
     "Tom Kusonsuphanimit <tom.kusonsuphanimit@manchester.ac.uk>"
 ]
 readme = "README.md"
 repository = "https://github.com/UoM-NXCT/TAMS"
+documentation = "https://tams-nxct.readthedocs.io/en/latest/"
 
 [tool.poetry.urls]
 "NXCT homepage" = "https://nxct.ac.uk/"
