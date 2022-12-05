@@ -7,5 +7,3 @@ python -m poetry run pyinstaller \
 --windowed client/__main__.py --name "TAMS"
 
 $SHELL
-
-python -m poetry run pyinstaller --windowed client/__main__.py --name "TAMS"
