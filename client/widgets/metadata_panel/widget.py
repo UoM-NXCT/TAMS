@@ -220,8 +220,10 @@ class MetadataPanel(QWidget):
                 # If the project ID is found, load the thumbnail
                 thumbnail: Path = get_thumbnail(prj_id, scan_id)
                 self.thumbnail_widget.load(thumbnail)
+                self.thumbnail_widget.show()
             else:
                 self.thumbnail_widget.load(settings.placeholder_image)
+                self.thumbnail_widget.hide()
 
     def update_readme_text_edit(self, readme_dir: Path) -> None:
         """Load the README.txt file."""
