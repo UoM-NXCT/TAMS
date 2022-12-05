@@ -111,7 +111,7 @@ class MainWindow(QMainWindow):
         self.search_query.setPlaceholderText("Search the table...")
         self.search_query.textChanged.connect(self.proxy_model.setFilterFixedString)
 
-        # Add table and search query to table layout
+        # Add the table and search query to table layout
         self.table_layout.addWidget(self.search_query)
         self.table_layout.addWidget(self.table_view)
         table_widget.setLayout(self.table_layout)
