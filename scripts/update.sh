@@ -2,4 +2,6 @@
 
 echo "Updating packages..."
 python -m pip install --upgrade pip
-poetry update
+python -m poetry update
+
+$SHELL

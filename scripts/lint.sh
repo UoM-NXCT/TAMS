@@ -1,21 +1,21 @@
 #!/bin/bash
 
 echo "Checking with ssort..."
-poetry run ssort --check .
+python -m poetry run ssort --check .
 
 echo "Checking with isort..."
-poetry run isort --check-only --profile black .
+python -m poetry run isort --check-only --profile black .
 
 echo "Checking with black..."
-poetry run black --check .
+python -m poetry run black --check .
 
 echo "Checking with mypy..."
-poetry run mypy client/db --strict
-poetry run mypy client/runners --strict
-poetry run mypy client/settings --strict
-poetry run mypy client/utils --strict
+python -m poetry run mypy client/db --strict
+python -m poetry run mypy client/runners --strict
+python -m poetry run mypy client/settings --strict
+python -m poetry run mypy client/utils --strict
 
 echo "Checking with pylint..."
-poetry run pylint client
+python -m poetry run pylint client
 
 $SHELL
