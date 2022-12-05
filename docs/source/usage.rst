@@ -116,5 +116,5 @@ You can use this software to sort and search the table.
 * You can select a table to view using the toolbox on the left-hand side.
 * You can sort the table by clicking on the column headers.
 * You can search the table by typing in the search box above the table. The search
-  will be performed on the currently selected table and is case-insensitive. _Note: the
-  search is only performed on data in the table and not, for example, relational data._
+  will be performed on the currently selected table and is case-insensitive. *Note: the
+  search is only performed on data in the table and not, for example, relational data.*
