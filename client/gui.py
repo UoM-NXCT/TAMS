@@ -247,6 +247,15 @@ class MainWindow(QMainWindow):
 
         # Create actions for the Help menu
 
+        self.doc_act = QAction("Documentation")
+        self.doc_act.setShortcut("F1")
+        self.doc_act.setStatusTip("Open documentation in browser")
+        self.doc_act.triggered.connect(
+            lambda: QDesktopServices.openUrl(
+                QUrl("https://tams-nxct.readthedocs.io/")
+            )  # pylint: disable=unnecessary-lambda
+        )
+
         pixmap = QStyle.StandardPixmap.SP_MessageBoxInformation
         about_icon = self.style().standardIcon(pixmap)
         self.about_act = QAction(about_icon, "About")
@@ -304,6 +313,7 @@ class MainWindow(QMainWindow):
 
         # Create the Help menu
         help_menu = self.menuBar().addMenu("Help")
+        help_menu.addAction(self.doc_act)
         help_menu.addAction(self.about_act)
 
     def create_tool_bar(self) -> None:
@@ -322,8 +332,9 @@ class MainWindow(QMainWindow):
         toolbar.addAction(self.open_act)
         toolbar.addAction(self.validate_act)
 
-        # Config actions
+        # Help actions
         toolbar.addSeparator()
+        toolbar.addAction(self.doc_act)
         toolbar.addAction(self.about_act)
 
     def get_value_from_row(self, column: int) -> int:
