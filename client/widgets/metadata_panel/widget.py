@@ -176,6 +176,7 @@ class MetadataPanel(QWidget):
 
     def get_prj_id(self) -> int | None:
         """Get the project ID from the metadata."""
+
         try:
             if not self._data or not self._column_headers:
                 return None

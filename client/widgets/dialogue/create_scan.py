@@ -11,9 +11,11 @@ import psycopg
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QComboBox,
+    QCompleter,
     QDialog,
     QFormLayout,
     QLabel,
+    QLineEdit,
     QMessageBox,
     QPushButton,
     QVBoxLayout,
@@ -46,7 +48,7 @@ class CreateScan(QDialog):
         header_label: QLabel = QLabel("Create new scan")
 
         # Get project ID options
-        self.new_scan_prj_id_entry = QComboBox()
+        self.new_scan_prj_id_entry = QLineEdit()
         with psycopg.connect(self.conn_str) as conn:
             with conn.cursor() as cur:
                 cur.execute("select project_id, title from project;")
@@ -56,10 +58,12 @@ class CreateScan(QDialog):
                     f"{tuple_value[0]} ({tuple_value[1]})"
                     for tuple_value in raw_prj_ids
                 ]
-        self.new_scan_prj_id_entry.addItems(prj_ids)
+        completer = QCompleter(prj_ids)
+        completer.setFilterMode(Qt.MatchContains)
+        self.new_scan_prj_id_entry.setCompleter(completer)
 
         # Get instrument ID options
-        self.new_scan_instrument_id_entry = QComboBox()
+        self.new_scan_instrument_id_entry = QLineEdit()
         with psycopg.connect(self.conn_str) as conn:
             with conn.cursor() as cur:
                 cur.execute("select instrument_id, name from instrument;")
@@ -69,7 +73,9 @@ class CreateScan(QDialog):
                     f"{tuple_value[0]} ({tuple_value[1]})"
                     for tuple_value in raw_instrument_ids
                 ]
-        self.new_scan_instrument_id_entry.addItems(instrument_ids)
+        completer = QCompleter(instrument_ids)
+        completer.setFilterMode(Qt.MatchContains)
+        self.new_scan_instrument_id_entry.setCompleter(completer)
 
         # Arrange QLineEdit widgets in a QFormLayout
         dlg_form = QFormLayout()
