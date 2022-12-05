@@ -14,12 +14,14 @@ from PySide6.QtGui import QAction, QDesktopServices
 from PySide6.QtWidgets import (
     QGridLayout,
     QHeaderView,
+    QLineEdit,
     QMainWindow,
     QMessageBox,
     QSplitter,
     QStatusBar,
     QStyle,
     QToolBar,
+    QVBoxLayout,
     QWidget,
 )
 
@@ -94,11 +96,25 @@ class MainWindow(QMainWindow):
         # Metadata panel
         self.metadata_panel = MetadataPanel()
 
+        # Create table layout
+        table_widget = QWidget()
+        self.table_layout = QVBoxLayout()
+
         # Create a table; initialize with projects
         self.table_view = TableView()
         self.table_view.setSelectionBehavior(TableView.SelectionBehavior.SelectRows)
         self.table_view.doubleClicked.connect(self.on_double_click)
         self.update_table_with_projects()
+
+        # Create search query
+        self.search_query = QLineEdit()
+        self.search_query.setPlaceholderText("Search the table...")
+        self.search_query.textChanged.connect(self.proxy_model.setFilterFixedString)
+
+        # Add table and search query to table layout
+        self.table_layout.addWidget(self.search_query)
+        self.table_layout.addWidget(self.table_view)
+        table_widget.setLayout(self.table_layout)
 
         # Create table toolbox
         self.toolbox = ToolBox()
@@ -114,7 +130,7 @@ class MainWindow(QMainWindow):
         layout: QGridLayout = QGridLayout()
         splitter: QSplitter = QSplitter(Qt.Horizontal)
         splitter.addWidget(self.toolbox)
-        splitter.addWidget(self.table_view)
+        splitter.addWidget(table_widget)
         splitter.addWidget(self.metadata_panel)
         splitter.setSizes([216, 432, 216])  # 1:4 ratio
         layout.addWidget(splitter, 0, 0)
@@ -127,6 +143,7 @@ class MainWindow(QMainWindow):
     def update_table(self) -> None:
         """Update table model using SQL command."""
 
+        # Get table data
         select_value, from_value, where_value = self.current_table_query
         if self.database_view:
             if where_value:
@@ -140,9 +157,23 @@ class MainWindow(QMainWindow):
         else:
             data = []
             column_headers = ()
+
+        # Create table model
         self.table_model = TableModel(data, column_headers)
+
+        # Create proxy model
         self.proxy_model = QSortFilterProxyModel()
+
+        # Set proxy model to table model
         self.proxy_model.setSourceModel(self.table_model)
+
+        # Make the filters case-insensitive
+        self.proxy_model.setFilterCaseSensitivity(Qt.CaseInsensitive)
+
+        # Filter by all columns
+        self.proxy_model.setFilterKeyColumn(-1)
+
+        # Set the table view to use the proxy model
         self.table_view.setModel(self.proxy_model)
 
         # Make table look pretty
