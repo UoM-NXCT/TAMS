@@ -5,14 +5,8 @@ Common TOML file operation methods.
 from pathlib import Path
 from typing import Any
 
-# As of Python 3.11, tomllib is the preferred way of reading TOML files.
-# We should attempt to import it, but use tomli if tomllib fails to import.
-try:
-    import tomllib  # noqa
-except ModuleNotFoundError:
-    import tomli as tomllib  # type: ignore
-
 import tomli_w
+import tomllib
 
 
 def create_toml(path: Path | str, data: dict[str, Any]) -> None:
