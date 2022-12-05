@@ -54,7 +54,7 @@ class MainWindow(QMainWindow):
         super().__init__()
 
         # Create empty variables for use later.
-        self.database_view: DatabaseView | None = None
+        self.db_view: DatabaseView | None = None
         self.connection_string: str | None = None
         self.table_model: TableModel | None = None
         self.proxy_model: QSortFilterProxyModel | None = None
@@ -76,7 +76,7 @@ class MainWindow(QMainWindow):
             login_dlg = Login()
             login_dlg.exec()
             self.connection_string = login_dlg.conn_str
-            self.database_view = DatabaseView(self.connection_string)
+            self.db_view = DatabaseView(self.connection_string)
         except SystemExit:
             sys.exit()
 
@@ -101,8 +101,8 @@ class MainWindow(QMainWindow):
         self.table_layout = QVBoxLayout()
 
         # Create search query
-        self.search_query = QLineEdit()
-        self.search_query.setPlaceholderText("Search the table...")
+        self.search = QLineEdit()
+        self.search.setPlaceholderText("Search the table...")
 
         # Create a table; initialize with projects
         self.table_view = TableView()
@@ -111,7 +111,7 @@ class MainWindow(QMainWindow):
         self.update_table_with_projects()
 
         # Add the table and search query to table layout
-        self.table_layout.addWidget(self.search_query)
+        self.table_layout.addWidget(self.search)
         self.table_layout.addWidget(self.table_view)
         table_widget.setLayout(self.table_layout)
 
@@ -144,13 +144,13 @@ class MainWindow(QMainWindow):
 
         # Get table data
         select_value, from_value, where_value = self.current_table_query
-        if self.database_view:
+        if self.db_view:
             if where_value:
-                data, column_headers = self.database_view.view_select_from_where(
+                data, column_headers = self.db_view.view_select_from_where(
                     select_value, from_value, where_value
                 )
             else:
-                data, column_headers = self.database_view.view_select_from_where(
+                data, column_headers = self.db_view.view_select_from_where(
                     select_value, from_value
                 )
         else:
@@ -171,7 +171,7 @@ class MainWindow(QMainWindow):
 
         # Connect search query to proxy model
         # Note: must do this on each table update, or it will disconnect
-        self.search_query.textChanged.connect(self.proxy_model.setFilterFixedString)
+        self.search.textChanged.connect(self.proxy_model.setFilterFixedString)
 
         # Filter by all columns
         self.proxy_model.setFilterKeyColumn(-1)
@@ -194,8 +194,6 @@ class MainWindow(QMainWindow):
 
         # Update metadata panel
         self.metadata_panel.update_metadata()
-
-        logging.info("Table updated.")
 
     def update_table_with_projects(self) -> None:
         """Update table to display projects."""
@@ -461,19 +459,19 @@ class MainWindow(QMainWindow):
         row_pk: int = self.get_value_from_row(0)
 
         # Get the path of the local library
-        local_library: str = load_toml(settings.general)["storage"]["local_library"]
+        local_lib: Path = Path(settings.get_lib("local"))
 
         if table == "project":
             logging.info("Opening data from project ID %s", row_pk)
 
             # Get the path of the local project directory
-            project_path: Path = Path(local_library) / str(row_pk)
+            prj_path: Path = local_lib / str(row_pk)
 
-            if project_path.exists():
-                logging.info("Opening project path %s", project_path)
-                QDesktopServices.openUrl(QUrl.fromLocalFile(str(project_path)))
+            if prj_path.exists():
+                logging.info("Opening project path %s", prj_path)
+                QDesktopServices.openUrl(QUrl.fromLocalFile(str(prj_path)))
             else:
-                logging.error("Project path %s does not exist", project_path)
+                logging.error("Project path %s does not exist", prj_path)
                 QMessageBox.critical(
                     self,
                     "Error",
@@ -485,7 +483,7 @@ class MainWindow(QMainWindow):
 
             # Get the path of the local scan directory
             project_id: int = self.get_value_from_row(1)
-            scan_path: Path = Path(local_library) / str(project_id) / str(row_pk)
+            scan_path: Path = local_lib / str(project_id) / str(row_pk)
 
             if scan_path.exists():
                 logging.info("Opening scan path %s", scan_path)
@@ -561,11 +559,11 @@ class MainWindow(QMainWindow):
         # Each item has a different metadata format; use the current table to method
         metadata: tuple[tuple[any], list[str]]
         if self.current_table() == "project":
-            metadata = self.database_view.get_project_metadata(key)
+            metadata = self.db_view.get_project_metadata(key)
         elif self.current_table() == "scan":
-            metadata = self.database_view.get_scan_metadata(key)
+            metadata = self.db_view.get_scan_metadata(key)
         elif self.current_table() == '"user"':
-            metadata = self.database_view.get_user_metadata(key)
+            metadata = self.db_view.get_user_metadata(key)
         else:
             # Escape the function if not a valid table
             logging.warning("%s is not a valid table.", self.current_table())
