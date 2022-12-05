@@ -100,16 +100,15 @@ class MainWindow(QMainWindow):
         table_widget = QWidget()
         self.table_layout = QVBoxLayout()
 
-        # Create a table; initialize with projects
-        self.table_view = TableView()
-        self.table_view.setSelectionBehavior(TableView.SelectionBehavior.SelectRows)
-        self.table_view.doubleClicked.connect(self.on_double_click)
-        self.update_table_with_projects()
-
         # Create search query
         self.search_query = QLineEdit()
         self.search_query.setPlaceholderText("Search the table...")
-        self.search_query.textChanged.connect(self.proxy_model.setFilterFixedString)
+
+        # Create a table; initialize with projects
+        self.table_view = TableView()
+        self.table_view.setSelectionBehavior(TableView.SelectionBehavior.SelectRows)
+        self.table_view.doubleClicked.connect(lambda: self.open_data())
+        self.update_table_with_projects()
 
         # Add the table and search query to table layout
         self.table_layout.addWidget(self.search_query)
@@ -170,6 +169,10 @@ class MainWindow(QMainWindow):
         # Make the filters case-insensitive
         self.proxy_model.setFilterCaseSensitivity(Qt.CaseInsensitive)
 
+        # Connect search query to proxy model
+        # Note: must do this on each table update, or it will disconnect
+        self.search_query.textChanged.connect(self.proxy_model.setFilterFixedString)
+
         # Filter by all columns
         self.proxy_model.setFilterKeyColumn(-1)
 
@@ -191,6 +194,8 @@ class MainWindow(QMainWindow):
 
         # Update metadata panel
         self.metadata_panel.update_metadata()
+
+        logging.info("Table updated.")
 
     def update_table_with_projects(self) -> None:
         """Update table to display projects."""
@@ -365,7 +370,6 @@ class MainWindow(QMainWindow):
 
         # Help actions
         toolbar.addSeparator()
-        toolbar.addAction(self.doc_act)
         toolbar.addAction(self.about_act)
 
     def get_value_from_row(self, column: int) -> int:
@@ -538,11 +542,6 @@ class MainWindow(QMainWindow):
         """Get the current table displayed."""
 
         return self.current_table_query[1]
-
-    def on_double_click(self) -> None:
-        """Open the selected data when double-clicking a row."""
-
-        self.open_data()
 
     def on_selection_changed(self) -> None:
         """Update the metadata when a new row is selected."""

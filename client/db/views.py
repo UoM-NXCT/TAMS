@@ -1,10 +1,12 @@
 """
 This files classes to represent data from the database to the user.
 """
-
+from pathlib import Path
 from typing import Any
 
 from psycopg.errors import DuplicateObject
+
+from client import settings
 
 from .exceptions import MissingTables
 from .models import Database
@@ -194,3 +196,31 @@ class DatabaseView:
                 f"Duplicate instrument ID {instrument_id} found in database"
             )
         return bool(rows)
+
+    # Catechism: why is this function in the database module?
+    # As the project grows, the database will be involved in connecting the user to
+    # their files. While primitive at present, it may become more complex. Hence, it is
+    # in the database view module.
+    @staticmethod
+    def get_prj_dir(prj_id: int) -> Path:
+        """Get the project directory path."""
+
+        perm_lib: Path = Path(settings.get_lib("permanent"))
+        prj_dir: Path = perm_lib / str(prj_id)
+        return prj_dir
+
+    def get_scan_dir(self, scan_id: int, prj_id: int | None = None) -> Path:
+        """Get the scan directory path."""
+
+        if prj_id is None:
+            data, _ = self.view_select_from_where(
+                "project_id",
+                "scan",
+                f"scan_id={scan_id}",
+            )
+            prj_id = data[0][0]
+        if prj_id is None:
+            raise ValueError("Project ID not found")
+        prj_dir: Path = self.get_prj_dir(prj_id)
+        scan_dir: Path = prj_dir / str(scan_id)
+        return scan_dir

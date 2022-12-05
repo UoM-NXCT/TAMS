@@ -258,14 +258,15 @@ class MetadataPanel(QWidget):
         """Update the README.txt widget."""
 
         if self._data and self._column_headers:
-
-            readme_dir: Path = self.get_readme_dir()
-
             try:
+                readme_dir: Path = self.get_readme_dir()
                 self.update_readme_text_edit(readme_dir)
                 self.readme_widget.show()
             except FileNotFoundError:
                 logging.debug("README.txt not found in %s", readme_dir)
+                self.readme_widget.hide()
+            except ValueError:
+                logging.debug("Project ID not found during README.txt update.")
                 self.readme_widget.hide()
         else:
             self.readme_widget.hide()
