@@ -87,6 +87,8 @@ class MainWindow(QMainWindow):
 
         self.show()
 
+        self.update_table()
+
     def set_up_main_window(self) -> None:
         """Create and arrange widgets in the main window."""
 
@@ -180,9 +182,24 @@ class MainWindow(QMainWindow):
         self.table_view.setModel(self.proxy_model)
 
         # Make table look pretty
+
+        # Stretch table to fill window and store width of each column
         self.table_view.horizontalHeader().setSectionResizeMode(
-            QHeaderView.ResizeMode.Stretch
+            QHeaderView.ResizeMode.ResizeToContents
         )
+        header_widths = tuple(
+            self.table_view.horizontalHeader().sectionSize(i)
+            for i, _ in enumerate(column_headers)
+        )
+
+        # Set the width of each column to be interactive for the user
+        self.table_view.horizontalHeader().setSectionResizeMode(
+            QHeaderView.ResizeMode.Interactive
+        )
+
+        # Set initial width of each column to be the width of the header when pretty
+        for i, width in enumerate(header_widths):
+            self.table_view.horizontalHeader().resizeSection(i, width)
 
         # Make the table react to selection changes
         self.table_view.selectionModel().selectionChanged.connect(
