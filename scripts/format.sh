@@ -1,12 +1,12 @@
 #!/bin/bash
 
 echo "Formatting with ssort..."
-poetry run ssort .
+python -m poetry run ssort .
 
 echo "Formatting with isort..."
-poetry run isort . --profile black
+python -m poetry run isort . --profile black
 
 echo "Formatting with black..."
-poetry run black .
+python -m poetry run black .
 
 $SHELL

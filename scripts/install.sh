@@ -2,5 +2,7 @@
 
 echo "Installing packages..."
 python -m pip install --upgrade pip
-pip install poetry
-poetry install
+python -m pip install poetry
+python -m poetry install
+
+$SHELL

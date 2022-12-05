@@ -176,6 +176,7 @@ class MetadataPanel(QWidget):
 
     def get_prj_id(self) -> int | None:
         """Get the project ID from the metadata."""
+
         try:
             if not self._data or not self._column_headers:
                 return None
@@ -220,8 +221,10 @@ class MetadataPanel(QWidget):
                 # If the project ID is found, load the thumbnail
                 thumbnail: Path = get_thumbnail(prj_id, scan_id)
                 self.thumbnail_widget.load(thumbnail)
+                self.thumbnail_widget.show()
             else:
                 self.thumbnail_widget.load(settings.placeholder_image)
+                self.thumbnail_widget.hide()
 
     def update_readme_text_edit(self, readme_dir: Path) -> None:
         """Load the README.txt file."""
@@ -258,14 +261,15 @@ class MetadataPanel(QWidget):
         """Update the README.txt widget."""
 
         if self._data and self._column_headers:
-
-            readme_dir: Path = self.get_readme_dir()
-
             try:
+                readme_dir: Path = self.get_readme_dir()
                 self.update_readme_text_edit(readme_dir)
                 self.readme_widget.show()
             except FileNotFoundError:
                 logging.debug("README.txt not found in %s", readme_dir)
+                self.readme_widget.hide()
+            except ValueError:
+                logging.debug("Project ID not found during README.txt update.")
                 self.readme_widget.hide()
         else:
             self.readme_widget.hide()

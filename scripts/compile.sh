@@ -1,9 +1,10 @@
 #!/bin/bash
 
-echo "Compiling..."
-poetry run pyinstaller \
+echo "Compiling with pyinstaller..."
+python -m poetry run pyinstaller \
 --add-data="client/settings/*;client/settings/" \
 --add-data="client/resources/*;client/resources/" \
---windowed client/__main__.py --name "TAMS"
+--windowed client/__main__.py --name "TAMS" \
+--log-level=DEBUG
 
 $SHELL
