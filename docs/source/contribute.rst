@@ -127,6 +127,12 @@ To help with this, TAMS uses `PyInstaller <https://www.pyinstaller.org/>`_ to co
 
 To compile the code, execute the ``compile.sh`` script in the scripts directory. The compiled code will be placed in the ``dist`` directory.
 
+.. note::
+
+    Anti-virus surveillance has a habit of flagging compiled code and pyinstaller
+    executables as malicious, even though they are not. You may need to disable your
+    anti-virus software to compile and run the code.
+
 Code style
 ----------
 
