@@ -10,17 +10,6 @@ tomography research facility.
 
 It aims to make storing and accessing data easy and quick.
 
-## Table of Contents
-
-- [Get started](#get-started)
-- [Develop](#develop)
-  - [GUI](#gui)
-  - [PostgreSQL server](#postgresql-server)
-  - [Tests](#tests)
-- [Issues](#issues)
-- [Licence](#licence)
-- [Warranty](#warranty)
-
 ## Get started
 
 TAMS is currently in development, so it does not yet have installation instructions and 
