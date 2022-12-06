@@ -28,6 +28,7 @@ from PySide6.QtWidgets import (
 from client import settings
 from client.db import DatabaseView
 from client.runners import SaveScans, ValidateScans
+from client.utils import log
 from client.utils.toml import load_toml
 from client.widgets.dialogue import (
     About,
@@ -45,6 +46,8 @@ from client.widgets.table import TableModel, TableView
 from client.widgets.toolbox import ToolBox
 
 TAMS_ROOT = Path(__file__).parents[1]
+
+logger = log.logger(__name__)
 
 
 class MainWindow(QMainWindow):
@@ -416,16 +419,14 @@ class MainWindow(QMainWindow):
         row_pk: int = self.get_value_from_row(0)
 
         if table == "project":
-            logging.info("Uploading data from project ID %s", row_pk)
             runner = SaveScans(row_pk, download=False)
             self.upload_dlg = UploadScans(runner)
         elif table == "scan":
-            logging.info("Uploading data from scan ID %s", row_pk)
             prj_id: int = self.get_value_from_row(1)
             runner = SaveScans(prj_id, row_pk, download=False)
             self.upload_dlg = UploadScans(runner)
         else:
-            logging.error("Cannot upload data from table %s", table)
+            logger.error("Cannot upload data from table %s", table)
             QMessageBox.critical(
                 self,
                 "Error",
@@ -443,14 +444,10 @@ class MainWindow(QMainWindow):
         row_pk: int = self.get_value_from_row(0)
 
         if table == "project":
-            logging.info("Downloading data from project ID %s", row_pk)
-
             runner = SaveScans(row_pk, download=True)
             self.download_dlg = DownloadScans(runner)
 
         elif table == "scan":
-            logging.info("Downloading data from scan ID %s", row_pk)
-
             # Get the path of the local scan directory
             prj_id: int = self.get_value_from_row(1)
 
@@ -458,7 +455,7 @@ class MainWindow(QMainWindow):
             self.download_dlg = DownloadScans(runner)
 
         else:
-            logging.error("Cannot download data from table %s", table)
+            logger.error("Cannot download data from table %s", table)
             QMessageBox.critical(
                 self,
                 "Error",
@@ -476,7 +473,16 @@ class MainWindow(QMainWindow):
         row_pk: int = self.get_value_from_row(0)
 
         # Get the path of the local library
-        local_lib: Path = Path(settings.get_lib("local"))
+        try:
+            local_lib: Path = Path(settings.get_lib("local"))
+        except TypeError:
+            logger.error("Local library path not set")
+            QMessageBox.critical(
+                self,
+                "Error",
+                "Local library path not set",
+            )
+            return
 
         if table == "project":
             logging.info("Opening data from project ID %s", row_pk)

@@ -1,6 +1,0 @@
-[storage]
-local_library = "C:/Users/LabAdmin/Desktop/local"
-permanent_library = "Y:/perm_project_storage"
-
-[structure]
-perm_dir_name = "raw"
