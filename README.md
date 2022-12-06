@@ -10,17 +10,6 @@ tomography research facility.
 
 It aims to make storing and accessing data easy and quick.
 
-## Table of Contents
-
-- [Get started](#get-started)
-- [Develop](#develop)
-  - [GUI](#gui)
-  - [PostgreSQL server](#postgresql-server)
-  - [Tests](#tests)
-- [Issues](#issues)
-- [Licence](#licence)
-- [Warranty](#warranty)
-
 ## Get started
 
 TAMS is currently in development, so it does not yet have installation instructions and 
@@ -35,8 +24,9 @@ poetry run python -m client
 
 ## Documentation
 
-The documentation is hosted [online](https://tams-nxct.readthedocs.io/en/latest/). You 
-can also build the documentation locally by executing the following command from the 
+You can read the documentation [online](https://tams-nxct.readthedocs.io/). 
+
+You can also build the documentation locally by executing the following command from the 
 `docs/` directory:
 
 ```commandline
@@ -45,9 +35,9 @@ poetry run sphinx-build -b html source build
 
 ## Contribute
 
-This project is open to contributions. Read the 
-[contributing guidelines](https://tams-nxct.readthedocs.io/en/latest/contribute.html) 
-for more information.
+This project is open to contributions. Read the [contributing 
+guidelines](https://tams-nxct.readthedocs.io/en/latest/contribute.html) for more 
+information.
 
 ## Licence
 
