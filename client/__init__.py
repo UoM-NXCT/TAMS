@@ -6,7 +6,7 @@ from importlib import metadata
 
 # Get the version of the package
 try:
-    __version__ = metadata.version("Tomography Archival Management System")
+    __version__ = metadata.version(__name__)
 except metadata.PackageNotFoundError:
     logging.exception(
         "Could not find package metadata during init. Setting version to 'unknown'."
