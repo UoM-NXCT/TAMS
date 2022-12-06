@@ -33,7 +33,7 @@ def access_settings(func: Callable[..., Any]) -> Callable[..., Any]:
     """Decorator to access settings."""
 
     @wraps(func)
-    def wrapper(*args: Any, **kwargs: Any) -> None:
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
         """Attempt to execute the sql command, and handle any exceptions."""
 
         try:

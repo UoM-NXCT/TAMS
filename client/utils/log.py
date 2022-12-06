@@ -13,8 +13,8 @@ def logger(name: str) -> logging.Logger:
     custom_logger: logging.Logger = logging.getLogger(name)
 
     # Create logging handler
-    f_handler: logging.FileHandler = logging.FileHandler(settings.log_file)
-    c_handler: logging.StreamHandler = logging.StreamHandler()
+    f_handler = logging.FileHandler(settings.log_file)
+    c_handler = logging.StreamHandler()
     f_handler.setLevel(logging.ERROR)
     c_handler.setLevel(logging.WARNING)
 
