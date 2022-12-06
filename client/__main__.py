@@ -1,7 +1,6 @@
 """
 Entry point for the GUI application script.
 """
-import logging
 import sys
 
 from PySide6.QtGui import QPixmap
@@ -13,9 +12,6 @@ from client.gui import MainWindow
 
 def main() -> None:
     """Main function implements the GUI."""
-
-    # Enable logging
-    logging.basicConfig(level=logging.INFO)
 
     app: QApplication = QApplication(sys.argv)
 

@@ -140,6 +140,9 @@ Please follow the code style of this project when contributing code. Doing so wi
 
 If something is not covered by the code style, please use your best judgement and try to adhere to modern Python best practices.
 
+Tools
+~~~~~
+
 Black
 ^^^^^
 
@@ -227,7 +230,7 @@ To run pylint, run:
     poetry run pylint .
 
 Variable names
-^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~
 
 Variable names should be descriptive and follow `PEP 8 <https://www.python.org/dev/peps/pep-0008/#naming-conventions>`_.
 
@@ -249,12 +252,12 @@ Security policy
 ---------------
 
 Supported versions
-^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~
 
 Please use the latest release for the best performance, stability, and security.
 
 Reporting a vulnerability
-^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The development team and community take security issues seriously. We appreciate your
 efforts to disclose your findings responsibly and will make every effort to acknowledge

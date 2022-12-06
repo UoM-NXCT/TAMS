@@ -5,8 +5,10 @@ Settings are saved as TOML files in the settings directory.
 """
 
 import logging
+from pathlib import Path
 
 import psycopg
+from PySide6.QtCore import QFile, QUrl
 from PySide6.QtGui import QDesktopServices
 from PySide6.QtWidgets import (
     QDialog,
@@ -44,12 +46,15 @@ class Settings(QDialog):
         tab_bar: QTabWidget = QTabWidget(self)
         self.general_settings_tab: QWidget = QWidget()
         self.database_settings_tab: QWidget = QWidget()
+        self.logging_settings_tab: QWidget = QWidget()
         tab_bar.addTab(self.general_settings_tab, "General")
         tab_bar.addTab(self.database_settings_tab, "Database")
+        tab_bar.addTab(self.logging_settings_tab, "Logging")
 
         # Call methods to create the pages.
         self.general_settings()
         self.database_settings()
+        self.set_up_logging_settings()
 
         # Create buttons
         btn_box: QDialogButtonBox = QDialogButtonBox(
@@ -76,7 +81,7 @@ class Settings(QDialog):
         """General settings page allows to set the local and permanent library."""
 
         # Create the layout for the local library settings.
-        self.local_lib_info = QLabel(self.local_lib_info())
+        self.local_lib_info = QLabel(self.get_local_lib_info())
         self.local_lib_info.setWordWrap(True)
 
         local_lib_buttons: QWidget = QWidget()
@@ -95,7 +100,7 @@ class Settings(QDialog):
         local_lib_buttons.setLayout(local_lib_buttons_layout)
 
         # Create the layout for the permanent library settings.
-        self.permanent_lib_info = QLabel(self.perm_lib_info())
+        self.permanent_lib_info = QLabel(self.get_perm_lib_info())
         self.permanent_lib_info.setWordWrap(True)
 
         permanent_lib_buttons: QWidget = QWidget()
@@ -124,8 +129,37 @@ class Settings(QDialog):
         # Set layout for general settings tab
         self.general_settings_tab.setLayout(tab_v_box)
 
+    def set_up_logging_settings(self) -> None:
+        """Logging settings page allows to set the logging level."""
+
+        # Create the layout for the logging settings.
+        logging_settings: QWidget = QWidget()
+        logging_settings_layout: QVBoxLayout = QVBoxLayout()
+
+        open_logs_btn: QPushButton = QPushButton("Open logs")
+        open_logs_btn.clicked.connect(
+            lambda: QDesktopServices.openUrl(QUrl.fromLocalFile(settings.log_file))
+        )
+        logging_settings_layout.addWidget(open_logs_btn)
+
+        clear_logs_btn: QPushButton = QPushButton("Clear logs")
+        clear_logs_btn.clicked.connect(
+            lambda: QFile(settings.log_file).open(QFile.WriteOnly | QFile.Truncate)
+        )
+        logging_settings_layout.addWidget(clear_logs_btn)
+
+        logging_settings.setLayout(logging_settings_layout)
+
+        # Add widgets to logging settings page layout
+        tab_v_box = QVBoxLayout()
+        tab_v_box.addWidget(logging_settings)
+        tab_v_box.addStretch()
+
+        # Set layout for logging settings tab
+        self.logging_settings_tab.setLayout(tab_v_box)
+
     @staticmethod
-    def local_lib_info() -> str:
+    def get_local_lib_info() -> str:
         """Generate the text to display the local library."""
 
         info: str = f"""
@@ -146,7 +180,7 @@ class Settings(QDialog):
         return info
 
     @staticmethod
-    def perm_lib_info() -> str:
+    def get_perm_lib_info() -> str:
         """Generate the text to display the local library."""
 
         info: str = f"""
@@ -271,9 +305,9 @@ class Settings(QDialog):
 
         # Update the library info text
         if lib_title == "local":
-            self.local_lib_info.setText(self.local_lib_info())
+            self.local_lib_info.setText(self.get_local_lib_info())
         elif lib_title == "permanent":
-            self.permanent_lib_info.setText(self.perm_lib_info())
+            self.permanent_lib_info.setText(self.get_perm_lib_info())
         else:
             logging.critical("Invalid library title: %s", lib_title)
 

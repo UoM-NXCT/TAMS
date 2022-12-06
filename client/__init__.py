@@ -1,14 +1,16 @@
 """
 Evaluate run-time constants.
 """
-import logging
 from importlib import metadata
+
+from client.utils import log
 
 # Get the version of the package
 try:
+    # FIXME: This doesn't seem to work and raises an exception (see below).
     __version__ = metadata.version(__name__)
 except metadata.PackageNotFoundError:
-    logging.exception(
+    log.logger(__name__).exception(
         "Could not find package metadata during init. Setting version to 'unknown'."
     )
     __version__ = "unknown"
