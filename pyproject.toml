@@ -8,7 +8,7 @@ authors = [
 ]
 readme = "README.md"
 repository = "https://github.com/UoM-NXCT/TAMS"
-documentation = "https://tams-nxct.readthedocs.io/en/latest/"
+documentation = "https://tams-nxct.readthedocs.io/"
 
 [tool.poetry.urls]
 "NXCT homepage" = "https://nxct.ac.uk/"
