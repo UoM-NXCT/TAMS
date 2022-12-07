@@ -269,7 +269,7 @@ class MainWindow(QMainWindow):
         self.upload_act = QAction(icon, "Upload data")
         self.upload_act.setShortcut("Ctrl+U")
         self.upload_act.setToolTip("Upload selected data")
-        self.upload_act.triggered.connect(self.upload_data)
+        self.upload_act.triggered.connect(lambda: actions.upload(self))
 
         icon = self.style().standardIcon(QStyle.StandardPixmap.SP_DialogOpenButton)
         self.open_act = QAction(icon, "Open data")
@@ -411,31 +411,6 @@ class MainWindow(QMainWindow):
         row_value = row[column]
 
         return row_value
-
-    @attempt_file_io
-    def upload_data(self) -> None:
-        """Upload data to the database."""
-
-        # Get the selected table
-        table = self.current_table()
-
-        # Get the primary key of the selected row
-        row_pk: int = self.get_value_from_row(0)
-
-        if table == "project":
-            runner = SaveScans(row_pk, download=False)
-            self.upload_dlg = UploadScans(runner)
-        elif table == "scan":
-            prj_id: int = self.get_value_from_row(1)
-            runner = SaveScans(prj_id, row_pk, download=False)
-            self.upload_dlg = UploadScans(runner)
-        else:
-            logger.error("Cannot upload data from table %s", table)
-            QMessageBox.critical(
-                self,
-                "Error",
-                f"Cannot upload data from table {table}",
-            )
 
     @attempt_file_io
     def open_data(self) -> None:

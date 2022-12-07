@@ -1,10 +1,12 @@
 """
 Progress bar dialogue for uploading scans.
 """
+from __future__ import annotations
+
 import logging
+import typing
 
 from PySide6.QtCore import QThreadPool
-from PySide6.QtGui import QCloseEvent
 from PySide6.QtWidgets import (
     QDialog,
     QHBoxLayout,
@@ -19,14 +21,23 @@ from client.runners.generic import RunnerStatus
 from client.runners.save import SaveScans
 from client.utils.file import size_fmt
 
+if typing.TYPE_CHECKING:
+    from PySide6.QtGui import QCloseEvent
+    from PySide6.QtWidgets import QWidget
+
 
 class UploadScans(QDialog):
     """Progress dialogue."""
 
-    def __init__(self, runner: SaveScans, hide: bool = False) -> None:
+    def __init__(
+        self,
+        runner: SaveScans,
+        hide: bool = False,
+        parent_widget: QWidget | None = None,
+    ) -> None:
         """Initialize the dialogue."""
 
-        super().__init__()
+        super().__init__(parent=parent_widget)
 
         self.setWindowTitle("Uploading data...")
 
@@ -107,7 +118,7 @@ class UploadScans(QDialog):
         logging.info("Closing %s.", self.__class__.__name__)
 
         # Kill the runner on close if not killed already
-        if not self.runner.worker_status is RunnerStatus.KILLED:
+        if self.runner.worker_status is not RunnerStatus.KILLED:
             self.runner.kill()
 
         super().closeEvent(arg__1)
