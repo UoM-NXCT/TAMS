@@ -16,7 +16,7 @@ def logger(name: str) -> logging.Logger:
     f_handler = logging.FileHandler(settings.log_file)
     c_handler = logging.StreamHandler()
     f_handler.setLevel(logging.ERROR)
-    c_handler.setLevel(logging.WARNING)
+    c_handler.setLevel(logging.INFO)
 
     # Create logging formatter and add it to the handler
     f_format: logging.Formatter = logging.Formatter(

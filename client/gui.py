@@ -25,7 +25,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from client import settings
+from client import actions, settings
 from client.db import DatabaseView
 from client.runners import SaveScans, ValidateScans
 from client.utils import log
@@ -283,13 +283,13 @@ class MainWindow(QMainWindow):
         self.validate_act = QAction(icon, "Validate data")
         self.validate_act.setShortcut("Ctrl+V")
         self.validate_act.setToolTip("Validate selected data")
-        self.validate_act.triggered.connect(self.validate_data)
+        self.validate_act.triggered.connect(lambda: actions.validate(self))
 
         icon = self.style().standardIcon(QStyle.StandardPixmap.SP_FileDialogNewFolder)
         self.add_act = QAction(icon, "Add data")
         self.add_act.setShortcut("Ctrl+A")
         self.add_act.setToolTip("Add data to the local library")
-        self.add_act.triggered.connect(lambda: print("Add data"))
+        self.add_act.triggered.connect(self.add_data)
 
         self.quit_act = QAction("&Quit")
         self.quit_act.setShortcut("Ctrl+Q")
@@ -386,6 +386,7 @@ class MainWindow(QMainWindow):
         toolbar.addAction(self.reload_table_act)
         toolbar.addAction(self.download_act)
         toolbar.addAction(self.upload_act)
+        toolbar.addAction(self.add_act)
         toolbar.addAction(self.open_act)
         toolbar.addAction(self.validate_act)
 
@@ -519,7 +520,8 @@ class MainWindow(QMainWindow):
                 QMessageBox.critical(
                     self,
                     "Error",
-                    f"Scan ID {row_pk} does not exist in the local library. Has the data been downloaded?",
+                    f"Scan ID {row_pk} does not exist in the local library. Has the data"
+                    " been downloaded?",
                 )
         else:
             logging.error("Cannot open data from table %s", table)
@@ -530,36 +532,22 @@ class MainWindow(QMainWindow):
             )
 
     @attempt_file_io
-    def validate_data(self):
-        """Download selected data."""
+    def add_data(self) -> None:
+        """Add data to the local library."""
 
         # Get the selected table
         table = self.current_table()
 
-        # Get the primary key of the selected row
-        row_pk: int = self.get_value_from_row(0)
-
         if table == "project":
-            logging.info("Validating data from project ID %s", row_pk)
-
-            runner = ValidateScans(row_pk)
-            self.download_dlg = Validate(runner)
-
+            raise NotImplementedError("Adding projects is not yet implemented")
         elif table == "scan":
-            logging.info("Validating data from scan ID %s", row_pk)
-
-            # Get the path of the local scan directory
-            project_id: int = self.get_value_from_row(1)
-
-            runner = ValidateScans(project_id, row_pk)
-            self.download_dlg = Validate(runner)
-
+            print("Adding scan")
         else:
-            logging.error("Cannot validate.py data from table %s", table)
+            logging.error("Cannot add data to table %s", table)
             QMessageBox.critical(
                 self,
                 "Error",
-                f"Cannot download data from table {table}",
+                f"Cannot add data to table {table}",
             )
 
     def current_table(self) -> str:
@@ -591,9 +579,7 @@ class MainWindow(QMainWindow):
         elif self.current_table() == '"user"':
             metadata = self.db_view.get_user_metadata(key)
         else:
-            # Escape the function if not a valid table
-            logging.warning("%s is not a valid table.", self.current_table())
-            return
+            raise NotImplementedError(f"Unknown table {self.current_table()}")
 
         # Update the metadata panel with the new metadata
         self.metadata_panel.update_metadata(metadata)
