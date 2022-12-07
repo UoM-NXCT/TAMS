@@ -14,13 +14,13 @@ from PySide6.QtGui import QDesktopServices
 from PySide6.QtWidgets import QMessageBox
 
 from client import settings
-from client.widgets.dialogue import attempt_file_io
+from client.widgets.dialogue import handle_common_exc
 
 if typing.TYPE_CHECKING:
     from client.gui import MainWindow
 
 
-@attempt_file_io
+@handle_common_exc
 def open_data(main_window: MainWindow) -> None:
     """Open directory in local library."""
 

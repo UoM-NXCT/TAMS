@@ -9,13 +9,13 @@ import typing
 from PySide6.QtWidgets import QDialog, QMessageBox
 
 from client.runners import ValidateScans
-from client.widgets.dialogue import Validate, attempt_file_io
+from client.widgets.dialogue import Validate, handle_common_exc
 
 if typing.TYPE_CHECKING:
     from client.gui import MainWindow
 
 
-@attempt_file_io
+@handle_common_exc
 def validate(main_window: MainWindow) -> QDialog:
     """Validate action returns a dialogue with a validation runner."""
 

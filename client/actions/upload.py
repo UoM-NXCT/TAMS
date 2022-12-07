@@ -9,7 +9,7 @@ import typing
 from PySide6.QtWidgets import QMessageBox
 
 from client.runners import SaveScans
-from client.widgets.dialogue import UploadScans, attempt_file_io
+from client.widgets.dialogue import UploadScans, handle_common_exc
 
 if typing.TYPE_CHECKING:
     from PySide6.QtWidgets import QDialog
@@ -17,7 +17,7 @@ if typing.TYPE_CHECKING:
     from client.gui import MainWindow
 
 
-@attempt_file_io
+@handle_common_exc
 def upload(main_window: MainWindow) -> QDialog:
     """Download action returns a dialogue with a save scans runner."""
 

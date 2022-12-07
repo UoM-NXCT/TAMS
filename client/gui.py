@@ -38,7 +38,7 @@ from client.widgets.dialogue import (
     Settings,
     UploadScans,
     Validate,
-    attempt_file_io,
+    handle_common_exc,
 )
 from client.widgets.metadata_panel import MetadataPanel
 from client.widgets.table import TableModel, TableView
@@ -289,7 +289,7 @@ class MainWindow(QMainWindow):
         self.add_act = QAction(icon, "Add data")
         self.add_act.setShortcut("Ctrl+A")
         self.add_act.setToolTip("Add data to the local library")
-        self.add_act.triggered.connect(self.add_data)
+        self.add_act.triggered.connect(lambda: print("Add data"))
 
         self.quit_act = QAction("&Quit")
         self.quit_act.setShortcut("Ctrl+Q")
@@ -300,7 +300,9 @@ class MainWindow(QMainWindow):
 
         self.full_screen_act = QAction("Full Screen", checkable=True)
         self.full_screen_act.setStatusTip("Toggle full screen mode")
-        self.full_screen_act.triggered.connect(self.toggle_full_screen)
+        self.full_screen_act.triggered.connect(
+            lambda: actions.toggle_full_screen(self, self.full_screen_act.isChecked())
+        )
 
         # Create actions for the Help menu
 
@@ -319,14 +321,6 @@ class MainWindow(QMainWindow):
         self.about_act.triggered.connect(
             lambda: About()  # pylint: disable=unnecessary-lambda
         )
-
-    def toggle_full_screen(self, state) -> None:
-        """Toggle full screen mode."""
-
-        if state:
-            self.showFullScreen()
-        else:
-            self.showNormal()
 
     def open_create_prj(self) -> None:
         """
@@ -411,25 +405,6 @@ class MainWindow(QMainWindow):
         row_value = row[column]
 
         return row_value
-
-    @attempt_file_io
-    def add_data(self) -> None:
-        """Add data to the local library."""
-
-        # Get the selected table
-        table = self.current_table()
-
-        if table == "project":
-            raise NotImplementedError("Adding projects is not yet implemented")
-        elif table == "scan":
-            print("Adding scan")
-        else:
-            logging.error("Cannot add data to table %s", table)
-            QMessageBox.critical(
-                self,
-                "Error",
-                f"Cannot add data to table {table}",
-            )
 
     def current_table(self) -> str:
         """Get the current table displayed."""
