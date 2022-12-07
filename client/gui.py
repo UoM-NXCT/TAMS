@@ -90,7 +90,7 @@ class MainWindow(QMainWindow):
 
         self.show()
 
-        self.update_table()
+        actions.update_table(self)
 
     def set_up_main_window(self) -> None:
         """Create and arrange widgets in the main window."""
@@ -144,77 +144,6 @@ class MainWindow(QMainWindow):
         widget.setLayout(layout)
         self.setCentralWidget(widget)
 
-    def update_table(self) -> None:
-        """Update table model using SQL command."""
-
-        # Get table data
-        select_value, from_value, where_value = self.current_table_query
-        if self.db_view:
-            if where_value:
-                data, column_headers = self.db_view.view_select_from_where(
-                    select_value, from_value, where_value
-                )
-            else:
-                data, column_headers = self.db_view.view_select_from_where(
-                    select_value, from_value
-                )
-        else:
-            data = []
-            column_headers = ()
-
-        # Create table model
-        self.table_model = TableModel(data, column_headers)
-
-        # Create proxy model
-        self.proxy_model = QSortFilterProxyModel()
-
-        # Set proxy model to table model
-        self.proxy_model.setSourceModel(self.table_model)
-
-        # Make the filters case-insensitive
-        self.proxy_model.setFilterCaseSensitivity(Qt.CaseInsensitive)
-
-        # Connect search query to proxy model
-        # Note: must do this on each table update, or it will disconnect
-        self.search.textChanged.connect(self.proxy_model.setFilterFixedString)
-
-        # Filter by all columns
-        self.proxy_model.setFilterKeyColumn(-1)
-
-        # Set the table view to use the proxy model
-        self.table_view.setModel(self.proxy_model)
-
-        # Make table look pretty
-
-        # Stretch table to fill window and store width of each column
-        self.table_view.horizontalHeader().setSectionResizeMode(
-            QHeaderView.ResizeMode.ResizeToContents
-        )
-        header_widths = tuple(
-            self.table_view.horizontalHeader().sectionSize(i)
-            for i, _ in enumerate(column_headers)
-        )
-
-        # Set the width of each column to be interactive for the user
-        self.table_view.horizontalHeader().setSectionResizeMode(
-            QHeaderView.ResizeMode.Interactive
-        )
-
-        # Set initial width of each column to be the width of the header when pretty
-        for i, width in enumerate(header_widths):
-            self.table_view.horizontalHeader().resizeSection(i, width)
-
-        # Make the table react to selection changes
-        self.table_view.selectionModel().selectionChanged.connect(
-            self.on_selection_changed
-        )
-
-        # Let user sort table by column
-        self.table_view.setSortingEnabled(True)
-
-        # Update metadata panel
-        self.metadata_panel.update_metadata()
-
     def update_table_with_projects(self) -> None:
         """Update table to display projects."""
 
@@ -223,7 +152,7 @@ class MainWindow(QMainWindow):
             "project",
             None,
         )
-        self.update_table()
+        actions.update_table(self)
 
     def update_table_with_users(self) -> None:
         """Update the table widget to display users."""
@@ -233,13 +162,13 @@ class MainWindow(QMainWindow):
             '"user"',
             None,
         )
-        self.update_table()
+        actions.update_table(self)
 
     def update_table_with_scans(self) -> None:
         """Update the table widget to display scans."""
 
         self.current_table_query = ("scan_id, project_id, instrument_id", "scan", None)
-        self.update_table()
+        actions.update_table(self)
 
     def create_actions(self):
         """Create the application actions."""
@@ -257,7 +186,7 @@ class MainWindow(QMainWindow):
         self.reload_table_act = QAction(icon, "Reload")
         self.reload_table_act.setShortcut("F5")
         self.reload_table_act.setToolTip("Reload the active table")
-        self.reload_table_act.triggered.connect(self.update_table)
+        self.reload_table_act.triggered.connect(lambda: actions.update_table(self))
 
         icon = self.style().standardIcon(QStyle.StandardPixmap.SP_ArrowDown)
         self.download_act = QAction(icon, "Download data")
