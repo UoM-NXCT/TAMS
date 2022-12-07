@@ -86,3 +86,36 @@ def update_table(main_window: MainWindow) -> None:
 
     # Update metadata panel
     main_window.metadata_panel.update_metadata()
+
+
+def update_table_with_projects(main_window: MainWindow) -> None:
+    """Update table to display projects."""
+
+    main_window.current_table_query = (
+        "project_id, title, start_date, end_date",
+        "project",
+        None,
+    )
+    main_window.reload_table_act.trigger()
+
+
+def update_table_with_scans(main_window: MainWindow) -> None:
+    """Update the table widget to display scans."""
+
+    main_window.current_table_query = (
+        "scan_id, project_id, instrument_id",
+        "scan",
+        None,
+    )
+    main_window.reload_table_act.trigger()
+
+
+def update_table_with_users(main_window: MainWindow) -> None:
+    """Update the table widget to display users."""
+
+    main_window.current_table_query = (
+        "user_id, first_name, last_name, email_address",
+        '"user"',
+        None,
+    )
+    main_window.reload_table_act.trigger()

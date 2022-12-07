@@ -86,7 +86,7 @@ class MainWindow(QMainWindow):
         self.create_actions()
         self.create_window()
         self.create_tool_bar()
-
+        actions.update_table_with_projects(self)
         self.show()
 
         actions.update_table(self)
@@ -112,7 +112,6 @@ class MainWindow(QMainWindow):
         self.table_view = TableView()
         self.table_view.setSelectionBehavior(TableView.SelectionBehavior.SelectRows)
         self.table_view.doubleClicked.connect(lambda: actions.open_data(self))
-        self.update_table_with_projects()
 
         # Add the table and search query to table layout
         self.table_layout.addWidget(self.search)
@@ -123,13 +122,27 @@ class MainWindow(QMainWindow):
         self.toolbox = ToolBox()
 
         # Link toolbox buttons to functions
-        self.toolbox.prj_btn.clicked.connect(self.update_table_with_projects)
+
+        # Project tab buttons
+        self.toolbox.prj_btn.clicked.connect(
+            lambda: actions.update_table_with_projects(self)
+        )
         self.toolbox.create_prj_btn.clicked.connect(
             lambda: CreatePrj(self, self.conn_str)
         )
-        self.toolbox.scans_btn.clicked.connect(self.update_table_with_scans)
-        self.toolbox.create_scan_btn.clicked.connect(self.open_create_scan)
-        self.toolbox.users_btn.clicked.connect(self.update_table_with_users)
+
+        # Scan tab buttons
+        self.toolbox.scans_btn.clicked.connect(
+            lambda: actions.update_table_with_scans(self)
+        )
+        self.toolbox.create_scan_btn.clicked.connect(
+            lambda: CreateScan(self, self.conn_str)
+        )
+
+        # User tab buttons
+        self.toolbox.users_btn.clicked.connect(
+            lambda: actions.update_table_with_users(self)
+        )
 
         # Create layout
         layout: QGridLayout = QGridLayout()
@@ -144,32 +157,6 @@ class MainWindow(QMainWindow):
         widget = QWidget()
         widget.setLayout(layout)
         self.setCentralWidget(widget)
-
-    def update_table_with_projects(self) -> None:
-        """Update table to display projects."""
-
-        self.current_table_query = (
-            "project_id, title, start_date, end_date",
-            "project",
-            None,
-        )
-        actions.update_table(self)
-
-    def update_table_with_users(self) -> None:
-        """Update the table widget to display users."""
-
-        self.current_table_query = (
-            "user_id, first_name, last_name, email_address",
-            '"user"',
-            None,
-        )
-        actions.update_table(self)
-
-    def update_table_with_scans(self) -> None:
-        """Update the table widget to display scans."""
-
-        self.current_table_query = ("scan_id, project_id, instrument_id", "scan", None)
-        actions.update_table(self)
 
     def create_actions(self):
         """Create the application actions."""
@@ -251,14 +238,6 @@ class MainWindow(QMainWindow):
         self.about_act.triggered.connect(
             lambda: About()  # pylint: disable=unnecessary-lambda
         )
-
-    def open_create_scan(self) -> None:
-        """
-        Open the scan creation dialogue; pass the database connection string so that
-        the window can access the database.
-        """
-
-        self.create_scan_dlg = CreateScan(self.conn_str)
 
     def create_window(self):
         """Create the application menu bar."""
