@@ -66,7 +66,6 @@ class MainWindow(QMainWindow):
 
         # Define empty widgets for use later
         self.settings_dlg: QWidget
-        self.create_prj: QWidget
         self.create_scan_dlg: QWidget
         self.download_dlg: DownloadScans
 
@@ -125,7 +124,9 @@ class MainWindow(QMainWindow):
 
         # Link toolbox buttons to functions
         self.toolbox.prj_btn.clicked.connect(self.update_table_with_projects)
-        self.toolbox.create_prj_btn.clicked.connect(self.open_create_prj)
+        self.toolbox.create_prj_btn.clicked.connect(
+            lambda: CreatePrj(self, self.conn_str)
+        )
         self.toolbox.scans_btn.clicked.connect(self.update_table_with_scans)
         self.toolbox.create_scan_btn.clicked.connect(self.open_create_scan)
         self.toolbox.users_btn.clicked.connect(self.update_table_with_users)
@@ -250,14 +251,6 @@ class MainWindow(QMainWindow):
         self.about_act.triggered.connect(
             lambda: About()  # pylint: disable=unnecessary-lambda
         )
-
-    def open_create_prj(self) -> None:
-        """
-        Open the create project window; pass the database connection string so that
-        the window can access the database.
-        """
-
-        self.create_prj = CreatePrj(self.conn_str)
 
     def open_create_scan(self) -> None:
         """
