@@ -2,15 +2,14 @@
 This window lets a user input and create a new scan, which is added to the database
 specified by the input connection string.
 """
+from __future__ import annotations
 
-import logging
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING
 
 import psycopg
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
-    QComboBox,
     QCompleter,
     QDialog,
     QFormLayout,
@@ -23,7 +22,14 @@ from PySide6.QtWidgets import (
 
 from client import settings
 from client.db.views import DatabaseView
-from client.utils import file, toml
+from client.utils import file, log, toml
+
+from .decorators import handle_common_exc
+
+if TYPE_CHECKING:
+    from typing import Any
+
+    from PySide6.QtWidgets import QWidget
 
 
 class CreateScan(QDialog):
@@ -32,8 +38,8 @@ class CreateScan(QDialog):
     database specified by the connection string.
     """
 
-    def __init__(self, conn_str: str) -> None:
-        super().__init__()
+    def __init__(self, parent_widget: QWidget, conn_str: str) -> None:
+        super().__init__(parent=parent_widget)
         self.conn_str: str = conn_str
 
         # Set up the settings window GUI.
@@ -48,7 +54,7 @@ class CreateScan(QDialog):
         header_label: QLabel = QLabel("Create new scan")
 
         # Get project ID options
-        self.new_scan_prj_id_entry = QLineEdit()
+        self.new_scan_prj_id_entry: QLineEdit = QLineEdit()
         with psycopg.connect(self.conn_str) as conn:
             with conn.cursor() as cur:
                 cur.execute("select project_id, title from project;")
@@ -78,7 +84,7 @@ class CreateScan(QDialog):
         self.new_scan_instrument_id_entry.setCompleter(completer)
 
         # Arrange QLineEdit widgets in a QFormLayout
-        dlg_form = QFormLayout()
+        dlg_form: QFormLayout = QFormLayout()
         dlg_form.addRow("New scan project id:", self.new_scan_prj_id_entry)
         dlg_form.addRow("New scan instrument id:", self.new_scan_instrument_id_entry)
 
@@ -111,48 +117,33 @@ class CreateScan(QDialog):
         }
         return data
 
+    @handle_common_exc
     def accept_new_scan_info(self) -> None:
         """Read input data and save to database."""
 
         # Get IDs from the combo boxes
-        selected_project_id: int = int(
-            self.new_scan_prj_id_entry.currentText().split()[0]
-        )
+        selected_prj_id: int = int(self.new_scan_prj_id_entry.text().split()[0])
         selected_instrument_id: int = int(
-            self.new_scan_instrument_id_entry.currentText().split()[0]
+            self.new_scan_instrument_id_entry.text().split()[0]
         )
 
         db_view: DatabaseView = DatabaseView(self.conn_str)
-        prj_exists: bool = db_view.prj_exists(selected_project_id)
-        instrument_exists: bool = db_view.instrument_exists(selected_instrument_id)
 
-        if not prj_exists:
-            logging.warning(
-                "Tried to create a scan with a project id that does not exist."
+        # Check the project and instrument IDs are valid
+        if not db_view.prj_exists(selected_prj_id):
+            raise RuntimeError(
+                "Tried to create a scan with a project ID that does not exist."
             )
-            QMessageBox.warning(
-                self,
-                "Invalid project id",
-                "Project id does not exist. Please check inputs.",
-                QMessageBox.StandardButton.Ok,
-            )
-            return
-        if not instrument_exists:
-            logging.warning(
+        if not db_view.instrument_exists(selected_instrument_id):
+            raise RuntimeError(
                 "Tried to create a scan with an instrument ID that does not exist."
             )
-            QMessageBox.warning(
-                self,
-                "Invalid instrument ID",
-                "Instrument ID does not exist. Please check inputs.",
-                QMessageBox.StandardButton.Ok,
-            )
-            return
 
         with psycopg.connect(self.conn_str) as conn:
             with conn.cursor() as cur:
                 cur.execute(
-                    f"insert into scan (project_id, instrument_id) values ({selected_project_id}, {selected_instrument_id}) returning scan_id;"
+                    "insert into scan (project_id, instrument_id) values (%s, %s) returning scan_id;",
+                    (selected_prj_id, selected_instrument_id),
                 )
                 conn.commit()
                 scan_id: int = cur.fetchone()[
@@ -160,7 +151,7 @@ class CreateScan(QDialog):
                 ]  # May raise TypeError if no scan_id rows returned
                 # Check to see if the newly created scan exists in the local library and create it if not
                 local_lib: Path = Path(settings.get_lib("local"))
-                scan_dir: Path = local_lib / str(selected_project_id) / str(scan_id)
+                scan_dir: Path = local_lib / str(selected_prj_id) / str(scan_id)
                 file.create_dir(scan_dir)
                 file.create_dir(scan_dir / "tams_meta")
                 form: Path = scan_dir / "tams_meta" / "user_form.toml"
@@ -172,20 +163,25 @@ class CreateScan(QDialog):
                 }
                 scan_form_data: dict[str, Any] = immutable_fields | mutable_fields
                 toml.create_toml(form, scan_form_data)
+
                 # Create README.txt
-                readme: Path = scan_dir / "tams_meta" / "README.txt"
-                with open(readme, "w") as f:
+                with open(
+                    scan_dir / "tams_meta" / "README.txt", "w", encoding="utf-8"
+                ) as f:
                     f.write("Placeholder file for README.txt")
                 perm_dir_name = settings.get_perm_dir_name()
                 file.create_dir(
-                    local_lib / str(selected_project_id) / str(scan_id) / perm_dir_name
+                    local_lib / str(selected_prj_id) / str(scan_id) / perm_dir_name
                 )
-                logging.info("Created and committed scan to database.")
+
+                # Inform the user that the scan was created and committed
+                log.logger(__name__).info("Created and committed scan to database.")
                 QMessageBox.information(
                     self,
                     "Success",
                     "Scan committed to database.",
                     QMessageBox.StandardButton.Ok,
                 )
+
             # Close window once done.
             self.close()
