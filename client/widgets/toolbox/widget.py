@@ -6,21 +6,33 @@ from PySide6.QtWidgets import QPushButton, QToolBox, QVBoxLayout, QWidget
 
 
 class ToolBox(QToolBox):
-    """Custom toolbox class that inherits from the Qt QToolBox built-in class."""
+    """Custom toolbox class inherits from the Qt QToolBox built-in class."""
 
     def __init__(self) -> None:
+        """Initialize the custom toolbox class."""
+
         super().__init__()
 
         # Create project tab
+
+        # Project tab layout
         prj_tab_layout: QVBoxLayout = QVBoxLayout()
+
+        # Display projects button
         self.prj_btn: QPushButton = QPushButton("Display projects", self)
         self.prj_btn.setToolTip("Display projects")
         prj_tab_layout.addWidget(self.prj_btn)
+
+        # Create project button
         self.create_prj_btn: QPushButton = QPushButton("Create project", self)
         self.create_prj_btn.setToolTip("Create a new project")
         prj_tab_layout.addWidget(self.create_prj_btn)
+
+        # Create project tab widget
         prj_tab: QWidget = QWidget()
         prj_tab.setLayout(prj_tab_layout)
+
+        # Add project tab to toolbox
         self.addItem(prj_tab, "Projects")
 
         # Create scans tab

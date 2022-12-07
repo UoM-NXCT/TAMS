@@ -13,11 +13,15 @@ from PySide6.QtWidgets import (
     QProgressBar,
     QPushButton,
     QVBoxLayout,
+    QWidget,
 )
 
 from client.runners.generic import RunnerStatus
 from client.runners.validate import ValidateScans
+from client.utils import log
 from client.utils.file import size_fmt
+
+logger = log.logger(__name__)
 
 
 class Validate(QDialog):
@@ -27,10 +31,11 @@ class Validate(QDialog):
         self,
         runner: ValidateScans,
         hide: bool = False,
+        parent_widget: QWidget | None = None,
     ) -> None:
         """Initialize the dialogue."""
 
-        super().__init__()
+        super().__init__(parent=parent_widget)
 
         self.setWindowTitle("Validating data...")
 
@@ -98,21 +103,21 @@ class Validate(QDialog):
 
         match self.runner.result_value:
             case True:
-                # Show a message box
+                logger.info("Validation successful.")
                 QMessageBox.information(
                     self,
                     "Data validated",
                     "Data validated successfully.",
                 )
             case False:
-                # Show a message box
+                logger.info("Validation failed.")
                 QMessageBox.critical(
                     self,
                     "Data invalid",
                     "Data on server does not match local. Data is either missing or corrupted.",
                 )
             case _:
-                # Show a message box
+                logger.critical("Validation is neither true nor false. This is bad!")
                 QMessageBox.critical(self, "Error", "An error occurred.")
 
         self.close()

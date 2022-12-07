@@ -18,6 +18,7 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QPushButton,
     QVBoxLayout,
+    QWidget,
 )
 
 from client import settings
@@ -31,10 +32,10 @@ class CreatePrj(QDialog):
     database specified by the connection string.
     """
 
-    def __init__(self, conn_str: str):
+    def __init__(self, parent_widget: QWidget, conn_str: str):
         """Initialize the project creation dialogue."""
 
-        super().__init__()
+        super().__init__(parent=parent_widget)
         self.conn_str: str = conn_str
         # Set up the settings window GUI.
         self.setMinimumSize(400, 300)

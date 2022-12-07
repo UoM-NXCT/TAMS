@@ -25,11 +25,10 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from client import settings
+from client import actions, settings
 from client.db import DatabaseView
 from client.runners import SaveScans, ValidateScans
 from client.utils import log
-from client.utils.toml import load_toml
 from client.widgets.dialogue import (
     About,
     CreatePrj,
@@ -39,7 +38,7 @@ from client.widgets.dialogue import (
     Settings,
     UploadScans,
     Validate,
-    attempt_file_io,
+    handle_common_exc,
 )
 from client.widgets.metadata_panel import MetadataPanel
 from client.widgets.table import TableModel, TableView
@@ -58,7 +57,7 @@ class MainWindow(QMainWindow):
 
         # Create empty variables for use later.
         self.db_view: DatabaseView | None = None
-        self.connection_string: str | None = None
+        self.conn_str: str | None = None
         self.table_model: TableModel | None = None
         self.proxy_model: QSortFilterProxyModel | None = None
         self.current_table_query: tuple | None = None
@@ -67,7 +66,6 @@ class MainWindow(QMainWindow):
 
         # Define empty widgets for use later
         self.settings_dlg: QWidget
-        self.create_prj: QWidget
         self.create_scan_dlg: QWidget
         self.download_dlg: DownloadScans
 
@@ -78,9 +76,10 @@ class MainWindow(QMainWindow):
         try:
             login_dlg = Login()
             login_dlg.exec()
-            self.connection_string = login_dlg.conn_str
-            self.db_view = DatabaseView(self.connection_string)
+            self.conn_str = login_dlg.conn_str
+            self.db_view = DatabaseView(self.conn_str)
         except SystemExit:
+            # User closed the login window
             sys.exit()
 
         self.set_up_main_window()
@@ -90,7 +89,7 @@ class MainWindow(QMainWindow):
 
         self.show()
 
-        self.update_table()
+        actions.update_table(self)
 
     def set_up_main_window(self) -> None:
         """Create and arrange widgets in the main window."""
@@ -112,7 +111,7 @@ class MainWindow(QMainWindow):
         # Create a table; initialize with projects
         self.table_view = TableView()
         self.table_view.setSelectionBehavior(TableView.SelectionBehavior.SelectRows)
-        self.table_view.doubleClicked.connect(lambda: self.open_data())
+        self.table_view.doubleClicked.connect(lambda: actions.open_data(self))
         self.update_table_with_projects()
 
         # Add the table and search query to table layout
@@ -125,7 +124,9 @@ class MainWindow(QMainWindow):
 
         # Link toolbox buttons to functions
         self.toolbox.prj_btn.clicked.connect(self.update_table_with_projects)
-        self.toolbox.create_prj_btn.clicked.connect(self.open_create_prj)
+        self.toolbox.create_prj_btn.clicked.connect(
+            lambda: CreatePrj(self, self.conn_str)
+        )
         self.toolbox.scans_btn.clicked.connect(self.update_table_with_scans)
         self.toolbox.create_scan_btn.clicked.connect(self.open_create_scan)
         self.toolbox.users_btn.clicked.connect(self.update_table_with_users)
@@ -144,77 +145,6 @@ class MainWindow(QMainWindow):
         widget.setLayout(layout)
         self.setCentralWidget(widget)
 
-    def update_table(self) -> None:
-        """Update table model using SQL command."""
-
-        # Get table data
-        select_value, from_value, where_value = self.current_table_query
-        if self.db_view:
-            if where_value:
-                data, column_headers = self.db_view.view_select_from_where(
-                    select_value, from_value, where_value
-                )
-            else:
-                data, column_headers = self.db_view.view_select_from_where(
-                    select_value, from_value
-                )
-        else:
-            data = []
-            column_headers = ()
-
-        # Create table model
-        self.table_model = TableModel(data, column_headers)
-
-        # Create proxy model
-        self.proxy_model = QSortFilterProxyModel()
-
-        # Set proxy model to table model
-        self.proxy_model.setSourceModel(self.table_model)
-
-        # Make the filters case-insensitive
-        self.proxy_model.setFilterCaseSensitivity(Qt.CaseInsensitive)
-
-        # Connect search query to proxy model
-        # Note: must do this on each table update, or it will disconnect
-        self.search.textChanged.connect(self.proxy_model.setFilterFixedString)
-
-        # Filter by all columns
-        self.proxy_model.setFilterKeyColumn(-1)
-
-        # Set the table view to use the proxy model
-        self.table_view.setModel(self.proxy_model)
-
-        # Make table look pretty
-
-        # Stretch table to fill window and store width of each column
-        self.table_view.horizontalHeader().setSectionResizeMode(
-            QHeaderView.ResizeMode.ResizeToContents
-        )
-        header_widths = tuple(
-            self.table_view.horizontalHeader().sectionSize(i)
-            for i, _ in enumerate(column_headers)
-        )
-
-        # Set the width of each column to be interactive for the user
-        self.table_view.horizontalHeader().setSectionResizeMode(
-            QHeaderView.ResizeMode.Interactive
-        )
-
-        # Set initial width of each column to be the width of the header when pretty
-        for i, width in enumerate(header_widths):
-            self.table_view.horizontalHeader().resizeSection(i, width)
-
-        # Make the table react to selection changes
-        self.table_view.selectionModel().selectionChanged.connect(
-            self.on_selection_changed
-        )
-
-        # Let user sort table by column
-        self.table_view.setSortingEnabled(True)
-
-        # Update metadata panel
-        self.metadata_panel.update_metadata()
-
     def update_table_with_projects(self) -> None:
         """Update table to display projects."""
 
@@ -223,7 +153,7 @@ class MainWindow(QMainWindow):
             "project",
             None,
         )
-        self.update_table()
+        actions.update_table(self)
 
     def update_table_with_users(self) -> None:
         """Update the table widget to display users."""
@@ -233,16 +163,16 @@ class MainWindow(QMainWindow):
             '"user"',
             None,
         )
-        self.update_table()
+        actions.update_table(self)
 
     def update_table_with_scans(self) -> None:
         """Update the table widget to display scans."""
 
         self.current_table_query = ("scan_id, project_id, instrument_id", "scan", None)
-        self.update_table()
+        actions.update_table(self)
 
     def create_actions(self):
-        """Create the application's menu actions."""
+        """Create the application actions."""
 
         # Create actions for the File menu
 
@@ -253,51 +183,56 @@ class MainWindow(QMainWindow):
             lambda: Settings()  # pylint: disable=unnecessary-lambda
         )
 
-        pixmap = QStyle.StandardPixmap.SP_BrowserReload
-        reload_table_icon = self.style().standardIcon(pixmap)
-        self.reload_table_act = QAction(reload_table_icon, "Reload")
+        icon = self.style().standardIcon(QStyle.StandardPixmap.SP_BrowserReload)
+        self.reload_table_act = QAction(icon, "Reload")
         self.reload_table_act.setShortcut("F5")
         self.reload_table_act.setToolTip("Reload the active table")
-        self.reload_table_act.triggered.connect(self.update_table)
+        self.reload_table_act.triggered.connect(lambda: actions.update_table(self))
 
-        pixmap = QStyle.StandardPixmap.SP_ArrowDown
-        download_icon = self.style().standardIcon(pixmap)
-        self.download_act = QAction(download_icon, "Download data")
+        icon = self.style().standardIcon(QStyle.StandardPixmap.SP_ArrowDown)
+        self.download_act = QAction(icon, "Download data")
         self.download_act.setShortcut("Ctrl+D")
         self.download_act.setToolTip("Download selected data")
-        self.download_act.triggered.connect(self.download_data)
+        self.download_act.triggered.connect(lambda: actions.download(self))
 
-        pixmap = QStyle.StandardPixmap.SP_ArrowUp
-        upload_icon = self.style().standardIcon(pixmap)
-        self.upload_act = QAction(upload_icon, "Upload data")
+        icon = self.style().standardIcon(QStyle.StandardPixmap.SP_ArrowUp)
+        self.upload_act = QAction(icon, "Upload data")
         self.upload_act.setShortcut("Ctrl+U")
         self.upload_act.setToolTip("Upload selected data")
-        self.upload_act.triggered.connect(self.upload_data)
+        self.upload_act.triggered.connect(lambda: actions.upload(self))
 
-        pixmap = QStyle.StandardPixmap.SP_DialogOpenButton
-        open_icon = self.style().standardIcon(pixmap)
-        self.open_act = QAction(open_icon, "Open data")
+        icon = self.style().standardIcon(QStyle.StandardPixmap.SP_DialogOpenButton)
+        self.open_act = QAction(icon, "Open data")
         self.open_act.setShortcut("Ctrl+O")
         self.open_act.setToolTip("Open selected data")
-        self.open_act.triggered.connect(self.open_data)
+        self.open_act.triggered.connect(lambda: actions.open_data(self))
 
-        pixmap = QStyle.StandardPixmap.SP_FileDialogContentsView
-        validate_icon = self.style().standardIcon(pixmap)
-        self.validate_act = QAction(validate_icon, "Validate data")
+        icon = self.style().standardIcon(
+            QStyle.StandardPixmap.SP_FileDialogContentsView
+        )
+        self.validate_act = QAction(icon, "Validate data")
         self.validate_act.setShortcut("Ctrl+V")
         self.validate_act.setToolTip("Validate selected data")
-        self.validate_act.triggered.connect(self.validate_data)
+        self.validate_act.triggered.connect(lambda: actions.validate(self))
+
+        icon = self.style().standardIcon(QStyle.StandardPixmap.SP_FileDialogNewFolder)
+        self.add_act = QAction(icon, "Add data")
+        self.add_act.setShortcut("Ctrl+A")
+        self.add_act.setToolTip("Add data to the local library")
+        self.add_act.triggered.connect(lambda: print("Add data"))
 
         self.quit_act = QAction("&Quit")
         self.quit_act.setShortcut("Ctrl+Q")
         self.quit_act.setStatusTip("Quit application")
-        self.quit_act.triggered.connect(self.close)
+        self.quit_act.triggered.connect(self.close)  # close is a method of QMainWindow
 
         # Create actions for the View menu
 
         self.full_screen_act = QAction("Full Screen", checkable=True)
         self.full_screen_act.setStatusTip("Toggle full screen mode")
-        self.full_screen_act.triggered.connect(self.toggle_full_screen)
+        self.full_screen_act.triggered.connect(
+            lambda: actions.toggle_full_screen(self, self.full_screen_act.isChecked())
+        )
 
         # Create actions for the Help menu
 
@@ -310,29 +245,12 @@ class MainWindow(QMainWindow):
             )  # pylint: disable=unnecessary-lambda
         )
 
-        pixmap = QStyle.StandardPixmap.SP_MessageBoxInformation
-        about_icon = self.style().standardIcon(pixmap)
-        self.about_act = QAction(about_icon, "About")
+        icon = self.style().standardIcon(QStyle.StandardPixmap.SP_MessageBoxInformation)
+        self.about_act = QAction(icon, "About")
         self.about_act.setStatusTip("Show information about this software")
         self.about_act.triggered.connect(
             lambda: About()  # pylint: disable=unnecessary-lambda
         )
-
-    def toggle_full_screen(self, state) -> None:
-        """Toggle full screen mode."""
-
-        if state:
-            self.showFullScreen()
-        else:
-            self.showNormal()
-
-    def open_create_prj(self) -> None:
-        """
-        Open the create project window; pass the database connection string so that
-        the window can access the database.
-        """
-
-        self.create_prj = CreatePrj(self.connection_string)
 
     def open_create_scan(self) -> None:
         """
@@ -340,7 +258,7 @@ class MainWindow(QMainWindow):
         the window can access the database.
         """
 
-        self.create_scan_dlg = CreateScan(self.connection_string)
+        self.create_scan_dlg = CreateScan(self.conn_str)
 
     def create_window(self):
         """Create the application menu bar."""
@@ -356,6 +274,7 @@ class MainWindow(QMainWindow):
         file_menu.addAction(self.download_act)
         file_menu.addAction(self.upload_act)
         file_menu.addAction(self.open_act)
+        file_menu.addAction(self.add_act)
         file_menu.addAction(self.validate_act)
         file_menu.addSeparator()
         file_menu.addAction(self.quit_act)
@@ -383,6 +302,7 @@ class MainWindow(QMainWindow):
         toolbar.addAction(self.reload_table_act)
         toolbar.addAction(self.download_act)
         toolbar.addAction(self.upload_act)
+        toolbar.addAction(self.add_act)
         toolbar.addAction(self.open_act)
         toolbar.addAction(self.validate_act)
 
@@ -407,157 +327,6 @@ class MainWindow(QMainWindow):
         row_value = row[column]
 
         return row_value
-
-    @attempt_file_io
-    def upload_data(self) -> None:
-        """Upload data to the database."""
-
-        # Get the selected table
-        table = self.current_table()
-
-        # Get the primary key of the selected row
-        row_pk: int = self.get_value_from_row(0)
-
-        if table == "project":
-            runner = SaveScans(row_pk, download=False)
-            self.upload_dlg = UploadScans(runner)
-        elif table == "scan":
-            prj_id: int = self.get_value_from_row(1)
-            runner = SaveScans(prj_id, row_pk, download=False)
-            self.upload_dlg = UploadScans(runner)
-        else:
-            logger.error("Cannot upload data from table %s", table)
-            QMessageBox.critical(
-                self,
-                "Error",
-                f"Cannot upload data from table {table}",
-            )
-
-    @attempt_file_io
-    def download_data(self):
-        """Download selected data."""
-
-        # Get the selected table
-        table = self.current_table()
-
-        # Get the primary key of the selected row
-        row_pk: int = self.get_value_from_row(0)
-
-        if table == "project":
-            runner = SaveScans(row_pk, download=True)
-            self.download_dlg = DownloadScans(runner)
-
-        elif table == "scan":
-            # Get the path of the local scan directory
-            prj_id: int = self.get_value_from_row(1)
-
-            runner = SaveScans(prj_id, row_pk, download=True)
-            self.download_dlg = DownloadScans(runner)
-
-        else:
-            logger.error("Cannot download data from table %s", table)
-            QMessageBox.critical(
-                self,
-                "Error",
-                f"Cannot download data from table {table}",
-            )
-
-    @attempt_file_io
-    def open_data(self) -> None:
-        """Open selected data."""
-
-        # Get the selected table
-        table = self.current_table()
-
-        # Get the primary key of the selected row
-        row_pk: int = self.get_value_from_row(0)
-
-        # Get the path of the local library
-        try:
-            local_lib: Path = Path(settings.get_lib("local"))
-        except TypeError:
-            logger.error("Local library path not set")
-            QMessageBox.critical(
-                self,
-                "Error",
-                "Local library path not set",
-            )
-            return
-
-        if table == "project":
-            logging.info("Opening data from project ID %s", row_pk)
-
-            # Get the path of the local project directory
-            prj_path: Path = local_lib / str(row_pk)
-
-            if prj_path.exists():
-                logging.info("Opening project path %s", prj_path)
-                QDesktopServices.openUrl(QUrl.fromLocalFile(str(prj_path)))
-            else:
-                logging.error("Project path %s does not exist", prj_path)
-                QMessageBox.critical(
-                    self,
-                    "Error",
-                    f"Project ID {row_pk} does not exist in the local library. Has the "
-                    "data been downloaded?",
-                )
-        elif table == "scan":
-            logging.info("Opening data from scan ID %s", row_pk)
-
-            # Get the path of the local scan directory
-            project_id: int = self.get_value_from_row(1)
-            scan_path: Path = local_lib / str(project_id) / str(row_pk)
-
-            if scan_path.exists():
-                logging.info("Opening scan path %s", scan_path)
-                QDesktopServices.openUrl(QUrl.fromLocalFile(str(scan_path)))
-            else:
-                logging.error("Scan path %s does not exist", scan_path)
-                QMessageBox.critical(
-                    self,
-                    "Error",
-                    f"Scan ID {row_pk} does not exist in the local library. Has the data been downloaded?",
-                )
-        else:
-            logging.error("Cannot open data from table %s", table)
-            QMessageBox.critical(
-                self,
-                "Error",
-                f"Cannot open data from table {table}",
-            )
-
-    @attempt_file_io
-    def validate_data(self):
-        """Download selected data."""
-
-        # Get the selected table
-        table = self.current_table()
-
-        # Get the primary key of the selected row
-        row_pk: int = self.get_value_from_row(0)
-
-        if table == "project":
-            logging.info("Validating data from project ID %s", row_pk)
-
-            runner = ValidateScans(row_pk)
-            self.download_dlg = Validate(runner)
-
-        elif table == "scan":
-            logging.info("Validating data from scan ID %s", row_pk)
-
-            # Get the path of the local scan directory
-            project_id: int = self.get_value_from_row(1)
-
-            runner = ValidateScans(project_id, row_pk)
-            self.download_dlg = Validate(runner)
-
-        else:
-            logging.error("Cannot validate.py data from table %s", table)
-            QMessageBox.critical(
-                self,
-                "Error",
-                f"Cannot download data from table {table}",
-            )
 
     def current_table(self) -> str:
         """Get the current table displayed."""
@@ -588,9 +357,7 @@ class MainWindow(QMainWindow):
         elif self.current_table() == '"user"':
             metadata = self.db_view.get_user_metadata(key)
         else:
-            # Escape the function if not a valid table
-            logging.warning("%s is not a valid table.", self.current_table())
-            return
+            raise NotImplementedError(f"Unknown table {self.current_table()}")
 
         # Update the metadata panel with the new metadata
         self.metadata_panel.update_metadata(metadata)
