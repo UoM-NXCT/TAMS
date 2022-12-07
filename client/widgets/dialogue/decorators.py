@@ -11,17 +11,24 @@ def attempt_file_io(func: Callable[..., Any]) -> Callable[..., Any]:
 
     @wraps(func)
     def wrapper(*args: Any, **kwargs: Any) -> None:
-        """Attempt to execute the sql command, and handle any exceptions."""
+        """Attempt to execute file operations, and handle any exceptions."""
 
         try:
             func(*args, **kwargs)
         except FileNotFoundError as exc:
+            logging.error("File %s not found", exc.filename)
+            QMessageBox.critical(
+                QWidget(),
+                "File not found error",
+                f"File {exc.filename} not found."
+                "Check that the path exists and is accessible.",
+            )
+        except RuntimeError as exc:
             logging.exception("Exception raised")
             QMessageBox.critical(
                 QWidget(),
-                "Error: file not found",
-                f"File {exc.filename} not found. "
-                "Check that the file exists and is accessible.",
+                "File operation runtime error",
+                f"{exc}",
             )
 
     return wrapper

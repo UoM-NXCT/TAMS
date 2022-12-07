@@ -112,7 +112,7 @@ class MainWindow(QMainWindow):
         # Create a table; initialize with projects
         self.table_view = TableView()
         self.table_view.setSelectionBehavior(TableView.SelectionBehavior.SelectRows)
-        self.table_view.doubleClicked.connect(lambda: self.open_data())
+        self.table_view.doubleClicked.connect(lambda: actions.open_data(self))
         self.update_table_with_projects()
 
         # Add the table and search query to table layout
@@ -275,7 +275,7 @@ class MainWindow(QMainWindow):
         self.open_act = QAction(icon, "Open data")
         self.open_act.setShortcut("Ctrl+O")
         self.open_act.setToolTip("Open selected data")
-        self.open_act.triggered.connect(self.open_data)
+        self.open_act.triggered.connect(lambda: actions.open_data(self))
 
         icon = self.style().standardIcon(
             QStyle.StandardPixmap.SP_FileDialogContentsView
@@ -294,7 +294,7 @@ class MainWindow(QMainWindow):
         self.quit_act = QAction("&Quit")
         self.quit_act.setShortcut("Ctrl+Q")
         self.quit_act.setStatusTip("Quit application")
-        self.quit_act.triggered.connect(self.close)
+        self.quit_act.triggered.connect(self.close)  # close is a method of QMainWindow
 
         # Create actions for the View menu
 
@@ -411,71 +411,6 @@ class MainWindow(QMainWindow):
         row_value = row[column]
 
         return row_value
-
-    @attempt_file_io
-    def open_data(self) -> None:
-        """Open selected data."""
-
-        # Get the selected table
-        table = self.current_table()
-
-        # Get the primary key of the selected row
-        row_pk: int = self.get_value_from_row(0)
-
-        # Get the path of the local library
-        try:
-            local_lib: Path = Path(settings.get_lib("local"))
-        except TypeError:
-            logger.error("Local library path not set")
-            QMessageBox.critical(
-                self,
-                "Error",
-                "Local library path not set",
-            )
-            return
-
-        if table == "project":
-            logging.info("Opening data from project ID %s", row_pk)
-
-            # Get the path of the local project directory
-            prj_path: Path = local_lib / str(row_pk)
-
-            if prj_path.exists():
-                logging.info("Opening project path %s", prj_path)
-                QDesktopServices.openUrl(QUrl.fromLocalFile(str(prj_path)))
-            else:
-                logging.error("Project path %s does not exist", prj_path)
-                QMessageBox.critical(
-                    self,
-                    "Error",
-                    f"Project ID {row_pk} does not exist in the local library. Has the "
-                    "data been downloaded?",
-                )
-        elif table == "scan":
-            logging.info("Opening data from scan ID %s", row_pk)
-
-            # Get the path of the local scan directory
-            project_id: int = self.get_value_from_row(1)
-            scan_path: Path = local_lib / str(project_id) / str(row_pk)
-
-            if scan_path.exists():
-                logging.info("Opening scan path %s", scan_path)
-                QDesktopServices.openUrl(QUrl.fromLocalFile(str(scan_path)))
-            else:
-                logging.error("Scan path %s does not exist", scan_path)
-                QMessageBox.critical(
-                    self,
-                    "Error",
-                    f"Scan ID {row_pk} does not exist in the local library. Has the data"
-                    " been downloaded?",
-                )
-        else:
-            logging.error("Cannot open data from table %s", table)
-            QMessageBox.critical(
-                self,
-                "Error",
-                f"Cannot open data from table {table}",
-            )
 
     @attempt_file_io
     def add_data(self) -> None:
