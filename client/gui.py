@@ -263,7 +263,7 @@ class MainWindow(QMainWindow):
         self.download_act = QAction(icon, "Download data")
         self.download_act.setShortcut("Ctrl+D")
         self.download_act.setToolTip("Download selected data")
-        self.download_act.triggered.connect(self.download_data)
+        self.download_act.triggered.connect(lambda: actions.download(self))
 
         icon = self.style().standardIcon(QStyle.StandardPixmap.SP_ArrowUp)
         self.upload_act = QAction(icon, "Upload data")
@@ -435,35 +435,6 @@ class MainWindow(QMainWindow):
                 self,
                 "Error",
                 f"Cannot upload data from table {table}",
-            )
-
-    @attempt_file_io
-    def download_data(self):
-        """Download selected data."""
-
-        # Get the selected table
-        table = self.current_table()
-
-        # Get the primary key of the selected row
-        row_pk: int = self.get_value_from_row(0)
-
-        if table == "project":
-            runner = SaveScans(row_pk, download=True)
-            self.download_dlg = DownloadScans(runner)
-
-        elif table == "scan":
-            # Get the path of the local scan directory
-            prj_id: int = self.get_value_from_row(1)
-
-            runner = SaveScans(prj_id, row_pk, download=True)
-            self.download_dlg = DownloadScans(runner)
-
-        else:
-            logger.error("Cannot download data from table %s", table)
-            QMessageBox.critical(
-                self,
-                "Error",
-                f"Cannot download data from table {table}",
             )
 
     @attempt_file_io

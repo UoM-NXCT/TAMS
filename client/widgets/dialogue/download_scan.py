@@ -13,6 +13,7 @@ from PySide6.QtWidgets import (
     QProgressBar,
     QPushButton,
     QVBoxLayout,
+    QWidget,
 )
 
 from client.runners.generic import RunnerStatus
@@ -27,10 +28,11 @@ class DownloadScans(QDialog):
         self,
         runner: SaveScans,
         hide: bool = False,
+        parent_widget: QWidget | None = None,
     ) -> None:
         """Initialize the dialogue."""
 
-        super().__init__()
+        super().__init__(parent=parent_widget)
 
         self.setWindowTitle("Downloading data...")
 
