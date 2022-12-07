@@ -29,7 +29,6 @@ from client import settings
 from client.db import DatabaseView
 from client.runners import SaveScans, ValidateScans
 from client.utils import log
-from client.utils.toml import load_toml
 from client.widgets.dialogue import (
     About,
     CreatePrj,
@@ -58,7 +57,7 @@ class MainWindow(QMainWindow):
 
         # Create empty variables for use later.
         self.db_view: DatabaseView | None = None
-        self.connection_string: str | None = None
+        self.conn_str: str | None = None
         self.table_model: TableModel | None = None
         self.proxy_model: QSortFilterProxyModel | None = None
         self.current_table_query: tuple | None = None
@@ -78,9 +77,10 @@ class MainWindow(QMainWindow):
         try:
             login_dlg = Login()
             login_dlg.exec()
-            self.connection_string = login_dlg.conn_str
-            self.db_view = DatabaseView(self.connection_string)
+            self.conn_str = login_dlg.conn_str
+            self.db_view = DatabaseView(self.conn_str)
         except SystemExit:
+            # User closed the login window
             sys.exit()
 
         self.set_up_main_window()
@@ -242,7 +242,7 @@ class MainWindow(QMainWindow):
         self.update_table()
 
     def create_actions(self):
-        """Create the application's menu actions."""
+        """Create the application actions."""
 
         # Create actions for the File menu
 
@@ -253,40 +253,43 @@ class MainWindow(QMainWindow):
             lambda: Settings()  # pylint: disable=unnecessary-lambda
         )
 
-        pixmap = QStyle.StandardPixmap.SP_BrowserReload
-        reload_table_icon = self.style().standardIcon(pixmap)
-        self.reload_table_act = QAction(reload_table_icon, "Reload")
+        icon = self.style().standardIcon(QStyle.StandardPixmap.SP_BrowserReload)
+        self.reload_table_act = QAction(icon, "Reload")
         self.reload_table_act.setShortcut("F5")
         self.reload_table_act.setToolTip("Reload the active table")
         self.reload_table_act.triggered.connect(self.update_table)
 
-        pixmap = QStyle.StandardPixmap.SP_ArrowDown
-        download_icon = self.style().standardIcon(pixmap)
-        self.download_act = QAction(download_icon, "Download data")
+        icon = self.style().standardIcon(QStyle.StandardPixmap.SP_ArrowDown)
+        self.download_act = QAction(icon, "Download data")
         self.download_act.setShortcut("Ctrl+D")
         self.download_act.setToolTip("Download selected data")
         self.download_act.triggered.connect(self.download_data)
 
-        pixmap = QStyle.StandardPixmap.SP_ArrowUp
-        upload_icon = self.style().standardIcon(pixmap)
-        self.upload_act = QAction(upload_icon, "Upload data")
+        icon = self.style().standardIcon(QStyle.StandardPixmap.SP_ArrowUp)
+        self.upload_act = QAction(icon, "Upload data")
         self.upload_act.setShortcut("Ctrl+U")
         self.upload_act.setToolTip("Upload selected data")
         self.upload_act.triggered.connect(self.upload_data)
 
-        pixmap = QStyle.StandardPixmap.SP_DialogOpenButton
-        open_icon = self.style().standardIcon(pixmap)
-        self.open_act = QAction(open_icon, "Open data")
+        icon = self.style().standardIcon(QStyle.StandardPixmap.SP_DialogOpenButton)
+        self.open_act = QAction(icon, "Open data")
         self.open_act.setShortcut("Ctrl+O")
         self.open_act.setToolTip("Open selected data")
         self.open_act.triggered.connect(self.open_data)
 
-        pixmap = QStyle.StandardPixmap.SP_FileDialogContentsView
-        validate_icon = self.style().standardIcon(pixmap)
-        self.validate_act = QAction(validate_icon, "Validate data")
+        icon = self.style().standardIcon(
+            QStyle.StandardPixmap.SP_FileDialogContentsView
+        )
+        self.validate_act = QAction(icon, "Validate data")
         self.validate_act.setShortcut("Ctrl+V")
         self.validate_act.setToolTip("Validate selected data")
         self.validate_act.triggered.connect(self.validate_data)
+
+        icon = self.style().standardIcon(QStyle.StandardPixmap.SP_FileDialogNewFolder)
+        self.add_act = QAction(icon, "Add data")
+        self.add_act.setShortcut("Ctrl+A")
+        self.add_act.setToolTip("Add data to the local library")
+        self.add_act.triggered.connect(lambda: print("Add data"))
 
         self.quit_act = QAction("&Quit")
         self.quit_act.setShortcut("Ctrl+Q")
@@ -310,9 +313,8 @@ class MainWindow(QMainWindow):
             )  # pylint: disable=unnecessary-lambda
         )
 
-        pixmap = QStyle.StandardPixmap.SP_MessageBoxInformation
-        about_icon = self.style().standardIcon(pixmap)
-        self.about_act = QAction(about_icon, "About")
+        icon = self.style().standardIcon(QStyle.StandardPixmap.SP_MessageBoxInformation)
+        self.about_act = QAction(icon, "About")
         self.about_act.setStatusTip("Show information about this software")
         self.about_act.triggered.connect(
             lambda: About()  # pylint: disable=unnecessary-lambda
@@ -332,7 +334,7 @@ class MainWindow(QMainWindow):
         the window can access the database.
         """
 
-        self.create_prj = CreatePrj(self.connection_string)
+        self.create_prj = CreatePrj(self.conn_str)
 
     def open_create_scan(self) -> None:
         """
@@ -340,7 +342,7 @@ class MainWindow(QMainWindow):
         the window can access the database.
         """
 
-        self.create_scan_dlg = CreateScan(self.connection_string)
+        self.create_scan_dlg = CreateScan(self.conn_str)
 
     def create_window(self):
         """Create the application menu bar."""
@@ -356,6 +358,7 @@ class MainWindow(QMainWindow):
         file_menu.addAction(self.download_act)
         file_menu.addAction(self.upload_act)
         file_menu.addAction(self.open_act)
+        file_menu.addAction(self.add_act)
         file_menu.addAction(self.validate_act)
         file_menu.addSeparator()
         file_menu.addAction(self.quit_act)
