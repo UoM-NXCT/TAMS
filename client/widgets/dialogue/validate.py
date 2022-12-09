@@ -97,8 +97,6 @@ class Validate(QDialog):
     def job_done(self) -> None:
         """Show a message box when the job is done."""
 
-        # Pause the runner if not paused already
-
         match self.runner.result_value:
             case True:
                 logger.info("Validation successful.")

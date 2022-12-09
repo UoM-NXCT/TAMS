@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import typing
 
-from PySide6.QtWidgets import QDialog, QMessageBox
+from PySide6.QtWidgets import QMessageBox
 
 from client.runners import SaveScans
 from client.widgets.dialogue import DownloadScans, handle_common_exc

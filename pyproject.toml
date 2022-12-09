@@ -4,7 +4,7 @@ version = "0.1.1"
 description = "Makes storing and accessing tomographic data easy and quick."
 license = "MIT"
 authors = [
-    "Tom Kusonsuphanimit <tom.kusonsuphanimit@manchester.ac.uk>"
+    "Tom Kuson <mail@tjkuson.me>"
 ]
 readme = "README.md"
 repository = "https://github.com/UoM-NXCT/TAMS"
