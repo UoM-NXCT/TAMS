@@ -4,14 +4,14 @@ Decoration function utilities.
 
 from __future__ import annotations
 
-import typing
 from functools import wraps
+from typing import TYPE_CHECKING
 
 from PySide6.QtWidgets import QMessageBox, QWidget
 
 from client.utils import log
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     from collections.abc import Callable
     from typing import Any
 

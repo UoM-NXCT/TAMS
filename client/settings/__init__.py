@@ -42,6 +42,7 @@ def access_settings(func: Callable[..., Any]) -> Callable[..., Any]:
             # Settings file does not exist
             log.logger(__name__).warning("Settings file does not exist, creating it.")
             create_toml(general, default_general_settings)
+            return func(*args, **kwargs)
 
     return wrapper
 

@@ -12,7 +12,6 @@ from client.runners import SaveScans
 from client.widgets.dialogue import UploadScans, handle_common_exc
 
 if typing.TYPE_CHECKING:
-    from PySide6.QtWidgets import QDialog
 
     from client.gui import MainWindow
 

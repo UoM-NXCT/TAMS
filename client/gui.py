@@ -159,9 +159,7 @@ class MainWindow(QMainWindow):
         self.settings_act = QAction("Settings")
         self.settings_act.setShortcut("Ctrl+Alt+S")
         self.settings_act.setStatusTip("Edit application settings")
-        self.settings_act.triggered.connect(
-            lambda: Settings()  # pylint: disable=unnecessary-lambda
-        )
+        self.settings_act.triggered.connect(Settings)
 
         icon = self.style().standardIcon(QStyle.StandardPixmap.SP_BrowserReload)
         self.reload_table_act = QAction(icon, "Reload")
@@ -228,9 +226,7 @@ class MainWindow(QMainWindow):
         icon = self.style().standardIcon(QStyle.StandardPixmap.SP_MessageBoxInformation)
         self.about_act = QAction(icon, "About")
         self.about_act.setStatusTip("Show information about this software")
-        self.about_act.triggered.connect(
-            lambda: About()  # pylint: disable=unnecessary-lambda
-        )
+        self.about_act.triggered.connect(About)
 
     def create_window(self):
         """Create the application menu bar."""
