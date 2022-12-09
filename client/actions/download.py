@@ -16,7 +16,7 @@ if typing.TYPE_CHECKING:
 
 
 @handle_common_exc
-def download(main_window: MainWindow) -> QDialog:
+def download(main_window: MainWindow) -> DownloadScans:
     """Download action returns a dialogue with a save scans runner."""
 
     # Get the selected table

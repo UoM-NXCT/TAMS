@@ -4,7 +4,6 @@ Main window for the GUI.
 
 from __future__ import annotations
 
-import logging
 import sys
 from pathlib import Path
 from typing import Any
@@ -13,10 +12,8 @@ from PySide6.QtCore import QModelIndex, QSize, QSortFilterProxyModel, Qt, QUrl
 from PySide6.QtGui import QAction, QDesktopServices
 from PySide6.QtWidgets import (
     QGridLayout,
-    QHeaderView,
     QLineEdit,
     QMainWindow,
-    QMessageBox,
     QSplitter,
     QStatusBar,
     QStyle,
@@ -25,9 +22,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from client import actions, settings
+from client import actions
 from client.db import DatabaseView
-from client.runners import SaveScans, ValidateScans
 from client.utils import log
 from client.widgets.dialogue import (
     About,
@@ -36,9 +32,6 @@ from client.widgets.dialogue import (
     DownloadScans,
     Login,
     Settings,
-    UploadScans,
-    Validate,
-    handle_common_exc,
 )
 from client.widgets.metadata_panel import MetadataPanel
 from client.widgets.table import TableModel, TableView

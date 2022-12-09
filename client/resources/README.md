@@ -1,3 +1,5 @@
 # Resources
 
-- [placeholder.jpg](placeholder.jpg); credit: [Von.grzanka](https://commons.wikimedia.org/wiki/File:Felis_catus-cat_on_snow.jpg), [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0), via Wikimedia Commons
+- [404.png](404.png); content not found image
+- [splash.png](splash.png); splash-screen image
+- [tams.png](tams.png); TAMS logo

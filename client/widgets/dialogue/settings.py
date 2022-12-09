@@ -5,7 +5,6 @@ Settings are saved as TOML files in the settings directory.
 """
 
 import logging
-from pathlib import Path
 
 import psycopg
 from PySide6.QtCore import QFile, QUrl
