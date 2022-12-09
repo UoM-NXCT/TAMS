@@ -1,7 +1,6 @@
 """
 Progress bar dialogue for validating files.
 """
-import logging
 
 from PySide6.QtCore import QThreadPool
 from PySide6.QtGui import QCloseEvent
@@ -16,8 +15,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from client.runners.generic import RunnerStatus
-from client.runners.validate import ValidateScans
+from client.runners import RunnerStatus, ValidateScans
 from client.utils import log
 from client.utils.file import size_fmt
 
@@ -45,7 +43,8 @@ class Validate(QDialog):
 
         # Create label
         label = QLabel(
-            f"Validating {runner.get_max_progress() + 1} items... ({size_fmt(runner.size_in_bytes)})"
+            f"Validating {runner.get_max_progress() + 1} items... "
+            f"({size_fmt(runner.size_in_bytes)})"
         )
         layout.addWidget(label)
 
@@ -99,7 +98,6 @@ class Validate(QDialog):
         """Show a message box when the job is done."""
 
         # Pause the runner if not paused already
-        ...
 
         match self.runner.result_value:
             case True:
@@ -114,7 +112,8 @@ class Validate(QDialog):
                 QMessageBox.critical(
                     self,
                     "Data invalid",
-                    "Data on server does not match local. Data is either missing or corrupted.",
+                    "Data on server does not match local. Data is either missing or "
+                    "corrupted.",
                 )
             case _:
                 logger.critical("Validation is neither true nor false. This is bad!")
@@ -128,10 +127,10 @@ class Validate(QDialog):
         Overloads QDialog.closeEvent method.
         """
 
-        logging.info("Closing %s.", self.__class__.__name__)
+        logger.info("Closing %s.", self.__class__.__name__)
 
         # Kill the runner on close if not killed already
-        if not self.runner.worker_status is RunnerStatus.KILLED:
+        if self.runner.worker_status is not RunnerStatus.KILLED:
             self.runner.kill()
 
         super().closeEvent(arg__1)
