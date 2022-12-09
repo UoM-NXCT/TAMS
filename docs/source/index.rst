@@ -20,4 +20,5 @@ This documentation is licenced under `CC BY 4.0
    about
    install
    usage
+   security
    contribute
