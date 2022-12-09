@@ -60,6 +60,8 @@ class TableModel(QAbstractTableModel):
                 # Align numbers to the right and vertically centre
                 return Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
 
+        return None
+
     def rowCount(self, _parent: QModelIndex | QPersistentModelIndex = ...) -> int:
         """Return the length of the outer list."""
 
