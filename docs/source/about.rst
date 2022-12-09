@@ -16,6 +16,9 @@ TAMS is distributed in the hope that it will be useful, but with **absolutely no
 warranty**. See the `software licence
 <https://github.com/UoM-NXCT/TAMS/blob/main/LICENCE>`_ for details.
 
+This documentation is released under `CC BY 4.0
+<https://creativecommons.org/licenses/by/4.0/>`_.
+
 Credits and acknowledgements
 ----------------------------
 
