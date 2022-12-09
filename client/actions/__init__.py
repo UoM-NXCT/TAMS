@@ -9,3 +9,15 @@ from .update_table import (
 )
 from .upload import upload
 from .validate import validate
+
+__all__ = [
+    "download",
+    "open_data",
+    "toggle_full_screen",
+    "update_table",
+    "update_table_with_projects",
+    "update_table_with_scans",
+    "update_table_with_users",
+    "upload",
+    "validate",
+]
