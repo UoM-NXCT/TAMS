@@ -16,7 +16,7 @@ if typing.TYPE_CHECKING:
 
 
 @handle_common_exc
-def validate(main_window: MainWindow) -> QDialog:
+def validate(main_window: MainWindow) -> Validate:
     """Validate action returns a dialogue with a validation runner."""
 
     # Get the selected table

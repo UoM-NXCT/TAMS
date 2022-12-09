@@ -18,7 +18,7 @@ if typing.TYPE_CHECKING:
 
 
 @handle_common_exc
-def upload(main_window: MainWindow) -> QDialog:
+def upload(main_window: MainWindow) -> UploadScans:
     """Download action returns a dialogue with a save scans runner."""
 
     # Get the selected table
