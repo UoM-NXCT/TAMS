@@ -105,19 +105,6 @@ To run the tests, run:
 
     poetry run pytest
 
-Type checking
-^^^^^^^^^^^^^
-
-Python is a dynamically typed language. This means that the Python interpreter does type checking only as code runs, and that the type of a variable can change over its lifetime. This is a powerful feature, but it can also lead to bugs, unexpected behaviour, and security vulnerabilities. It can also make code difficult to read if the project becomes complex.
-
-To help with this, TAMS uses Python's built-in type annotations `mypy <http://mypy-lang.org/>`_ to perform static type checking. This means that the type of a variable is checked before the code is run. This can help to catch bugs before they occur.
-
-To run the type checker, run:
-
-.. code-block:: bash
-
-    poetry run mypy . --strict
-
 Compile
 ^^^^^^^
 
@@ -270,3 +257,11 @@ We will try to respond quickly and keep you updated throughout the process.
 A vulnerability is a vulnerability in the code distributed through the main source code
 repository. Vulnerabilities specific to a given setup due to, for example, a
 misconfiguration should be reported to the administrator of that setup.
+
+Licence
+-------
+
+By contributing your code, you agree to license your contribution under the `MIT licence
+<https://github.com/UoM-NXCT/TAMS/blob/main/LICENCE>`_. By contributing to the
+documentation, you agree to license your contribution under `CC BY 4.0
+<https://creativecommons.org/licenses/by/4.0/>`_.
