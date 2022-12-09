@@ -7,3 +7,15 @@ from .login import Login
 from .settings import Settings
 from .upload_scan import UploadScans
 from .validate import Validate
+
+__all__ = [
+    "About",
+    "CreatePrj",
+    "CreateScan",
+    "handle_common_exc",
+    "DownloadScans",
+    "Login",
+    "Settings",
+    "UploadScans",
+    "Validate",
+]

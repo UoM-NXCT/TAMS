@@ -9,4 +9,7 @@ python -m poetry run isort . --profile black
 echo "Formatting with black..."
 python -m poetry run black .
 
+echo "Formatting with sqlfluff..."
+python -m poetry run sqlfluff fix . --dialect postgres
+
 $SHELL
