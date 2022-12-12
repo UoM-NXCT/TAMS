@@ -11,5 +11,3 @@ python -m poetry run black . --preview
 
 echo "Formatting with sqlfluff..."
 python -m poetry run sqlfluff fix . --dialect postgres
-
-$SHELL
