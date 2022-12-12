@@ -1,9 +1,13 @@
+"""
+Abstract scan class.
+"""
+
 from pathlib import Path
 from typing import Any
 
 
 class AbstractScan:
-    """Base class for all instruments.
+    """Base class for all scans.
 
     This class defines the interface that all scans must implement.
     """
