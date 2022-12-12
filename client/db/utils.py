@@ -14,5 +14,5 @@ def dict_to_conn_str(config_dict: dict[str, dict[str, Any]]) -> str:
     dbname: str = config["database"]
     user: str = config["user"]
     pwd: str = config["password"]
-    conn_str: str = f"host={host} dbname={dbname} user={user} password" f"={pwd}"
+    conn_str: str = f"host={host} dbname={dbname} user={user} password={pwd}"
     return conn_str

@@ -110,8 +110,10 @@ class Validate(QDialog):
                 QMessageBox.critical(
                     self,
                     "Data invalid",
-                    "Data on server does not match local. Data is either missing or "
-                    "corrupted.",
+                    (
+                        "Data on server does not match local. Data is either missing or"
+                        " corrupted."
+                    ),
                 )
             case _:
                 logger.critical("Validation is neither true nor false. This is bad!")

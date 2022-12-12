@@ -28,7 +28,10 @@ class DatabaseView:
     def get_tables(self) -> list[tuple[str]]:
         """Get list of tables in the database."""
 
-        query: str = "select table_name from information_schema.tables where table_schema='public' and table_type='BASE TABLE';"
+        query: str = (
+            "select table_name from information_schema.tables where"
+            " table_schema='public' and table_type='BASE TABLE';"
+        )
         with Database(self.conn_str) as database:
             if database.cur:
                 database.exec(query)
@@ -89,7 +92,10 @@ class DatabaseView:
         """Get project metadata."""
 
         data, column_headers = self.view_select_from_where(
-            "project_id, title, project_type, summary, keyword, start_date, end_date, directory_path",
+            (
+                "project_id, title, project_type, summary, keyword, start_date,"
+                " end_date, directory_path"
+            ),
             "project",
             f"project_id={project_id}",
         )

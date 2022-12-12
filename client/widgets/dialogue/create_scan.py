@@ -142,7 +142,10 @@ class CreateScan(QDialog):
         with psycopg.connect(self.conn_str) as conn:
             with conn.cursor() as cur:
                 cur.execute(
-                    "insert into scan (project_id, instrument_id) values (%s, %s) returning scan_id;",
+                    (
+                        "insert into scan (project_id, instrument_id) values (%s, %s)"
+                        " returning scan_id;"
+                    ),
                     (selected_prj_id, selected_instrument_id),
                 )
                 conn.commit()

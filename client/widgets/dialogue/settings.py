@@ -340,8 +340,10 @@ class Settings(QDialog):
                 QMessageBox.information(
                     self,
                     "Connection success",
-                    "<p>Connected to database successfully.</p>"
-                    f"<p>Version: <samp>{database}</samp></p>",
+                    (
+                        "<p>Connected to database successfully.</p>"
+                        f"<p>Version: <samp>{database}</samp></p>"
+                    ),
                     QMessageBox.StandardButton.Ok,
                 )
 

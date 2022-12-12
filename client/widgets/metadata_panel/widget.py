@@ -137,12 +137,10 @@ class MetadataPanel(QWidget):
         self.metadata_tree.clear()
 
         if self._data and self._column_headers:
-
             items: list[QTreeWidgetItem] = []
 
             # Iterate over the data and column headers
             for index, column in enumerate(self._column_headers):
-
                 # Create the tree item for the column
                 item: QTreeWidgetItem = QTreeWidgetItem([column])
 
@@ -210,7 +208,6 @@ class MetadataPanel(QWidget):
         """Update the thumbnail widget."""
 
         if self._data and self._column_headers:
-
             # Get the project ID
             prj_id: int | None = self.get_prj_id()
 

@@ -4,7 +4,6 @@ from client.db.utils import dict_to_conn_str
 
 
 class TestDictToConnStr(unittest.TestCase):
-
     config_dict: dict = {
         "postgresql": {
             "host": "example.com",

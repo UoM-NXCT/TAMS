@@ -47,7 +47,8 @@ class UploadScans(QDialog):
 
         # Create label
         label = QLabel(
-            f"Uploading {runner.get_max_progress() + 1} items... ({size_fmt(runner.size_in_bytes)})"
+            f"Uploading {runner.get_max_progress() + 1} items..."
+            f" ({size_fmt(runner.size_in_bytes)})"
         )
         layout.addWidget(label)
 
