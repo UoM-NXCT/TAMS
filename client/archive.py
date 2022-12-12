@@ -65,7 +65,6 @@ TRIUMVIRATE = ["_processing", "_tmp", "reconstructed data"]
 
 
 if __name__ == "__main__":
-
     # Search through every directory in the search directory.
     # Assume each directory in the search directory is a scan directory.
     for scan_dir in (d for d in SEARCH_DIR.glob("*") if d.is_dir()):
@@ -116,13 +115,15 @@ if __name__ == "__main__":
                 create_dir_if_missing(new_directory)
 
         print(
-            f"\nStage 3: find and move projections from {base_dirs['local']} to permanent and satellite storage directories."
+            f"\nStage 3: find and move projections from {base_dirs['local']} to"
+            " permanent and satellite storage directories."
         )
         find_and_move("*.tif", base_dirs["local"], [base_dirs["satellite"]], copy=True)
         find_and_move("*.tif", base_dirs["local"], [base_dirs["permanent"]], copy=True)
 
         print(
-            f"\nStage 4: find and move .xml, .xtekct, and .ANG files in {base_dirs['local']} to satellite and permanent storage directories."
+            "\nStage 4: find and move .xml, .xtekct, and .ANG files in"
+            f" {base_dirs['local']} to satellite and permanent storage directories."
         )
         # Create list with the target destinations for the files
         destinations = [
@@ -138,7 +139,8 @@ if __name__ == "__main__":
 
         # Find reconstructions and move to local reconstructed data directory
         print(
-            "\nStage 5: find and move reconstructions to local reconstructed data directory."
+            "\nStage 5: find and move reconstructions to local reconstructed data"
+            " directory."
         )
         local_reconstructed_data_directory = [base_dirs["local"] / "reconstructed data"]
         find_and_move(
@@ -154,7 +156,8 @@ if __name__ == "__main__":
 
         # Find reconstructions and move to stat storage
         print(
-            "\nStage 6: find and copy reconstructions to the stat reconstructed data directory."
+            "\nStage 6: find and copy reconstructions to the stat reconstructed data"
+            " directory."
         )
         for recon_dir in (
             d for d in (scan_dir / TRIUMVIRATE[2]).glob("*") if d.is_dir()
@@ -166,7 +169,8 @@ if __name__ == "__main__":
 
         # Find CentreSlices directory and move to stat and permanent storage
         print(
-            "\nStage 7: find and move CentreSlices directory to satellite and permenant storage."
+            "\nStage 7: find and move CentreSlices directory to satellite and permenant"
+            " storage."
         )
         destinations = [
             base_dirs["satellite"],

@@ -34,8 +34,10 @@ def handle_common_exc(func: Callable[..., Any]) -> Callable[..., Any]:
             QMessageBox.critical(
                 QWidget(),
                 "File not found error",
-                f"File {exc.filename} not found."
-                "Check that the path exists and is accessible.",
+                (
+                    f"File {exc.filename} not found."
+                    "Check that the path exists and is accessible."
+                ),
             )
         except RuntimeError as exc:
             log.logger(__name__).exception("Exception raised")

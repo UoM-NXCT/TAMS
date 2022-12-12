@@ -107,8 +107,10 @@ class CreatePrj(QDialog):
             with conn.cursor() as cur:
                 # Create project in database
                 cur.execute(
-                    "insert into project (title, summary, start_date, end_date) "
-                    "values (%s, %s, %s, %s) returning project_id;",
+                    (
+                        "insert into project (title, summary, start_date, end_date) "
+                        "values (%s, %s, %s, %s) returning project_id;"
+                    ),
                     (
                         new_prj_title,
                         new_prj_summary,

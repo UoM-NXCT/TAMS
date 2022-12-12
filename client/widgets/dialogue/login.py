@@ -153,8 +153,10 @@ class Login(QDialog):
             QMessageBox.critical(
                 self,
                 "Connection Error",
-                "Failed to connect to database. Please check the login details.\n"
-                f"Exception raised: {exc}",
+                (
+                    "Failed to connect to database. Please check the login details.\n"
+                    f"Exception raised: {exc}"
+                ),
             )
             return
 

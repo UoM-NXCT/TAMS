@@ -90,8 +90,10 @@ class SaveScans(GenericRunner):
         response: QMessageBox.StandardButton = QMessageBox.information(
             dlg,
             "Indexing files",
-            "Depending on the size of the data, this may take a long time."
-            "Are you sure you would like to continue?",
+            (
+                "Depending on the size of the data, this may take a long time."
+                "Are you sure you would like to continue?"
+            ),
             QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel,
         )
         if response == QMessageBox.StandardButton.Cancel:
@@ -177,7 +179,6 @@ class SaveScans(GenericRunner):
 
         # Save each scan in scan list
         for scan in self.scan_ids:
-
             # Target the scan directory in the source library
             source_scan_dir: Path = self.source_prj_dir / Path(scan)
 
@@ -191,7 +192,6 @@ class SaveScans(GenericRunner):
 
             # Move files
             for item in source_scan_dir.rglob(self.glob_arg):
-
                 # Move item
                 if not item.is_file():
                     # Skip directories

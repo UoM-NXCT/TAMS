@@ -43,7 +43,6 @@ def move_item(item: Path, dest_dir: Path, keep_original: bool = True) -> None:
     item_dest: Path = dest_dir / item.name
 
     try:
-
         # Check file or directory is a file or directory, respectively
         if item.is_file():
             shutil.copy(item, item_dest)

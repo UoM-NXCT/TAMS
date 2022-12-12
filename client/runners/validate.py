@@ -107,8 +107,10 @@ class ValidateScans(GenericRunner):
         response: QMessageBox.StandardButton = QMessageBox.information(
             dlg,
             "Indexing files",
-            "Depending on the size of the data, this may take a long time. Are you sure"
-            " you would like to continue?",
+            (
+                "Depending on the size of the data, this may take a long time. Are you"
+                " sure you would like to continue?"
+            ),
             QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel,
         )
         if response == QMessageBox.StandardButton.Cancel:
