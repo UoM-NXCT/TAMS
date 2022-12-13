@@ -16,9 +16,16 @@ base_units: dict[str, str] = {
 }
 
 prefix_exponents: dict[str, int] = {
+    "G": 9,
+    "M": 6,
     "k": 3,
-    "u": -6,
     "m": -3,
+    "u": -6,
+    "n": -9,
+    "p": -12,
+    "f": -15,
+    "a": -18,
+    "z": -21,
 }
 
 
@@ -26,8 +33,7 @@ def to_base_unit(value: int | float, unit: str):
     """Convert a value to the base unit for the given unit."""
 
     # Each prefix is one character long
-    # Note: this is not true for the SI prefix "deca" (da), but we don't use that
-
+    # Note: this is not true for the SI prefix deca (da), but we don't use that
     prefix: str = unit[0]
     given_prefix_exponent: int = prefix_exponents[prefix]
 
