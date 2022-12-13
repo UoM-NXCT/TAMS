@@ -1,8 +1,12 @@
+from configparser import ConfigParser
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from xml.etree import ElementTree
 
-from client.library.abstract_instrument import AbstractScan
+if TYPE_CHECKING:
+    from xml.etree.ElementTree import Element
+
+from .abstract_instrument import AbstractScan
 
 
 class NikonScan(AbstractScan):
@@ -36,18 +40,24 @@ class NikonScan(AbstractScan):
             raise FileNotFoundError("Could not find .xtekct file") from exc
 
         # Parse the XML file
-        tree = ElementTree.parse(xml_file)
-        root = tree.getroot()
+        # This not secure against maliciously constructed data; assume XML data is safe
+        tree: ElementTree = ElementTree.parse(xml_file)
+        root: Element = tree.getroot()
         voltage_kv: int = int(root.find("XraySettings").find("kV").text)
         current_ua: int = int(root.find("XraySettings").find("uA").text)
         # TODO: parse more metadata from the XML file
 
         # Parse the XTEKCT file
         # Treat the XTEKCT file as an INI file (I think it is close enough)
+        xtekct_data: ConfigParser = ConfigParser()
+        xtekct_data.read(xtekct_file)
+        scan_name: str = xtekct_data["XTekCT"]["Name"]
+        # TODO: parse more metadata from the XTEKCT file
 
         return {
             "voltage": voltage_kv,
             "current": current_ua,
+            "scan_name": scan_name,
         }
 
     @staticmethod

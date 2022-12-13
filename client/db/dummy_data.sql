@@ -131,6 +131,7 @@ values (
 delete from scan;
 
 insert into scan (
+    scan_name,
     voltage,
     amperage,
     exposure,
@@ -145,6 +146,7 @@ insert into scan (
     instrument_id
 )
 values (
+    'Some scan name',
     1,
     1,
     1,
@@ -162,6 +164,7 @@ values (
     (select instrument_id from instrument where name = 'Nikon')
 ),
 (
+    'Some other scan name',
     1,
     2,
     3,
@@ -179,6 +182,7 @@ values (
     (select instrument_id from instrument where name = 'Zeiss')
 ),
 (
+    'Scan name with a number 3',
     2,
     1,
     1,
@@ -196,6 +200,7 @@ values (
     (select instrument_id from instrument where name = 'Rapiscan')
 ),
 (
+    'Scan name with a number 4',
     3,
     2,
     3,
