@@ -32,15 +32,27 @@ prefix_exponents: dict[str, int] = {
 
 
 def to_base_unit(given_value: int | float, given_unit: str) -> tuple[int | float, str]:
-    """Convert a value to the base unit for the given unit."""
+    """Convert a value to the base unit for the given unit.
 
-    # Each prefix is one character long
-    # Note: this is not true for the SI prefix deca (da), but we don't use that
-    given_prefix: str = given_unit[0]
-    given_prefix_exponent: int = prefix_exponents[given_prefix]
+    :param given_value: value to convert
+    :param given_unit: unit of the value
+    :return: value in base units and the base unit, as a tuple
+    """
 
-    # The SI unit is the rest of the string
-    si_unit: str = given_unit[1:]
+    if len(given_unit) > 1:
+        # Each prefix is one character long
+        # Note: this is not true for the SI prefix deca (da), but we don't use that
+        given_prefix: str = given_unit[0]
+        given_prefix_exponent: int = prefix_exponents[given_prefix]
+
+        # The SI unit is the rest of the string
+        si_unit: str = given_unit[1:]
+    elif len(given_unit) == 1:
+        # Given unit is an SI unit
+        given_prefix_exponent = 0
+        si_unit = given_unit
+    else:
+        raise ValueError("No unit given")
 
     # Get the target prefix for the SI unit
     target_prefix: str = base_units[si_unit]
@@ -50,3 +62,6 @@ def to_base_unit(given_value: int | float, given_unit: str) -> tuple[int | float
     exponent_difference: int = given_prefix_exponent - target_prefix_exponent
     conversion_factor: float = 10**exponent_difference
     return given_value * conversion_factor, f"{target_prefix}{si_unit}"
+
+
+print(to_base_unit(1000, ""))
