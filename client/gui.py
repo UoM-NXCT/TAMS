@@ -27,6 +27,7 @@ from client.db import DatabaseView
 from client.utils import log
 from client.widgets.dialogue import (
     About,
+    AddToLibrary,
     CreatePrj,
     CreateScan,
     DownloadScans,
@@ -197,7 +198,7 @@ class MainWindow(QMainWindow):
         self.add_act = QAction(icon, "Add data")
         self.add_act.setShortcut("Ctrl+A")
         self.add_act.setToolTip("Add data to the local library")
-        self.add_act.triggered.connect(lambda: print("Add data"))
+        self.add_act.triggered.connect(lambda: AddToLibrary(self, self.conn_str))
 
         self.quit_act = QAction("&Quit")
         self.quit_act.setShortcut("Ctrl+Q")

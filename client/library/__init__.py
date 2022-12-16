@@ -1,3 +1,3 @@
-from nikon import NikonScan
+from .nikon import NikonScan
 
 __all__ = ["NikonScan"]
