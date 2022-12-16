@@ -740,7 +740,7 @@ test = ["pytest"]
 
 [[package]]
 name = "sqlfluff"
-version = "1.4.3"
+version = "1.4.4"
 description = "The SQL Linter for Humans"
 category = "dev"
 optional = false
@@ -1658,8 +1658,8 @@ sphinxcontrib-serializinghtml = [
     {file = "sphinxcontrib_serializinghtml-1.1.5-py2.py3-none-any.whl", hash = "sha256:352a9a00ae864471d3a7ead8d7d79f5fc0b57e8b3f95e9867eb9eb28999b92fd"},
 ]
 sqlfluff = [
-    {file = "sqlfluff-1.4.3-py3-none-any.whl", hash = "sha256:6e1948432e09f8614facc0719c9726ed1098b04c3c49b5caa08f0440cd46a926"},
-    {file = "sqlfluff-1.4.3.tar.gz", hash = "sha256:566587d3475b80c88db6d5b202fa96b87c3bfb3d3740d47c02a81c3971f855f3"},
+    {file = "sqlfluff-1.4.4-py3-none-any.whl", hash = "sha256:5b7fa6b790cdb610275f1595153e1a4c309175efe63a795f4ead26b3c0703fc4"},
+    {file = "sqlfluff-1.4.4.tar.gz", hash = "sha256:837e7fef6a1d7420e91f3bca439e9017d5e795dd373147e2ef79f869ea43962d"},
 ]
 ssort = [
     {file = "ssort-0.11.6.tar.gz", hash = "sha256:21fec493487f32dff50d30efa5b6aad18286e9817600b64bfe686ae062bae7ae"},
