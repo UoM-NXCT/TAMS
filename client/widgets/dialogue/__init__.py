@@ -1,4 +1,5 @@
 from .about import About
+from .add import AddToLibrary
 from .create_prj import CreatePrj
 from .create_scan import CreateScan
 from .decorators import handle_common_exc
@@ -10,6 +11,7 @@ from .validate import Validate
 
 __all__ = [
     "About",
+    "AddToLibrary",
     "CreatePrj",
     "CreateScan",
     "handle_common_exc",
