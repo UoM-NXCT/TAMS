@@ -19,6 +19,7 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QPushButton,
     QTreeWidget,
+    QTreeWidgetItem,
     QVBoxLayout,
     QWidget,
 )
@@ -85,13 +86,22 @@ class AddToLibrary(QDialog):
 
     def update_metadata_tree(self) -> None:
         """Update the metadata tree with the new scan's metadata."""
+        self.metadata_tree.clear()
         fmt = self.scan_fmt.currentText()
         match fmt:
             case "Nikon":
                 scan = NikonScan(self.scan_loc)
                 try:
                     metadata = scan.get_metadata()
-                    print(metadata)
+                    items: list[QTreeWidgetItem] = []
+                    for index, (key, value) in enumerate(metadata.items()):
+                        item = QTreeWidgetItem([key])
+                        child = QTreeWidgetItem([str(value)])
+                        print([value])
+                        item.addChild(child)
+                        items.append(item)
+                    self.metadata_tree.insertTopLevelItems(0, items)
+                    self.metadata_tree.expandAll()
                 except FileNotFoundError:
                     QMessageBox.warning(
                         self,
@@ -102,10 +112,8 @@ class AddToLibrary(QDialog):
                             " is valid."
                         ),
                     )
-                    self.metadata_tree.clear()
 
             case _:
-                self.metadata_tree.clear()
                 raise NotImplementedError(f"Scan format {fmt} not implemented.")
 
     def select_scan_loc(self) -> None:

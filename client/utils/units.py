@@ -60,7 +60,7 @@ def to_base_unit(given_value: int | float, given_unit: str) -> tuple[int | float
 
     # Calculate the exponent difference
     exponent_difference: int = given_prefix_exponent - target_prefix_exponent
-    conversion_factor: float = 10**exponent_difference
+    conversion_factor: int | float = 10**exponent_difference
 
     # Convert the new value
     new_value: int | float = given_value * conversion_factor
