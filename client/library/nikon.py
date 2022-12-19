@@ -88,10 +88,3 @@ class NikonScan(AbstractScan):
         return tuple(
             item for item in self.path.glob("*") if not self.is_reconstruction(item)
         )
-
-
-if __name__ == "__main__":
-    scan = NikonScan(
-        Path(r"Z:\for_archiving\NXCT0462_AG-SDCARD-8gb-Al-1 [2022-11-25 15.49.14]")
-    )
-    scan.get_metadata()
