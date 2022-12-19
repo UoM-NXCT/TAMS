@@ -2,11 +2,11 @@
 Common TOML file operation methods.
 """
 
+import tomllib
 from pathlib import Path
 from typing import Any
 
 import tomli_w
-import tomllib
 
 
 def create_toml(path: Path | str, data: dict[str, Any]) -> None:

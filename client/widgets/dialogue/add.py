@@ -2,20 +2,14 @@
 This window lets users add scans to the library.
 """
 
-import logging
 from pathlib import Path
-from typing import Any
 
-import psycopg
-from PySide6.QtCore import QDate, Qt
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QComboBox,
-    QDateEdit,
     QDialog,
     QFileDialog,
-    QFormLayout,
     QLabel,
-    QLineEdit,
     QMessageBox,
     QPushButton,
     QTreeWidget,
@@ -24,10 +18,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from client import settings
-from client.db.exceptions import exc_gui
 from client.library import NikonScan
-from client.utils import file
 
 
 class AddToLibrary(QDialog):
