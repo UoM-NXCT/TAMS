@@ -2,7 +2,10 @@
 This window lets users add scans to the library.
 """
 
+from __future__ import annotations
+
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
@@ -15,8 +18,10 @@ from PySide6.QtWidgets import (
     QTreeWidget,
     QTreeWidgetItem,
     QVBoxLayout,
-    QWidget,
 )
+
+if TYPE_CHECKING:
+    from client.gui import MainWindow
 
 from client.library import NikonScan
 
@@ -24,12 +29,25 @@ from client.library import NikonScan
 class AddToLibrary(QDialog):
     """Window for adding scans to the library."""
 
-    def __init__(self, parent_widget: QWidget, conn_str: str):
+    def __init__(self, main_window: MainWindow, conn_str: str):
         """Initialize the window."""
 
-        super().__init__(parent=parent_widget)
+        super().__init__(parent=main_window)
         self.conn_str: str = conn_str
         self.scan_loc: Path | None = None
+
+        # Check the selected row
+        if (
+            main_window.current_table() != "scan"
+            or not main_window.table_view.selectionModel().selectedRows()
+        ):
+            QMessageBox.warning(
+                self,
+                "No scan selected",
+                "Please select a scan to add to the library.",
+            )
+            self.close()
+            return
 
         # Set up the settings window GUI.
         self.setMinimumSize(400, 300)
