@@ -42,12 +42,18 @@ def move_item(item: Path, dest_dir: Path, keep_original: bool = True) -> None:
 
     item_dest: Path = dest_dir / item.name
 
+    print(item_dest)
+
     try:
         # Check file or directory is a file or directory, respectively
         if item.is_file():
+            print("File")
             shutil.copy(item, item_dest)
         elif item.is_dir():
+            print("Copying directory")
             shutil.copytree(item, item_dest)
+        else:
+            raise RuntimeError("Item is not a file or directory.")
 
         # Delete original if not keeping original
         if not keep_original:

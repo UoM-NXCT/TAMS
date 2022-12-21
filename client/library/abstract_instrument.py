@@ -19,7 +19,7 @@ class AbstractScan:
         """
         self.path = path
 
-    def get_reconstructions(self) -> list[list[Path]]:
+    def get_reconstructions(self) -> tuple[Path, ...]:
         """Get the reconstruction files.
 
         :return: list of reconstruction files

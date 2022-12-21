@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from configparser import ConfigParser
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -17,6 +19,7 @@ class NikonScan(AbstractScan):
 
         :param path: path to the scan
         """
+        self.path = path
         super().__init__(path)
 
     def get_metadata(self) -> dict[str, Any]:
@@ -75,7 +78,9 @@ class NikonScan(AbstractScan):
         """
 
         return tuple(
-            item for item in self.path.glob("*") if self.is_reconstruction(item)
+            item.relative_to(self.path)
+            for item in self.path.glob("*")
+            if self.is_reconstruction(item)
         )
 
     def get_raw_data(self) -> tuple[Path, ...]:

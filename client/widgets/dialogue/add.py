@@ -7,7 +7,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QThreadPool
 from PySide6.QtWidgets import (
     QComboBox,
     QDialog,
@@ -20,10 +20,13 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
 )
 
+from client.runners.addscan import AddScan
+from client.utils.file import create_dir
+
 if TYPE_CHECKING:
     from client.gui import MainWindow
 
-from client.library import NikonScan
+from client.library import NikonScan, get_relative_path, local_path
 
 
 class AddToLibrary(QDialog):
@@ -32,14 +35,16 @@ class AddToLibrary(QDialog):
     def __init__(self, main_window: MainWindow, conn_str: str):
         """Initialize the window."""
 
-        super().__init__(parent=main_window)
+        self.parent = main_window
+
+        super().__init__(parent=self.parent)
         self.conn_str: str = conn_str
         self.scan_loc: Path | None = None
 
         # Check the selected row
         if (
-            main_window.current_table() != "scan"
-            or not main_window.table_view.selectionModel().selectedRows()
+            self.parent.current_table() != "scan"
+            or not self.parent.table_view.selectionModel().selectedRows()
         ):
             QMessageBox.warning(
                 self,
@@ -78,7 +83,7 @@ class AddToLibrary(QDialog):
 
         # Make create project button
         add_btn = QPushButton("Add")
-        add_btn.clicked.connect(lambda: print("clicked"))
+        add_btn.clicked.connect(self.add_scan)
 
         # Create the layout for the settings window.
         v_box = QVBoxLayout()
@@ -96,7 +101,7 @@ class AddToLibrary(QDialog):
     def update_metadata_tree(self) -> None:
         """Update the metadata tree with the new scan's metadata."""
         self.metadata_tree.clear()
-        fmt = self.scan_fmt.currentText()
+        fmt: str = self.scan_fmt.currentText()
         match fmt:
             case "Nikon":
                 scan = NikonScan(self.scan_loc)
@@ -106,7 +111,6 @@ class AddToLibrary(QDialog):
                     for index, (key, value) in enumerate(metadata.items()):
                         item = QTreeWidgetItem([key])
                         child = QTreeWidgetItem([str(value)])
-                        print([value])
                         item.addChild(child)
                         items.append(item)
                     self.metadata_tree.insertTopLevelItems(0, items)
@@ -149,3 +153,29 @@ class AddToLibrary(QDialog):
                 "No directory set. Please set a directory first.",
             )
         self.update_metadata_tree()
+
+    def add_scan(self) -> None:
+        """Add the scan to the library."""
+
+        # For a scan to be saved, we need its project ID and scan ID as a minimum.
+
+        scan_id = self.parent.selected_row()[0]
+        prj_id = self.parent.selected_row()[1]
+
+        # Create directories in local library if they don't exist
+        relative_path: Path = get_relative_path(prj_id, scan_id)
+        local_dir: Path = local_path(relative_path)
+        create_dir(local_dir)
+
+        fmt: str = self.scan_fmt.currentText()
+        match fmt:
+            case "Nikon":
+                scan = NikonScan(self.scan_loc)
+                runner = AddScan(prj_id, scan_id, scan)
+                # TODO: This should not work like this! Fix before release.
+                threadpool = QThreadPool()
+                threadpool.start(runner)
+            case _:
+                raise NotImplementedError(f"Scan format {fmt} not implemented.")
+
+        pass
