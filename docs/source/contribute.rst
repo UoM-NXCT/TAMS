@@ -235,10 +235,17 @@ Rather than:
 
 However, this project uses PySide6 which interfaces with the C++ Qt library. This means that some variable names will be camelCase and not follow PEP 8. In this project, use snake_case to clarify where PySide6 ends and the project code begins.
 
-Licence
--------
+Contributor agreement
+---------------------
 
-By contributing code, you agree to licence your contribution under the `software licence
-<https://github.com/UoM-NXCT/TAMS/blob/main/LICENCE>`_. By contributing to the
-documentation, you agree to license your contribution under `CC BY 4.0
-<https://creativecommons.org/licenses/by/4.0/>`_.
+By contributing to this project, you verify that:
+
+#. you are responsible for anything you contribute;
+#. you will only contribute that which you have the right to contribute;
+#. you will fully comply with any third-party licences relating to your contributions;
+#. unless superseded by a separate agreement, your contribution to this project will
+   be licensed under the existing project licence;
+#. you understand and agree that this project and the contribution are public and that
+   a record of the contribution (including any personal information you submit) is
+   maintained indefinitely and may be redistributed consistent with this project or the
+   licence(s) involved.

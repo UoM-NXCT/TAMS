@@ -302,10 +302,10 @@ class MainWindow(QMainWindow):
 
         return self.current_table_query[1]
 
-    def on_selection_changed(self) -> None:
-        """Update the metadata when a new row is selected."""
+    def selected_row(self) -> tuple[Any, ...]:
+        """Get the selected row in the table view."""
 
-        # Because the rows can be sorted, the Nth item in the visible table may not be the Nth item in data
+        # Rows can be sorted, so the Nth table item may not be the Nth item in data
         # Hence, we have to translate the visible index to the source index
         proxy_index: QModelIndex = self.table_view.currentIndex()
         source_index: QModelIndex = self.proxy_model.mapToSource(proxy_index)
@@ -314,8 +314,13 @@ class MainWindow(QMainWindow):
         row_index: int = source_index.row()
         row: tuple[Any] = self.table_model.get_row_data(row_index)
 
+        return row
+
+    def on_selection_changed(self) -> None:
+        """Update the metadata when a new row is selected."""
+
         # Get the primary key from the first column (assume first column is the pk)
-        key: int = row[0]
+        key: int = self.selected_row()[0]
 
         # Each item has a different metadata format; use the current table to method
         metadata: tuple[tuple[any], list[str]]
