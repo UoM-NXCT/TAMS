@@ -22,7 +22,7 @@ class NikonScan(AbstractScan):
         self.path = path
         super().__init__(path)
 
-    def get_metadata(self) -> dict[str, Any]:
+    def get_metadata(self) -> dict[str, Any] | None:
         """Get the metadata for the scan.
 
         :return: metadata for the scan
@@ -44,10 +44,15 @@ class NikonScan(AbstractScan):
 
         # Parse the XML file
         # This not secure against maliciously constructed data; assume XML data is safe
-        tree: ElementTree = ElementTree.parse(xml_file)
+        tree = ElementTree.parse(xml_file)
         root: Element = tree.getroot()
-        voltage_kv: int = int(root.find("XraySettings").find("kV").text)
-        current_ua: int = int(root.find("XraySettings").find("uA").text)
+        try:
+            settings = root.find("XraySettings")
+            voltage_kv: int = int(settings.find("kV").text)  # type: ignore
+            current_ua: int = int(settings.find("uA").text)  # type: ignore
+        except (AttributeError, TypeError):
+            # If we can't find the voltage and current, we can't get the metadata
+            return None
         # TODO: parse more metadata from the XML file
 
         # Parse the XTEKCT file

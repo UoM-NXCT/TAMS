@@ -26,14 +26,14 @@ class AbstractScan:
         """
         raise NotImplementedError
 
-    def get_metadata(self) -> dict[str, Any]:
+    def get_metadata(self) -> dict[str, Any] | None:
         """Get the metadata for the scan.
 
         :return: metadata for the scan
         """
         raise NotImplementedError
 
-    def get_raw_data(self) -> list[Path]:
+    def get_raw_data(self) -> tuple[Path, ...]:
         """Get the raw data files.
 
         :return: list of raw data files
