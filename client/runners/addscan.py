@@ -3,9 +3,9 @@ Runner for adding scans to the local library and the database.
 """
 
 from client.library import AbstractScan, get_relative_path, local_path
-from client.utils.file import create_dir, move_item
+from client.utils.file import move_item
 
-from .generic import GenericRunner, RunnerKilledException, RunnerStatus
+from .generic import GenericRunner
 
 
 class AddScan(GenericRunner):
