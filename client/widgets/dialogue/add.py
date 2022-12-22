@@ -177,5 +177,3 @@ class AddToLibrary(QDialog):
                 threadpool.start(runner)
             case _:
                 raise NotImplementedError(f"Scan format {fmt} not implemented.")
-
-        pass
