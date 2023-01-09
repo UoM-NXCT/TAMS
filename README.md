@@ -28,8 +28,8 @@ poetry run python -m client
 
 You can read the documentation [online](https://tams-nxct.readthedocs.io/).
 
-You can also build the documentation locally by executing the following command from the
-`docs/` directory:
+You can also build the documentation by running the following command from the `docs/`
+directory:
 
 ```commandline
 poetry run sphinx-build -b html source build
