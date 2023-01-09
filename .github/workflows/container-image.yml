@@ -5,19 +5,15 @@ on:
     branches: ["main"]
   pull_request:
     branches: ["main"]
-
 jobs:
   build-docker:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
       - name: Build the container image with Docker
         run: docker build . --file db.Containerfile --tag db-image:$(date +%s)
-
   build-podman:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
       - name: Build the container image with Podman
