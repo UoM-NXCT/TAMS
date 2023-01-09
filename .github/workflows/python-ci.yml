@@ -16,8 +16,8 @@ jobs:
   build:
     strategy:
       matrix:
-        python-version: ["3.11"] # ignore 3.11 for now
-        os: [ubuntu-latest, windows-latest] # macOS is too expensive, thanks Tim Apple
+        python-version: ["3.11"]
+        os: [ubuntu-latest] # macOS too expensive (thanks Tim Apple) and Windows slow
     runs-on: ${{ matrix.os }}
 
     steps:
