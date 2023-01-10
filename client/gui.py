@@ -163,12 +163,7 @@ class MainWindow(QMainWindow):
         self.settings_act.triggered.connect(Settings)
 
         self.update_table_act = actions.UpdateTable(self)
-
-        icon = self.style().standardIcon(QStyle.StandardPixmap.SP_ArrowUp)
-        self.upload_act = QAction(icon, "Upload data")
-        self.upload_act.setShortcut("Ctrl+U")
-        self.upload_act.setToolTip("Upload selected data")
-        self.upload_act.triggered.connect(lambda: actions.upload(self))
+        self.upload_act = actions.UploadData(self)
 
         icon = self.style().standardIcon(QStyle.StandardPixmap.SP_DialogOpenButton)
         self.open_act = QAction(icon, "Open data")

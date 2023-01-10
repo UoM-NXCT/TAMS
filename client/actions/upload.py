@@ -6,7 +6,8 @@ from __future__ import annotations
 
 import typing
 
-from PySide6.QtWidgets import QMessageBox
+from PySide6.QtGui import QAction
+from PySide6.QtWidgets import QMessageBox, QStyle
 
 from client.runners import SaveScans
 from client.widgets.dialogue import UploadScans, handle_common_exc
@@ -48,3 +49,14 @@ def upload(main_window: MainWindow) -> UploadScans:
                 f"Cannot upload data from table {table}",
             )
             raise NotImplementedError("Table must be 'scan' or 'project'.")
+
+
+class UploadData(QAction):
+    def __init__(self, main_window: MainWindow) -> None:
+        """Upload data to the server."""
+
+        icon = main_window.style().standardIcon(QStyle.StandardPixmap.SP_ArrowUp)
+        super().__init__(icon, "Upload data", main_window)
+        self.setShortcut("Ctrl+U")
+        self.setToolTip("Upload selected data to the server.")
+        self.triggered.connect(lambda: upload(main_window))
