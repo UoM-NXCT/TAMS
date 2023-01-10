@@ -165,19 +165,10 @@ class MainWindow(QMainWindow):
         self.quit_act = actions.Quit(self)
 
         # Create actions for the View menu
-
         self.full_screen_act = actions.FullScreen(self)
 
         # Create actions for the Help menu
-
-        self.doc_act = QAction("Documentation")
-        self.doc_act.setShortcut("F1")
-        self.doc_act.setStatusTip("Open documentation in browser")
-        self.doc_act.triggered.connect(
-            lambda: QDesktopServices.openUrl(
-                QUrl("https://tams-nxct.readthedocs.io/")
-            )  # pylint: disable=unnecessary-lambda
-        )
+        self.doc_act = actions.OpenDocs(self)
 
         icon = self.style().standardIcon(QStyle.StandardPixmap.SP_MessageBoxInformation)
         self.about_act = QAction(icon, "About")
