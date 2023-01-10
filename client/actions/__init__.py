@@ -1,6 +1,7 @@
 from .add import AddData
 from .download import download
 from .open import OpenData
+from .quit import Quit
 from .toggle_full_screen import toggle_full_screen
 from .update_table import (
     UpdateTable,
@@ -16,6 +17,7 @@ __all__ = [
     "AddData",
     "download",
     "OpenData",
+    "Quit",
     "toggle_full_screen",
     "UpdateTable",
     "update_table",

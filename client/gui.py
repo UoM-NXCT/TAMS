@@ -167,11 +167,7 @@ class MainWindow(QMainWindow):
         self.open_act = actions.OpenData(self)
         self.validate_act = actions.ValidateData(self)
         self.add_act = actions.AddData(self)
-
-        self.quit_act = QAction("&Quit")
-        self.quit_act.setShortcut("Ctrl+Q")
-        self.quit_act.setStatusTip("Quit application")
-        self.quit_act.triggered.connect(self.close)  # close is a method of QMainWindow
+        self.quit_act = actions.Quit(self)
 
         # Create actions for the View menu
 
