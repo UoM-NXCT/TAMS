@@ -31,6 +31,6 @@ jobs:
       - name: Check formatting
         run: |
           poetry run black . --check
-          poetry run isort . --check-only --profile black
+          poetry run isort . --check-only
           poetry run ssort . --check
-          poetry run sqlfluff lint . --dialect postgres
+          poetry run sqlfluff lint .
