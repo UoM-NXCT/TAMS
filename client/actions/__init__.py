@@ -3,6 +3,7 @@ from .download import download
 from .open import open_data
 from .toggle_full_screen import toggle_full_screen
 from .update_table import (
+    UpdateTable,
     update_table,
     update_table_with_projects,
     update_table_with_scans,
@@ -16,6 +17,7 @@ __all__ = [
     "download",
     "open_data",
     "toggle_full_screen",
+    "UpdateTable",
     "update_table",
     "update_table_with_projects",
     "update_table_with_scans",

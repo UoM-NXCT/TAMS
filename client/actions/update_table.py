@@ -7,8 +7,8 @@ from __future__ import annotations
 import typing
 
 from PySide6.QtCore import QSortFilterProxyModel
-from PySide6.QtGui import Qt
-from PySide6.QtWidgets import QHeaderView
+from PySide6.QtGui import QAction, Qt
+from PySide6.QtWidgets import QHeaderView, QStyle
 
 from client.widgets.table import TableModel
 
@@ -96,7 +96,7 @@ def update_table_with_projects(main_window: MainWindow) -> None:
         "project",
         None,
     )
-    main_window.reload_table_act.trigger()
+    main_window.update_table_act.trigger()
 
 
 def update_table_with_scans(main_window: MainWindow) -> None:
@@ -107,7 +107,7 @@ def update_table_with_scans(main_window: MainWindow) -> None:
         "scan",
         None,
     )
-    main_window.reload_table_act.trigger()
+    main_window.update_table_act.trigger()
 
 
 def update_table_with_users(main_window: MainWindow) -> None:
@@ -118,4 +118,15 @@ def update_table_with_users(main_window: MainWindow) -> None:
         '"user"',
         None,
     )
-    main_window.reload_table_act.trigger()
+    main_window.update_table_act.trigger()
+
+
+class UpdateTable(QAction):
+    def __init__(self, main_window: MainWindow) -> None:
+        """Update table action."""
+
+        icon = main_window.style().standardIcon(QStyle.StandardPixmap.SP_BrowserReload)
+        super().__init__(icon, "Reload table")
+        self.setShortcut("Ctrl+R")
+        self.setToolTip("Reload the table currently being displayed.")
+        self.triggered.connect(lambda: update_table(main_window))

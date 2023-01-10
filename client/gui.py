@@ -83,7 +83,7 @@ class MainWindow(QMainWindow):
         actions.update_table_with_projects(self)
         self.show()
 
-        actions.update_table(self)
+        self.update_table_act.trigger()
 
     def set_up_main_window(self) -> None:
         """Create and arrange widgets in the main window."""
@@ -162,17 +162,7 @@ class MainWindow(QMainWindow):
         self.settings_act.setStatusTip("Edit application settings")
         self.settings_act.triggered.connect(Settings)
 
-        icon = self.style().standardIcon(QStyle.StandardPixmap.SP_BrowserReload)
-        self.reload_table_act = QAction(icon, "Reload")
-        self.reload_table_act.setShortcut("F5")
-        self.reload_table_act.setToolTip("Reload the active table")
-        self.reload_table_act.triggered.connect(lambda: actions.update_table(self))
-
-        icon = self.style().standardIcon(QStyle.StandardPixmap.SP_ArrowDown)
-        self.download_act = QAction(icon, "Download data")
-        self.download_act.setShortcut("Ctrl+D")
-        self.download_act.setToolTip("Download selected data")
-        self.download_act.triggered.connect(lambda: actions.download(self))
+        self.update_table_act = actions.UpdateTable(self)
 
         icon = self.style().standardIcon(QStyle.StandardPixmap.SP_ArrowUp)
         self.upload_act = QAction(icon, "Upload data")
@@ -238,9 +228,9 @@ class MainWindow(QMainWindow):
         # Create the File menu
         file_menu = self.menuBar().addMenu("File")
         file_menu.addAction(self.settings_act)
-        file_menu.addAction(self.reload_table_act)
+        file_menu.addAction(self.update_table_act)
         file_menu.addSeparator()
-        file_menu.addAction(self.download_act)
+        # file_menu.addAction(self.download_act)
         file_menu.addAction(self.upload_act)
         file_menu.addAction(self.open_act)
         file_menu.addAction(self.add_act)
@@ -268,8 +258,8 @@ class MainWindow(QMainWindow):
         # Add actions to the toolbar
 
         # File actions
-        toolbar.addAction(self.reload_table_act)
-        toolbar.addAction(self.download_act)
+        toolbar.addAction(self.update_table_act)
+        # toolbar.addAction(self.download_act)
         toolbar.addAction(self.upload_act)
         toolbar.addAction(self.add_act)
         toolbar.addAction(self.open_act)
