@@ -6,7 +6,8 @@ from __future__ import annotations
 
 import typing
 
-from PySide6.QtWidgets import QMessageBox
+from PySide6.QtGui import QAction
+from PySide6.QtWidgets import QMessageBox, QStyle
 
 from client.runners import SaveScans
 from client.widgets.dialogue import DownloadScans, handle_common_exc
@@ -44,3 +45,16 @@ def add_to_library(main_window: MainWindow) -> None:
                 ),
             )
             raise NotImplementedError("Table must be 'scan'.")
+
+
+class AddData(QAction):
+    def __init__(self, main_window: MainWindow) -> None:
+        """Add data to library action."""
+
+        icon = main_window.style().standardIcon(
+            QStyle.StandardPixmap.SP_FileDialogNewFolder
+        )
+        super().__init__(icon, "Add data to library", main_window)
+        self.setShortcut("Ctrl+Shift+A")
+        self.setToolTip("Add data to library/")
+        self.triggered.connect(lambda: add_to_library(main_window))

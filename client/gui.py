@@ -166,12 +166,7 @@ class MainWindow(QMainWindow):
         self.upload_act = actions.UploadData(self)
         self.open_act = actions.OpenData(self)
         self.validate_act = actions.ValidateData(self)
-
-        icon = self.style().standardIcon(QStyle.StandardPixmap.SP_FileDialogNewFolder)
-        self.add_act = QAction(icon, "Add data")
-        self.add_act.setShortcut("Ctrl+A")
-        self.add_act.setToolTip("Add data to the local library")
-        self.add_act.triggered.connect(lambda: actions.add_to_library(self))
+        self.add_act = actions.AddData(self)
 
         self.quit_act = QAction("&Quit")
         self.quit_act.setShortcut("Ctrl+Q")

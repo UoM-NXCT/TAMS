@@ -1,4 +1,4 @@
-from .add import add_to_library
+from .add import AddData
 from .download import download
 from .open import OpenData
 from .toggle_full_screen import toggle_full_screen
@@ -13,7 +13,7 @@ from .upload import UploadData
 from .validate import ValidateData
 
 __all__ = [
-    "add_to_library",
+    "AddData",
     "download",
     "OpenData",
     "toggle_full_screen",
