@@ -166,11 +166,7 @@ class MainWindow(QMainWindow):
 
         # Create actions for the View menu
 
-        self.full_screen_act = QAction("Full Screen", checkable=True)
-        self.full_screen_act.setStatusTip("Toggle full screen mode")
-        self.full_screen_act.triggered.connect(
-            lambda: actions.toggle_full_screen(self, self.full_screen_act.isChecked())
-        )
+        self.full_screen_act = actions.FullScreen(self)
 
         # Create actions for the Help menu
 

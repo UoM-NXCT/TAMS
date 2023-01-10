@@ -6,14 +6,26 @@ from __future__ import annotations
 
 import typing
 
+from PySide6.QtGui import QAction
+
 if typing.TYPE_CHECKING:
     from client.gui import MainWindow
 
 
-def toggle_full_screen(main_window: MainWindow, is_checked: bool) -> None:
-    """Toggle full screen mode."""
+class FullScreen(QAction):
+    def __init__(self, main_window: MainWindow) -> None:
+        """Toggle full screen mode action."""
 
-    if is_checked:
-        main_window.showFullScreen()
-    else:
-        main_window.showNormal()
+        super().__init__("&Full Screen", main_window)
+        self.setShortcut("F11")
+        self.setCheckable(True)
+        self.setStatusTip("Toggle full screen mode")
+        self.triggered.connect(self.toggle_full_screen)
+
+    def toggle_full_screen(self) -> None:
+        """Toggle full screen mode."""
+
+        if self.isChecked():
+            self.parent().showFullScreen()
+        else:
+            self.parent().showNormal()

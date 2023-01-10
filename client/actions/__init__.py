@@ -3,7 +3,7 @@ from .download import download
 from .open_data import OpenData
 from .open_settings import OpenSettings
 from .quit import Quit
-from .toggle_full_screen import toggle_full_screen
+from .toggle_full_screen import FullScreen
 from .update_table import (
     UpdateTable,
     update_table,
@@ -20,7 +20,7 @@ __all__ = [
     "OpenData",
     "OpenSettings",
     "Quit",
-    "toggle_full_screen",
+    "FullScreen",
     "UpdateTable",
     "update_table",
     "update_table_with_projects",
