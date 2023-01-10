@@ -3,7 +3,7 @@
 # TODO: Add mypy checking when PySide6 has better type support
 # https://github.com/UoM-NXCT/TAMS/issues/5
 
-name: Python CI
+name: CI
 on:
   push:
     branches: ["main"]
@@ -28,12 +28,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install poetry
           poetry install
-      - name: Lint with black
+      - name: Check formatting
         run: |
-          poetry run black --check .
-      - name: Lint with isort
-        run: |
-          poetry run isort --check-only --profile black .
-      - name: Lint with ssort
-        run: |
-          poetry run ssort --check .
+          poetry run black . --check
+          poetry run isort . --check-only --profile black
+          poetry run ssort . --check
+          poetry run sqlfluff lint . --dialect postgres
