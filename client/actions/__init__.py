@@ -10,7 +10,7 @@ from .update_table import (
     update_table_with_users,
 )
 from .upload import UploadData
-from .validate import validate
+from .validate import ValidateData
 
 __all__ = [
     "add_to_library",
@@ -23,5 +23,5 @@ __all__ = [
     "update_table_with_scans",
     "update_table_with_users",
     "UploadData",
-    "validate",
+    "ValidateData",
 ]

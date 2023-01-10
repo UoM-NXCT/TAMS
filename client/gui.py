@@ -165,14 +165,7 @@ class MainWindow(QMainWindow):
         self.update_table_act = actions.UpdateTable(self)
         self.upload_act = actions.UploadData(self)
         self.open_act = actions.OpenData(self)
-
-        icon = self.style().standardIcon(
-            QStyle.StandardPixmap.SP_FileDialogContentsView
-        )
-        self.validate_act = QAction(icon, "Validate data")
-        self.validate_act.setShortcut("Ctrl+V")
-        self.validate_act.setToolTip("Validate selected data")
-        self.validate_act.triggered.connect(lambda: actions.validate(self))
+        self.validate_act = actions.ValidateData(self)
 
         icon = self.style().standardIcon(QStyle.StandardPixmap.SP_FileDialogNewFolder)
         self.add_act = QAction(icon, "Add data")

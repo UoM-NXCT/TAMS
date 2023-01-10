@@ -6,7 +6,8 @@ from __future__ import annotations
 
 import typing
 
-from PySide6.QtWidgets import QDialog, QMessageBox
+from PySide6.QtGui import QAction
+from PySide6.QtWidgets import QDialog, QMessageBox, QStyle
 
 from client.runners import ValidateScans
 from client.widgets.dialogue import Validate, handle_common_exc
@@ -48,3 +49,16 @@ def validate(main_window: MainWindow) -> Validate:
                 f"Cannot download data from table {table}",
             )
             raise NotImplementedError("Table must be 'scan' or 'project'.")
+
+
+class ValidateData(QAction):
+    def __init__(self, main_window: MainWindow) -> None:
+        """Create a new validate action."""
+
+        icon = main_window.style().standardIcon(
+            QStyle.StandardPixmap.SP_FileDialogContentsView
+        )
+        super().__init__(icon, "Validate data")
+        self.setShortcut("Ctrl+V")
+        self.setToolTip("Validate selected data")
+        self.triggered.connect(lambda: validate(main_window))
