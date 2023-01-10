@@ -65,6 +65,7 @@ profile = "black"
 
 [tool.sqlfluff.core]
 dialect = "postgres"
+exclude_rules = "L016"
 
 [build-system]
 requires = ["poetry-core"]
