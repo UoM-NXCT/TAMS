@@ -164,12 +164,7 @@ class MainWindow(QMainWindow):
 
         self.update_table_act = actions.UpdateTable(self)
         self.upload_act = actions.UploadData(self)
-
-        icon = self.style().standardIcon(QStyle.StandardPixmap.SP_DialogOpenButton)
-        self.open_act = QAction(icon, "Open data")
-        self.open_act.setShortcut("Ctrl+O")
-        self.open_act.setToolTip("Open selected data")
-        self.open_act.triggered.connect(lambda: actions.open_data(self))
+        self.open_act = actions.OpenData(self)
 
         icon = self.style().standardIcon(
             QStyle.StandardPixmap.SP_FileDialogContentsView

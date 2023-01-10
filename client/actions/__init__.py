@@ -1,6 +1,6 @@
 from .add import add_to_library
 from .download import download
-from .open import open_data
+from .open import OpenData
 from .toggle_full_screen import toggle_full_screen
 from .update_table import (
     UpdateTable,
@@ -15,7 +15,7 @@ from .validate import validate
 __all__ = [
     "add_to_library",
     "download",
-    "open_data",
+    "OpenData",
     "toggle_full_screen",
     "UpdateTable",
     "update_table",

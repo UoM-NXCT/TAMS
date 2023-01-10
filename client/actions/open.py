@@ -10,8 +10,8 @@ import typing
 from pathlib import Path
 
 from PySide6.QtCore import QUrl
-from PySide6.QtGui import QDesktopServices
-from PySide6.QtWidgets import QMessageBox
+from PySide6.QtGui import QAction, QDesktopServices
+from PySide6.QtWidgets import QMessageBox, QStyle
 
 from client import settings
 from client.widgets.dialogue import handle_common_exc
@@ -63,3 +63,16 @@ def open_data(main_window: MainWindow) -> None:
                 f"Cannot download data from table {table}",
             )
             raise RuntimeError("Table must be 'scan' or 'project'.")
+
+
+class OpenData(QAction):
+    def __init__(self, main_window: MainWindow) -> None:
+        """Open data action."""
+
+        icon = main_window.style().standardIcon(
+            QStyle.StandardPixmap.SP_DialogOpenButton
+        )
+        super().__init__(icon, "Open data", main_window)
+        self.setShortcut("Ctrl+O")
+        self.setToolTip("Open selected data in the local library.")
+        self.triggered.connect(lambda: open_data(main_window))

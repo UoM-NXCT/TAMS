@@ -6,7 +6,11 @@ Actions can be added to menus and toolbars and automatically keep them in sync. 
 
 Most actions have an icon, name, shortcut, tooltip, and on trigger method. For example, the UpdateTable action has a reload icon, name, shortcut (Ctrl+R), tooltip, and on trigger method (update_table) that reloads the table.
 
-Technical documentation:
+Official documentation:
 
 - [Qt6](https://doc.qt.io/qt-6/qaction.html)
 - [PySide6](https://doc.qt.io/qtforpython/PySide6/QtGui/QAction.html)
+
+Tutorials:
+
+- [Martin Fitzpatrick](https://www.pythonguis.com/tutorials/pyside6-actions-toolbars-menus/)
