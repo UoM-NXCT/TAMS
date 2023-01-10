@@ -156,12 +156,7 @@ class MainWindow(QMainWindow):
         """Create the application actions."""
 
         # Create actions for the File menu
-
-        self.settings_act = QAction("Settings")
-        self.settings_act.setShortcut("Ctrl+Alt+S")
-        self.settings_act.setStatusTip("Edit application settings")
-        self.settings_act.triggered.connect(Settings)
-
+        self.settings_act = actions.OpenSettings(self)
         self.update_table_act = actions.UpdateTable(self)
         self.upload_act = actions.UploadData(self)
         self.open_act = actions.OpenData(self)

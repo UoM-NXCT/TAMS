@@ -31,8 +31,8 @@ from client.utils.toml import create_toml, load_toml, update_toml
 class Settings(QDialog):
     """Database settings dialogue allows to set the application settings."""
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
         self.setMinimumSize(400, 300)
         self.setWindowTitle("Settings")
         self.set_up_settings_window()
