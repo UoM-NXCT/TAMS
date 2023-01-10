@@ -198,7 +198,7 @@ class MainWindow(QMainWindow):
         self.add_act = QAction(icon, "Add data")
         self.add_act.setShortcut("Ctrl+A")
         self.add_act.setToolTip("Add data to the local library")
-        self.add_act.triggered.connect(lambda: AddToLibrary(self, self.conn_str))
+        self.add_act.triggered.connect(lambda: actions.add_to_library(self))
 
         self.quit_act = QAction("&Quit")
         self.quit_act.setShortcut("Ctrl+Q")

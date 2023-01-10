@@ -49,7 +49,12 @@ class AddToLibrary(QDialog):
             QMessageBox.warning(
                 self,
                 "No scan selected",
-                "Please select a scan to add to the library.",
+                (
+                    "The 'add' action is for adding data to scans and does not, at"
+                    " present, support adding projects. To add a project, you will have"
+                    " to the scans associated to the project manually. Please select a"
+                    " scan to add to the library."
+                ),
             )
             self.close()
             return
