@@ -7,8 +7,8 @@ from __future__ import annotations
 import typing
 
 from PySide6.QtCore import QSortFilterProxyModel
-from PySide6.QtGui import Qt
-from PySide6.QtWidgets import QHeaderView
+from PySide6.QtGui import QAction, Qt
+from PySide6.QtWidgets import QHeaderView, QStyle
 
 from client.widgets.table import TableModel
 
@@ -16,106 +16,114 @@ if typing.TYPE_CHECKING:
     from client.gui import MainWindow
 
 
-def update_table(main_window: MainWindow) -> None:
-    """Update table model using SQL command."""
+class UpdateTable(QAction):
+    def _update_table(self) -> None:
+        """Update table model using SQL command.
 
-    # Get table data
-    select_value, from_value, where_value = main_window.current_table_query
-    if main_window.db_view:
-        if where_value:
-            data, column_headers = main_window.db_view.view_select_from_where(
-                select_value, from_value, where_value
-            )
+        This method is called when the action is triggered.
+        """
+
+        # Get table data
+        sel_val, from_val, where_val = self.parent().current_table_query
+        if self.parent().db_view:
+            if where_val:
+                data, col_headers = self.parent().db_view.view_select_from_where(
+                    sel_val, from_val, where_val
+                )
+            else:
+                data, col_headers = self.parent().db_view.view_select_from_where(
+                    sel_val, from_val
+                )
         else:
-            data, column_headers = main_window.db_view.view_select_from_where(
-                select_value, from_value
-            )
-    else:
-        data = []
-        column_headers = ()
+            data = []
+            col_headers = ()
 
-    # Create table model
-    main_window.table_model = TableModel(data, column_headers)
+        # Create table model
+        self.parent().table_model = TableModel(data, col_headers)
 
-    # Create proxy model
-    main_window.proxy_model = QSortFilterProxyModel()
+        # Create proxy model
+        self.parent().proxy_model = QSortFilterProxyModel()
 
-    # Set proxy model to table model
-    main_window.proxy_model.setSourceModel(main_window.table_model)
+        # Set proxy model to table model
+        self.parent().proxy_model.setSourceModel(self.parent().table_model)
 
-    # Make the filters case-insensitive
-    main_window.proxy_model.setFilterCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
+        # Make the filters case-insensitive
+        self.parent().proxy_model.setFilterCaseSensitivity(
+            Qt.CaseSensitivity.CaseInsensitive
+        )
 
-    # Connect search query to proxy model
-    # Note: must do this on each table update, or it will disconnect
-    main_window.search.textChanged.connect(main_window.proxy_model.setFilterFixedString)
+        # Connect search query to proxy model
+        # Note: must do this on each table update, or it will disconnect
+        self.parent().search.textChanged.connect(
+            self.parent().proxy_model.setFilterFixedString
+        )
 
-    # Filter by all columns
-    main_window.proxy_model.setFilterKeyColumn(-1)
+        # Filter by all columns
+        self.parent().proxy_model.setFilterKeyColumn(-1)
 
-    # Set the table view to use the proxy model
-    main_window.table_view.setModel(main_window.proxy_model)
+        # Set the table view to use the proxy model
+        self.parent().table_view.setModel(self.parent().proxy_model)
 
-    # Make table look pretty
+        # Make table look pretty
+        self.parent().table_view.horizontalHeader().setSectionResizeMode(
+            QHeaderView.ResizeMode.ResizeToContents
+        )
+        header_widths = tuple(
+            self.parent().table_view.horizontalHeader().sectionSize(i)
+            for i, _ in enumerate(col_headers)
+        )
+        self.parent().table_view.horizontalHeader().setSectionResizeMode(
+            QHeaderView.ResizeMode.Interactive
+        )
+        for i, width in enumerate(header_widths):
+            self.parent().table_view.horizontalHeader().resizeSection(i, width)
 
-    # Stretch table to fill window and store width of each column
-    main_window.table_view.horizontalHeader().setSectionResizeMode(
-        QHeaderView.ResizeMode.ResizeToContents
-    )
-    header_widths = tuple(
-        main_window.table_view.horizontalHeader().sectionSize(i)
-        for i, _ in enumerate(column_headers)
-    )
+        # Make the table react to selection changes
+        self.parent().table_view.selectionModel().selectionChanged.connect(
+            self.parent().on_selection_changed
+        )
 
-    # Set the width of each column to be interactive for the user
-    main_window.table_view.horizontalHeader().setSectionResizeMode(
-        QHeaderView.ResizeMode.Interactive
-    )
+        # Let user sort table by column
+        self.parent().table_view.setSortingEnabled(True)
 
-    # Set initial width of each column to be the width of the header when pretty
-    for i, width in enumerate(header_widths):
-        main_window.table_view.horizontalHeader().resizeSection(i, width)
+        # Update metadata panel
+        self.parent().metadata_panel.update_metadata()
 
-    # Make the table react to selection changes
-    main_window.table_view.selectionModel().selectionChanged.connect(
-        main_window.on_selection_changed
-    )
+    def __init__(self, main_window: MainWindow) -> None:
+        """Update table action."""
 
-    # Let user sort table by column
-    main_window.table_view.setSortingEnabled(True)
+        icon = main_window.style().standardIcon(QStyle.StandardPixmap.SP_BrowserReload)
+        super().__init__(icon, "Reload table", main_window)
+        self.setShortcut("Ctrl+R")
+        self.setToolTip("Reload the table currently being displayed.")
+        self.triggered.connect(self._update_table)  # Runs on self.trigger()
 
-    # Update metadata panel
-    main_window.metadata_panel.update_metadata()
+    def with_users(self) -> None:
+        """Update the table widget to display users."""
 
+        self.parent().current_table_query = (
+            "user_id, first_name, last_name, email_address",
+            '"user"',
+            None,
+        )
+        self.trigger()
 
-def update_table_with_projects(main_window: MainWindow) -> None:
-    """Update table to display projects."""
+    def with_scans(self) -> None:
+        """Update the table widget to display scans."""
 
-    main_window.current_table_query = (
-        "project_id, title, start_date, end_date",
-        "project",
-        None,
-    )
-    main_window.reload_table_act.trigger()
+        self.parent().current_table_query = (
+            "scan_id, project_id, instrument_id",
+            "scan",
+            None,
+        )
+        self.trigger()
 
+    def with_projects(self) -> None:
+        """Update table to display projects."""
 
-def update_table_with_scans(main_window: MainWindow) -> None:
-    """Update the table widget to display scans."""
-
-    main_window.current_table_query = (
-        "scan_id, project_id, instrument_id",
-        "scan",
-        None,
-    )
-    main_window.reload_table_act.trigger()
-
-
-def update_table_with_users(main_window: MainWindow) -> None:
-    """Update the table widget to display users."""
-
-    main_window.current_table_query = (
-        "user_id, first_name, last_name, email_address",
-        '"user"',
-        None,
-    )
-    main_window.reload_table_act.trigger()
+        self.parent().current_table_query = (
+            "project_id, title, start_date, end_date",
+            "project",
+            None,
+        )
+        self.trigger()

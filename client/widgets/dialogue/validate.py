@@ -42,10 +42,8 @@ class Validate(QDialog):
         bar_layout: QHBoxLayout = QHBoxLayout()
 
         # Create label
-        label = QLabel(
-            f"Validating {runner.get_max_progress() + 1} items... "
-            f"({size_fmt(runner.size_in_bytes)})"
-        )
+        # TODO: Display size in bytes
+        label = QLabel(f"Validating {runner.get_max_progress() + 1} items... ")
         layout.addWidget(label)
 
         # Create buttons

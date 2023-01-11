@@ -8,16 +8,17 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from PySide6.QtCore import QModelIndex, QSize, QSortFilterProxyModel, Qt, QUrl
-from PySide6.QtGui import QAction, QDesktopServices
+from PySide6.QtCore import QModelIndex, QSize, QSortFilterProxyModel, Qt
+from PySide6.QtGui import QAction
 from PySide6.QtWidgets import (
     QGridLayout,
     QLineEdit,
     QMainWindow,
     QSplitter,
     QStatusBar,
-    QStyle,
+    QTableView,
     QToolBar,
+    QToolBox,
     QVBoxLayout,
     QWidget,
 )
@@ -25,15 +26,7 @@ from PySide6.QtWidgets import (
 from client import actions
 from client.db import DatabaseView
 from client.utils import log
-from client.widgets.dialogue import (
-    About,
-    AddToLibrary,
-    CreatePrj,
-    CreateScan,
-    DownloadScans,
-    Login,
-    Settings,
-)
+from client.widgets.dialogue import CreatePrj, CreateScan, DownloadScans, Login
 from client.widgets.metadata_panel import MetadataPanel
 from client.widgets.table import TableModel, TableView
 from client.widgets.toolbox import ToolBox
@@ -46,7 +39,130 @@ logger = log.logger(__name__)
 class MainWindow(QMainWindow):
     """The main Qt window for the database application."""
 
-    def __init__(self):
+    def _create_actions(self) -> None:
+        """Create the application actions.
+
+        Must be called only during initialization (__init__).
+        """
+
+        # Create actions for the File menu
+        self.settings_act: QAction = actions.OpenSettings(self)
+        self.update_table_act: QAction = actions.UpdateTable(self)
+        self.upload_act: QAction = actions.UploadData(self)
+        self.open_act: QAction = actions.OpenData(self)
+        self.validate_act: QAction = actions.ValidateData(self)
+        self.add_act: QAction = actions.AddData(self)
+        self.quit_act: QAction = actions.Quit(self)
+
+        # Create actions for the View menu
+        self.full_screen_act: QAction = actions.FullScreen(self)
+
+        # Create actions for the Help menu
+        self.doc_act: QAction = actions.OpenDocs(self)
+        self.about_act: QAction = actions.OpenAbout(self)
+
+    def _set_up_main_window(self) -> None:
+        """Create and arrange widgets in the main window.
+
+        This method should only be called during initialization (__init__).
+        """
+
+        # Create status bar
+        self.setStatusBar(QStatusBar())
+
+        # Create metadata panel
+        self.metadata_panel: QWidget = MetadataPanel()
+
+        # Create table
+        table_widget: QWidget = QWidget()
+        self.table_layout: QVBoxLayout = QVBoxLayout()
+        self.table_view: QTableView = TableView()
+        self.table_view.setSelectionBehavior(TableView.SelectionBehavior.SelectRows)
+        self.table_view.doubleClicked.connect(self.open_act.trigger)
+        self.search: QLineEdit = QLineEdit()
+        self.search.setPlaceholderText("Search the table...")
+        self.table_layout.addWidget(self.search)
+        self.table_layout.addWidget(self.table_view)
+        table_widget.setLayout(self.table_layout)
+
+        # Create toolbox
+        # TODO: Refactor to make this consistent with how we handle actions elsewhere!
+        self.toolbox: QToolBox = ToolBox()
+        self.toolbox.prj_btn.clicked.connect(self.update_table_act.with_projects)
+        self.toolbox.create_prj_btn.clicked.connect(
+            lambda: CreatePrj(self, self.conn_str)
+        )
+        self.toolbox.scans_btn.clicked.connect(self.update_table_act.with_scans)
+        self.toolbox.create_scan_btn.clicked.connect(
+            lambda: CreateScan(self, self.conn_str)
+        )
+        self.toolbox.users_btn.clicked.connect(self.update_table_act.with_users)
+
+        # Create layout
+        layout: QGridLayout = QGridLayout()
+        splitter: QSplitter = QSplitter(Qt.Horizontal)
+        splitter.addWidget(self.toolbox)
+        splitter.addWidget(table_widget)
+        splitter.addWidget(self.metadata_panel)
+        splitter.setSizes([216, 432, 216])  # 1:4 ratio
+        layout.addWidget(splitter, 0, 0)
+        widget: QWidget = QWidget()
+        widget.setLayout(layout)
+        self.setCentralWidget(widget)
+
+    def _create_tool_bar(self) -> None:
+        """Create the application toolbar.
+
+        This method should only be called during initialization (__init__).
+        """
+
+        toolbar: QToolBar = QToolBar("Main Toolbar")
+        toolbar.setIconSize(QSize(16, 16))
+        self.addToolBar(toolbar)
+
+        # Add actions to the toolbar
+        toolbar.addAction(self.update_table_act)
+        # toolbar.addAction(self.download_act)
+        toolbar.addAction(self.upload_act)
+        toolbar.addAction(self.add_act)
+        toolbar.addAction(self.open_act)
+        toolbar.addAction(self.validate_act)
+        toolbar.addSeparator()
+        toolbar.addAction(self.about_act)
+
+    def _create_window(self):
+        """Create the application menu bar.
+
+        This method should only be called during initialization (__init__).
+        """
+
+        # Due to macOS guidelines, the menu bar will not appear in the GUI
+        self.menuBar().setNativeMenuBar(True)
+
+        # Create the File menu
+        file_menu = self.menuBar().addMenu("File")
+        file_menu.addAction(self.settings_act)
+        file_menu.addAction(self.update_table_act)
+        file_menu.addSeparator()
+        # file_menu.addAction(self.download_act)
+        file_menu.addAction(self.upload_act)
+        file_menu.addAction(self.open_act)
+        file_menu.addAction(self.add_act)
+        file_menu.addAction(self.validate_act)
+        file_menu.addSeparator()
+        file_menu.addAction(self.quit_act)
+
+        # Create the View menu
+        view_menu = self.menuBar().addMenu("View")
+        appearance_submenu = view_menu.addMenu("Appearance")
+        appearance_submenu.addAction(self.full_screen_act)
+
+        # Create the Help menu
+        help_menu = self.menuBar().addMenu("Help")
+        help_menu.addAction(self.doc_act)
+        help_menu.addAction(self.about_act)
+
+    def __init__(self) -> None:
         super().__init__()
 
         # Create empty variables for use later.
@@ -54,7 +170,11 @@ class MainWindow(QMainWindow):
         self.conn_str: str | None = None
         self.table_model: TableModel | None = None
         self.proxy_model: QSortFilterProxyModel | None = None
-        self.current_table_query: tuple | None = None
+        self.current_table_query: tuple = (
+            None,
+            None,
+            None,
+        )  # (cols, table, filter)
         self.toolbox: ToolBox | None = None
         self.current_metadata: tuple | None = None
 
@@ -76,208 +196,14 @@ class MainWindow(QMainWindow):
             # User closed the login window
             sys.exit()
 
-        self.set_up_main_window()
-        self.create_actions()
-        self.create_window()
-        self.create_tool_bar()
-        actions.update_table_with_projects(self)
+        self._create_actions()
+        self._set_up_main_window()
+        self._create_window()
+        self._create_tool_bar()
+        self.update_table_act.with_projects()
         self.show()
 
-        actions.update_table(self)
-
-    def set_up_main_window(self) -> None:
-        """Create and arrange widgets in the main window."""
-
-        # Create the status bar
-        self.setStatusBar(QStatusBar())
-
-        # Metadata panel
-        self.metadata_panel = MetadataPanel()
-
-        # Create table layout
-        table_widget = QWidget()
-        self.table_layout = QVBoxLayout()
-
-        # Create search query
-        self.search = QLineEdit()
-        self.search.setPlaceholderText("Search the table...")
-
-        # Create a table; initialize with projects
-        self.table_view = TableView()
-        self.table_view.setSelectionBehavior(TableView.SelectionBehavior.SelectRows)
-        self.table_view.doubleClicked.connect(lambda: actions.open_data(self))
-
-        # Add the table and search query to table layout
-        self.table_layout.addWidget(self.search)
-        self.table_layout.addWidget(self.table_view)
-        table_widget.setLayout(self.table_layout)
-
-        # Create table toolbox
-        self.toolbox = ToolBox()
-
-        # Link toolbox buttons to functions
-
-        # Project tab buttons
-        self.toolbox.prj_btn.clicked.connect(
-            lambda: actions.update_table_with_projects(self)
-        )
-        self.toolbox.create_prj_btn.clicked.connect(
-            lambda: CreatePrj(self, self.conn_str)
-        )
-
-        # Scan tab buttons
-        self.toolbox.scans_btn.clicked.connect(
-            lambda: actions.update_table_with_scans(self)
-        )
-        self.toolbox.create_scan_btn.clicked.connect(
-            lambda: CreateScan(self, self.conn_str)
-        )
-
-        # User tab buttons
-        self.toolbox.users_btn.clicked.connect(
-            lambda: actions.update_table_with_users(self)
-        )
-
-        # Create layout
-        layout: QGridLayout = QGridLayout()
-        splitter: QSplitter = QSplitter(Qt.Horizontal)
-        splitter.addWidget(self.toolbox)
-        splitter.addWidget(table_widget)
-        splitter.addWidget(self.metadata_panel)
-        splitter.setSizes([216, 432, 216])  # 1:4 ratio
-        layout.addWidget(splitter, 0, 0)
-
-        # Set grid as central widget
-        widget = QWidget()
-        widget.setLayout(layout)
-        self.setCentralWidget(widget)
-
-    def create_actions(self):
-        """Create the application actions."""
-
-        # Create actions for the File menu
-
-        self.settings_act = QAction("Settings")
-        self.settings_act.setShortcut("Ctrl+Alt+S")
-        self.settings_act.setStatusTip("Edit application settings")
-        self.settings_act.triggered.connect(Settings)
-
-        icon = self.style().standardIcon(QStyle.StandardPixmap.SP_BrowserReload)
-        self.reload_table_act = QAction(icon, "Reload")
-        self.reload_table_act.setShortcut("F5")
-        self.reload_table_act.setToolTip("Reload the active table")
-        self.reload_table_act.triggered.connect(lambda: actions.update_table(self))
-
-        icon = self.style().standardIcon(QStyle.StandardPixmap.SP_ArrowDown)
-        self.download_act = QAction(icon, "Download data")
-        self.download_act.setShortcut("Ctrl+D")
-        self.download_act.setToolTip("Download selected data")
-        self.download_act.triggered.connect(lambda: actions.download(self))
-
-        icon = self.style().standardIcon(QStyle.StandardPixmap.SP_ArrowUp)
-        self.upload_act = QAction(icon, "Upload data")
-        self.upload_act.setShortcut("Ctrl+U")
-        self.upload_act.setToolTip("Upload selected data")
-        self.upload_act.triggered.connect(lambda: actions.upload(self))
-
-        icon = self.style().standardIcon(QStyle.StandardPixmap.SP_DialogOpenButton)
-        self.open_act = QAction(icon, "Open data")
-        self.open_act.setShortcut("Ctrl+O")
-        self.open_act.setToolTip("Open selected data")
-        self.open_act.triggered.connect(lambda: actions.open_data(self))
-
-        icon = self.style().standardIcon(
-            QStyle.StandardPixmap.SP_FileDialogContentsView
-        )
-        self.validate_act = QAction(icon, "Validate data")
-        self.validate_act.setShortcut("Ctrl+V")
-        self.validate_act.setToolTip("Validate selected data")
-        self.validate_act.triggered.connect(lambda: actions.validate(self))
-
-        icon = self.style().standardIcon(QStyle.StandardPixmap.SP_FileDialogNewFolder)
-        self.add_act = QAction(icon, "Add data")
-        self.add_act.setShortcut("Ctrl+A")
-        self.add_act.setToolTip("Add data to the local library")
-        self.add_act.triggered.connect(lambda: AddToLibrary(self, self.conn_str))
-
-        self.quit_act = QAction("&Quit")
-        self.quit_act.setShortcut("Ctrl+Q")
-        self.quit_act.setStatusTip("Quit application")
-        self.quit_act.triggered.connect(self.close)  # close is a method of QMainWindow
-
-        # Create actions for the View menu
-
-        self.full_screen_act = QAction("Full Screen", checkable=True)
-        self.full_screen_act.setStatusTip("Toggle full screen mode")
-        self.full_screen_act.triggered.connect(
-            lambda: actions.toggle_full_screen(self, self.full_screen_act.isChecked())
-        )
-
-        # Create actions for the Help menu
-
-        self.doc_act = QAction("Documentation")
-        self.doc_act.setShortcut("F1")
-        self.doc_act.setStatusTip("Open documentation in browser")
-        self.doc_act.triggered.connect(
-            lambda: QDesktopServices.openUrl(
-                QUrl("https://tams-nxct.readthedocs.io/")
-            )  # pylint: disable=unnecessary-lambda
-        )
-
-        icon = self.style().standardIcon(QStyle.StandardPixmap.SP_MessageBoxInformation)
-        self.about_act = QAction(icon, "About")
-        self.about_act.setStatusTip("Show information about this software")
-        self.about_act.triggered.connect(About)
-
-    def create_window(self):
-        """Create the application menu bar."""
-
-        # Due to macOS guidelines, the menu bar will not appear in the GUI.
-        self.menuBar().setNativeMenuBar(True)
-
-        # Create the File menu
-        file_menu = self.menuBar().addMenu("File")
-        file_menu.addAction(self.settings_act)
-        file_menu.addAction(self.reload_table_act)
-        file_menu.addSeparator()
-        file_menu.addAction(self.download_act)
-        file_menu.addAction(self.upload_act)
-        file_menu.addAction(self.open_act)
-        file_menu.addAction(self.add_act)
-        file_menu.addAction(self.validate_act)
-        file_menu.addSeparator()
-        file_menu.addAction(self.quit_act)
-
-        # Create the View menu
-        view_menu = self.menuBar().addMenu("View")
-        appearance_submenu = view_menu.addMenu("Appearance")
-        appearance_submenu.addAction(self.full_screen_act)
-
-        # Create the Help menu
-        help_menu = self.menuBar().addMenu("Help")
-        help_menu.addAction(self.doc_act)
-        help_menu.addAction(self.about_act)
-
-    def create_tool_bar(self) -> None:
-        """Create the application toolbar."""
-
-        toolbar: QToolBar = QToolBar("Main Toolbar")
-        toolbar.setIconSize(QSize(16, 16))
-        self.addToolBar(toolbar)
-
-        # Add actions to the toolbar
-
-        # File actions
-        toolbar.addAction(self.reload_table_act)
-        toolbar.addAction(self.download_act)
-        toolbar.addAction(self.upload_act)
-        toolbar.addAction(self.add_act)
-        toolbar.addAction(self.open_act)
-        toolbar.addAction(self.validate_act)
-
-        # Help actions
-        toolbar.addSeparator()
-        toolbar.addAction(self.about_act)
+        self.update_table_act.trigger()
 
     def get_value_from_row(self, column: int) -> int:
         """Get the primary key of the selected row in the table view.

@@ -1,23 +1,25 @@
+from .add import AddData
 from .download import download
-from .open import open_data
-from .toggle_full_screen import toggle_full_screen
-from .update_table import (
-    update_table,
-    update_table_with_projects,
-    update_table_with_scans,
-    update_table_with_users,
-)
-from .upload import upload
-from .validate import validate
+from .open_about import OpenAbout
+from .open_data import OpenData
+from .open_docs import OpenDocs
+from .open_settings import OpenSettings
+from .quit import Quit
+from .toggle_full_screen import FullScreen
+from .update_table import UpdateTable
+from .upload import UploadData
+from .validate import ValidateData
 
 __all__ = [
+    "AddData",
     "download",
-    "open_data",
-    "toggle_full_screen",
-    "update_table",
-    "update_table_with_projects",
-    "update_table_with_scans",
-    "update_table_with_users",
-    "upload",
-    "validate",
+    "OpenAbout",
+    "OpenData",
+    "OpenDocs",
+    "OpenSettings",
+    "Quit",
+    "FullScreen",
+    "UpdateTable",
+    "UploadData",
+    "ValidateData",
 ]
