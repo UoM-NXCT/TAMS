@@ -11,10 +11,10 @@ from client import __version__
 class About(QDialog):
     """About dialogue."""
 
-    def __init__(self) -> None:
+    def __init__(self, *args, **kwargs) -> None:
         """Initialize the dialogue."""
 
-        super().__init__(parent=None)
+        super().__init__(*args, **kwargs)
 
         title: str = "About this software"
         msg: str = self.get_msg()

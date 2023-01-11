@@ -1,5 +1,6 @@
 from .add import AddData
 from .download import download
+from .open_about import OpenAbout
 from .open_data import OpenData
 from .open_docs import OpenDocs
 from .open_settings import OpenSettings
@@ -18,6 +19,7 @@ from .validate import ValidateData
 __all__ = [
     "AddData",
     "download",
+    "OpenAbout",
     "OpenData",
     "OpenDocs",
     "OpenSettings",

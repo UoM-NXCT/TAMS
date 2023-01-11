@@ -77,7 +77,7 @@ class MainWindow(QMainWindow):
             sys.exit()
 
         self.set_up_main_window()
-        self.create_actions()
+        self._create_actions()
         self.create_window()
         self.create_tool_bar()
         actions.update_table_with_projects(self)
@@ -152,8 +152,11 @@ class MainWindow(QMainWindow):
         widget.setLayout(layout)
         self.setCentralWidget(widget)
 
-    def create_actions(self):
-        """Create the application actions."""
+    def _create_actions(self):
+        """Create the application actions.
+
+        Must be called only during initialization (__init__).
+        """
 
         # Create actions for the File menu
         self.settings_act = actions.OpenSettings(self)
@@ -169,11 +172,7 @@ class MainWindow(QMainWindow):
 
         # Create actions for the Help menu
         self.doc_act = actions.OpenDocs(self)
-
-        icon = self.style().standardIcon(QStyle.StandardPixmap.SP_MessageBoxInformation)
-        self.about_act = QAction(icon, "About")
-        self.about_act.setStatusTip("Show information about this software")
-        self.about_act.triggered.connect(About)
+        self.about_act = actions.OpenAbout(self)
 
     def create_window(self):
         """Create the application menu bar."""
