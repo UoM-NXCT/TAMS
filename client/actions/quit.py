@@ -7,4 +7,4 @@ class Quit(QAction):
 
         super().__init__("&Quit", main_window)
         self.setShortcut("Ctrl+Q")
-        self.triggered.connect(main_window.close)  # close is a method of QMainWindow
+        self.triggered.connect(self.parent().close)
