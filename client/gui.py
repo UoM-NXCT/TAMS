@@ -68,6 +68,61 @@ class MainWindow(QMainWindow):
         self.doc_act = actions.OpenDocs(self)
         self.about_act = actions.OpenAbout(self)
 
+    def _set_up_main_window(self) -> None:
+        """Create and arrange widgets in the main window.
+
+        This method should only be called during initialization (__init__).
+        """
+
+        # Create status bar
+        self.setStatusBar(QStatusBar())
+
+        # Create metadata panel
+        self.metadata_panel = MetadataPanel()
+
+        # Create table
+        table_widget = QWidget()
+        self.table_layout = QVBoxLayout()
+        self.table_view = TableView()
+        self.table_view.setSelectionBehavior(TableView.SelectionBehavior.SelectRows)
+        self.table_view.doubleClicked.connect(self.open_act.trigger)
+        self.search = QLineEdit()
+        self.search.setPlaceholderText("Search the table...")
+        self.table_layout.addWidget(self.search)
+        self.table_layout.addWidget(self.table_view)
+        table_widget.setLayout(self.table_layout)
+
+        # Create toolbox
+        # TODO: Refactor to make this consistent with how we handle actions elsewhere!
+        self.toolbox = ToolBox()
+        self.toolbox.prj_btn.clicked.connect(
+            lambda: actions.update_table_with_projects(self)
+        )
+        self.toolbox.create_prj_btn.clicked.connect(
+            lambda: CreatePrj(self, self.conn_str)
+        )
+        self.toolbox.scans_btn.clicked.connect(
+            lambda: actions.update_table_with_scans(self)
+        )
+        self.toolbox.create_scan_btn.clicked.connect(
+            lambda: CreateScan(self, self.conn_str)
+        )
+        self.toolbox.users_btn.clicked.connect(
+            lambda: actions.update_table_with_users(self)
+        )
+
+        # Create layout
+        layout: QGridLayout = QGridLayout()
+        splitter: QSplitter = QSplitter(Qt.Horizontal)
+        splitter.addWidget(self.toolbox)
+        splitter.addWidget(table_widget)
+        splitter.addWidget(self.metadata_panel)
+        splitter.setSizes([216, 432, 216])  # 1:4 ratio
+        layout.addWidget(splitter, 0, 0)
+        widget = QWidget()
+        widget.setLayout(layout)
+        self.setCentralWidget(widget)
+
     def __init__(self):
         super().__init__()
 
@@ -98,7 +153,7 @@ class MainWindow(QMainWindow):
             # User closed the login window
             sys.exit()
 
-        self.set_up_main_window()
+        self._set_up_main_window()
         self._create_actions()
         self.create_window()
         self.create_tool_bar()
@@ -106,73 +161,6 @@ class MainWindow(QMainWindow):
         self.show()
 
         self.update_table_act.trigger()
-
-    def set_up_main_window(self) -> None:
-        """Create and arrange widgets in the main window."""
-
-        # Create the status bar
-        self.setStatusBar(QStatusBar())
-
-        # Metadata panel
-        self.metadata_panel = MetadataPanel()
-
-        # Create table layout
-        table_widget = QWidget()
-        self.table_layout = QVBoxLayout()
-
-        # Create search query
-        self.search = QLineEdit()
-        self.search.setPlaceholderText("Search the table...")
-
-        # Create a table; initialize with projects
-        self.table_view = TableView()
-        self.table_view.setSelectionBehavior(TableView.SelectionBehavior.SelectRows)
-        self.table_view.doubleClicked.connect(lambda: actions.open_data(self))
-
-        # Add the table and search query to table layout
-        self.table_layout.addWidget(self.search)
-        self.table_layout.addWidget(self.table_view)
-        table_widget.setLayout(self.table_layout)
-
-        # Create table toolbox
-        self.toolbox = ToolBox()
-
-        # Link toolbox buttons to functions
-
-        # Project tab buttons
-        self.toolbox.prj_btn.clicked.connect(
-            lambda: actions.update_table_with_projects(self)
-        )
-        self.toolbox.create_prj_btn.clicked.connect(
-            lambda: CreatePrj(self, self.conn_str)
-        )
-
-        # Scan tab buttons
-        self.toolbox.scans_btn.clicked.connect(
-            lambda: actions.update_table_with_scans(self)
-        )
-        self.toolbox.create_scan_btn.clicked.connect(
-            lambda: CreateScan(self, self.conn_str)
-        )
-
-        # User tab buttons
-        self.toolbox.users_btn.clicked.connect(
-            lambda: actions.update_table_with_users(self)
-        )
-
-        # Create layout
-        layout: QGridLayout = QGridLayout()
-        splitter: QSplitter = QSplitter(Qt.Horizontal)
-        splitter.addWidget(self.toolbox)
-        splitter.addWidget(table_widget)
-        splitter.addWidget(self.metadata_panel)
-        splitter.setSizes([216, 432, 216])  # 1:4 ratio
-        layout.addWidget(splitter, 0, 0)
-
-        # Set grid as central widget
-        widget = QWidget()
-        widget.setLayout(layout)
-        self.setCentralWidget(widget)
 
     def create_window(self):
         """Create the application menu bar."""
