@@ -9,8 +9,7 @@ import typing
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QMessageBox, QStyle
 
-from client.runners import SaveScans
-from client.widgets.dialogue import DownloadScans, handle_common_exc
+from client.widgets.dialogue import handle_common_exc
 
 if typing.TYPE_CHECKING:
     from client.gui import MainWindow
