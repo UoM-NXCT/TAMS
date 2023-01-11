@@ -46,6 +46,28 @@ logger = log.logger(__name__)
 class MainWindow(QMainWindow):
     """The main Qt window for the database application."""
 
+    def _create_actions(self):
+        """Create the application actions.
+
+        Must be called only during initialization (__init__).
+        """
+
+        # Create actions for the File menu
+        self.settings_act = actions.OpenSettings(self)
+        self.update_table_act = actions.UpdateTable(self)
+        self.upload_act = actions.UploadData(self)
+        self.open_act = actions.OpenData(self)
+        self.validate_act = actions.ValidateData(self)
+        self.add_act = actions.AddData(self)
+        self.quit_act = actions.Quit(self)
+
+        # Create actions for the View menu
+        self.full_screen_act = actions.FullScreen(self)
+
+        # Create actions for the Help menu
+        self.doc_act = actions.OpenDocs(self)
+        self.about_act = actions.OpenAbout(self)
+
     def __init__(self):
         super().__init__()
 
@@ -151,28 +173,6 @@ class MainWindow(QMainWindow):
         widget = QWidget()
         widget.setLayout(layout)
         self.setCentralWidget(widget)
-
-    def _create_actions(self):
-        """Create the application actions.
-
-        Must be called only during initialization (__init__).
-        """
-
-        # Create actions for the File menu
-        self.settings_act = actions.OpenSettings(self)
-        self.update_table_act = actions.UpdateTable(self)
-        self.upload_act = actions.UploadData(self)
-        self.open_act = actions.OpenData(self)
-        self.validate_act = actions.ValidateData(self)
-        self.add_act = actions.AddData(self)
-        self.quit_act = actions.Quit(self)
-
-        # Create actions for the View menu
-        self.full_screen_act = actions.FullScreen(self)
-
-        # Create actions for the Help menu
-        self.doc_act = actions.OpenDocs(self)
-        self.about_act = actions.OpenAbout(self)
 
     def create_window(self):
         """Create the application menu bar."""
