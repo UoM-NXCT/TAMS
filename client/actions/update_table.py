@@ -30,9 +30,9 @@ class UpdateTable(QAction):
         metadata: tuple[tuple[any], list[str]]
         if self.parent().current_table() == "project":
             metadata = self.parent().db_view.get_project_metadata(key)
-        elif self.current_table() == "scan":
+        elif self.parent().current_table() == "scan":
             metadata = self.parent().db_view.get_scan_metadata(key)
-        elif self.current_table() == '"user"':
+        elif self.parent().current_table() == '"user"':
             metadata = self.parent().db_view.get_user_metadata(key)
         else:
             raise NotImplementedError(f"Unknown table {self.parent().current_table()}")
