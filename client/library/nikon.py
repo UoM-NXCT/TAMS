@@ -4,12 +4,11 @@ from configparser import ConfigParser
 from typing import TYPE_CHECKING, Any
 from xml.etree import ElementTree
 
-
 from .abstract_instrument import AbstractScan
 
 if TYPE_CHECKING:
-    from xml.etree.ElementTree import Element
     from pathlib import Path
+    from xml.etree.ElementTree import Element
 
 
 class NikonScan(AbstractScan):

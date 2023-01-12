@@ -6,7 +6,7 @@ import logging
 import sys
 import traceback
 from enum import Enum, auto
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from PySide6.QtCore import QObject, QRunnable, Signal, Slot
 
