@@ -2,6 +2,7 @@
 This window lets a user input and create a new project, which is added to the database
 specified by the input connection string.
 """
+from __future__ import annotations
 
 import logging
 from pathlib import Path

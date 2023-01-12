@@ -1,6 +1,7 @@
 """
 Generic worker class for running jobs in a separate thread.
 """
+from __future__ import annotations
 
 import logging
 import sys

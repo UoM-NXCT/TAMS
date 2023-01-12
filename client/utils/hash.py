@@ -1,6 +1,7 @@
 """
 File hashing algorithms.
 """
+from __future__ import annotations
 
 from hashlib import sha3_384
 from typing import TYPE_CHECKING

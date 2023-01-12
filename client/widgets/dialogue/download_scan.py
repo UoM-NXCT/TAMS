@@ -1,6 +1,8 @@
 """
 Progress bar dialogue for downloading the scan.
 """
+from __future__ import annotations
+
 import logging
 from typing import TYPE_CHECKING
 

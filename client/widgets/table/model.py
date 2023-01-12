@@ -11,6 +11,7 @@ Note: some PySide6 methods have bad type hints. When overloading methods, I have
 the type hints from the base class even though they are incorrect. This does not affect
 the runtime behaviour of the code.
 """
+from __future__ import annotations
 
 from datetime import date, datetime
 from typing import TYPE_CHECKING, Any

@@ -17,6 +17,29 @@ if typing.TYPE_CHECKING:
 
 
 class UpdateTable(QAction):
+    def _on_selection_change(self):
+        """Update the metadata when a new row is selected.
+
+        This method is called when the selection in the table changes.
+        """
+
+        # Get the primary key from the first column (assume first column is the pk)
+        key: int = self.parent().selected_row()[0]
+
+        # Each item has a different metadata format; use the current table to method
+        metadata: tuple[tuple[any], list[str]]
+        if self.parent().current_table() == "project":
+            metadata = self.parent().db_view.get_project_metadata(key)
+        elif self.current_table() == "scan":
+            metadata = self.parent().db_view.get_scan_metadata(key)
+        elif self.current_table() == '"user"':
+            metadata = self.parent().db_view.get_user_metadata(key)
+        else:
+            raise NotImplementedError(f"Unknown table {self.parent().current_table()}")
+
+        # Update the metadata panel with the new metadata
+        self.parent().metadata_panel.update_metadata(metadata)
+
     def _update_table(self) -> None:
         """Update table model using SQL command.
 
@@ -80,7 +103,7 @@ class UpdateTable(QAction):
 
         # Make the table react to selection changes
         self.parent().table_view.selectionModel().selectionChanged.connect(
-            self.parent().on_selection_changed
+            self._on_selection_change
         )
 
         # Let user sort table by column

@@ -3,6 +3,8 @@ The thumbnail widget scales an image to fill a box while maintaining aspect rati
 """
 
 
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 from PySide6.QtCore import QSize, Qt
@@ -18,8 +20,8 @@ if TYPE_CHECKING:
 class Thumbnail(QFrame):
     """A widget that scales an image to fill a box while maintaining aspect ratio."""
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
 
         # Use a layout to prevent the image from being stretched
         layout: QVBoxLayout = QVBoxLayout()
