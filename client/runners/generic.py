@@ -5,11 +5,13 @@ Generic worker class for running jobs in a separate thread.
 import logging
 import sys
 import traceback
-from collections.abc import Callable
 from enum import Enum, auto
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 from PySide6.QtCore import QObject, QRunnable, Signal, Slot
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 class RunnerKilledException(Exception):

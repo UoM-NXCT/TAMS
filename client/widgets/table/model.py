@@ -13,9 +13,12 @@ the runtime behaviour of the code.
 """
 
 from datetime import date, datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from PySide6.QtCore import QAbstractTableModel, QModelIndex, QPersistentModelIndex, Qt
+from PySide6.QtCore import QAbstractTableModel, Qt
+
+if TYPE_CHECKING:
+    from PySide6.QtCore import QModelIndex, QPersistentModelIndex
 
 
 class TableModel(QAbstractTableModel):

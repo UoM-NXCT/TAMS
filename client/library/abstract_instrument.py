@@ -1,9 +1,11 @@
 """
 Abstract scan class.
 """
+from __future__ import annotations
+from typing import Any, TYPE_CHECKING
 
-from pathlib import Path
-from typing import Any
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 class AbstractScan:

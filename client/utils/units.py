@@ -1,5 +1,5 @@
 """
-This software has to handle a lot of different units. When stored in the library and 
+This software has to handle a lot of different units. When stored in the library and
 database, we will use a set of standard units for each measurement.
 
 The base units are selected for what makes the most sense for CT data.

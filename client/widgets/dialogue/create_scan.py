@@ -152,7 +152,7 @@ class CreateScan(QDialog):
                 scan_id: int = cur.fetchone()[
                     0
                 ]  # May raise TypeError if no scan_id rows returned
-                # Check to see if the newly created scan exists in the local library and create it if not
+                # Check if new scan exists in the local library and create it if not
                 local_lib: Path = Path(settings.get_lib("local"))
                 scan_dir: Path = local_lib / str(selected_prj_id) / str(scan_id)
                 file.create_dir(scan_dir)

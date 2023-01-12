@@ -6,19 +6,16 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from PySide6.QtCore import QModelIndex, QSize, QSortFilterProxyModel, Qt
-from PySide6.QtGui import QAction
+from PySide6.QtCore import QSize, Qt
 from PySide6.QtWidgets import (
     QGridLayout,
     QLineEdit,
     QMainWindow,
     QSplitter,
     QStatusBar,
-    QTableView,
     QToolBar,
-    QToolBox,
     QVBoxLayout,
     QWidget,
 )
@@ -26,10 +23,18 @@ from PySide6.QtWidgets import (
 from client import actions
 from client.db import DatabaseView
 from client.utils import log
-from client.widgets.dialogue import CreatePrj, CreateScan, DownloadScans, Login
+from client.widgets.dialogue import CreatePrj, CreateScan, Login
 from client.widgets.metadata_panel import MetadataPanel
-from client.widgets.table import TableModel, TableView
+from client.widgets.table import TableView
 from client.widgets.toolbox import ToolBox
+
+if TYPE_CHECKING:
+    from PySide6.QtCore import QModelIndex, QSortFilterProxyModel
+    from PySide6.QtGui import QAction
+    from PySide6.QtWidgets import QTableView, QToolBox
+
+    from client.widgets.dialogue import DownloadScans
+    from client.widgets.table import TableModel
 
 TAMS_ROOT = Path(__file__).parents[1]
 

@@ -207,13 +207,12 @@ class ValidateScans(GenericRunner):
                     self.signals.progress.emit(1)
 
                     try:
-                        relative_path: str = file  # Should be of the form "/..." where "/" is the root of the scan
-                        local_file: str = os.path.join(local_dir, relative_path)
+                        # rel_path of the form "/..." where "/" is the root of the scan
+                        rel_path: str = file
+                        local_file: str = os.path.join(local_dir, rel_path)
 
                         # Hash the files
-                        target_hash: str = hash_in_chunks(
-                            os.path.join(root, relative_path)
-                        )
+                        target_hash: str = hash_in_chunks(os.path.join(root, rel_path))
                         local_hash: str = hash_in_chunks(local_file)
 
                         # Compare hashes
@@ -270,11 +269,12 @@ class ValidateScans(GenericRunner):
                     self.signals.progress.emit(1)
 
                     try:
-                        relative_path = file  # Should be of the form "/..." where "/" is the root of the scan
-                        local_file = os.path.join(local_dir, relative_path)
+                        # rel_path of the form "/..." where "/" is the root of the scan
+                        rel_path = file
+                        local_file = os.path.join(local_dir, rel_path)
 
                         # Hash the files
-                        target_hash = hash_in_chunks(os.path.join(root, relative_path))
+                        target_hash = hash_in_chunks(os.path.join(root, rel_path))
                         local_hash = hash_in_chunks(local_file)
 
                         # Compare hashes
