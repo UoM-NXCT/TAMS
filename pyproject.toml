@@ -69,8 +69,6 @@ profile = "black"
 dialect = "postgres"
 exclude_rules = "L016"
 
-
-
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

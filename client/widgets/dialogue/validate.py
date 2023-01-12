@@ -1,6 +1,7 @@
 """
 Progress bar dialogue for validating files.
 """
+from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
