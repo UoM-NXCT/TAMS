@@ -1,7 +1,10 @@
 """
 Entry point for the GUI application script.
 """
+from __future__ import annotations
+
 import sys
+from typing import TYPE_CHECKING
 
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QApplication, QSplashScreen
@@ -9,19 +12,19 @@ from PySide6.QtWidgets import QApplication, QSplashScreen
 from client import settings
 from client.gui import MainWindow
 
+if TYPE_CHECKING:
+    from PySide6.QtWidgets import QMainWindow
+
 
 def main() -> None:
     """Main function implements the GUI."""
 
     app: QApplication = QApplication(sys.argv)
-
-    # Create splash screen
-    splash = QSplashScreen(QPixmap(settings.splash))
+    splash: QSplashScreen = QSplashScreen(QPixmap(settings.splash))
     splash.show()
-
     app.processEvents()
-    _window: MainWindow = MainWindow()
-    splash.finish(_window)
+    window: QMainWindow = MainWindow()
+    splash.finish(window)
 
     sys.exit(app.exec())
 
