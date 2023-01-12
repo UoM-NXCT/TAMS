@@ -164,8 +164,8 @@ class Settings(QDialog):
         info: str = f"""
         <h3>Local library</h3>
         <p>
-        Select the location of the local library. This directory will store scans for 
-        syncing.
+        Select the location of the local library. This directory will store scans for
+         syncing.
         </p>
         <p>
         <em>

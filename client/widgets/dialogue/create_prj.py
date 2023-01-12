@@ -5,7 +5,7 @@ specified by the input connection string.
 
 import logging
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import psycopg
 from PySide6.QtCore import QDate, Qt
@@ -18,12 +18,14 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QPushButton,
     QVBoxLayout,
-    QWidget,
 )
 
 from client import settings
 from client.db.exceptions import exc_gui
 from client.utils import file
+
+if TYPE_CHECKING:
+    from PySide6.QtWidgets import QWidget
 
 
 class CreatePrj(QDialog):

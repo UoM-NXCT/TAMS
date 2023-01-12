@@ -2,11 +2,17 @@
 The thumbnail widget scales an image to fill a box while maintaining aspect ratio.
 """
 
-from pathlib import Path
 
-from PySide6.QtCore import QRect, QSize, Qt
+from typing import TYPE_CHECKING
+
+from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QPalette, QPixmap, QResizeEvent
 from PySide6.QtWidgets import QFrame, QLabel, QVBoxLayout
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from PySide6.QtCore import QRect
 
 
 class Thumbnail(QFrame):

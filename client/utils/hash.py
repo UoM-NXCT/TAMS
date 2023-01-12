@@ -3,7 +3,10 @@ File hashing algorithms.
 """
 
 from hashlib import sha3_384
-from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def hash_in_chunks(file: Path | str) -> str:

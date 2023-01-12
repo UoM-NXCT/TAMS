@@ -3,7 +3,7 @@ Configuration file for the Sphinx documentation builder.
 
 https://www.sphinx-doc.org/en/master/usage/configuration.html
 """
-import sphinx_rtd_theme  # pylint: disable=import-error
+import sphinx_rtd_theme  # noqa
 
 # Project information
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information

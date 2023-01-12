@@ -2,9 +2,9 @@
 Progress bar dialogue for downloading the scan.
 """
 import logging
+from typing import TYPE_CHECKING
 
 from PySide6.QtCore import QThreadPool
-from PySide6.QtGui import QCloseEvent
 from PySide6.QtWidgets import (
     QDialog,
     QHBoxLayout,
@@ -13,12 +13,16 @@ from PySide6.QtWidgets import (
     QProgressBar,
     QPushButton,
     QVBoxLayout,
-    QWidget,
 )
 
 from client.runners.generic import RunnerStatus
-from client.runners.save import SaveScans
 from client.utils.file import size_fmt
+
+if TYPE_CHECKING:
+    from PySide6.QtGui import QCloseEvent
+    from PySide6.QtWidgets import QWidget
+
+    from client.runners.save import SaveScans
 
 
 class DownloadScans(QDialog):
@@ -115,7 +119,7 @@ class DownloadScans(QDialog):
         logging.info("Closing %s.", self.__class__.__name__)
 
         # Kill the runner on close if not killed already
-        if not self.runner.worker_status is RunnerStatus.KILLED:
+        if self.runner.worker_status is not RunnerStatus.KILLED:
             self.runner.kill()
 
         super().closeEvent(arg__1)

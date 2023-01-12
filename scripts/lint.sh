@@ -18,6 +18,9 @@ python -m poetry run mypy client/utils --strict
 echo "Checking with pylint..."
 python -m poetry run pylint client
 
+echo "Checking with flake8..."
+python -m poetry run flake8 client
+
 echo "Checking with sqlfluff..."
 python -m poetry run sqlfluff lint . --dialect postgres
 

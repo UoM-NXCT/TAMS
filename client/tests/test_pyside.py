@@ -13,8 +13,8 @@ class TestPyside6(unittest.TestCase):
         """
         Test PySide6 can load the styles.
 
-        The current problem is that, on Linux and via Pip, PySide6 defaults to Fusion and
-        cannot find the system styles.
+        The current problem is that, on Linux and via Pip, PySide6 defaults to Fusion
+        and cannot find the system styles.
         """
 
         # Get the list of styles

@@ -18,12 +18,13 @@ from PySide6.QtWidgets import (
 )
 
 from client.runners.generic import RunnerStatus
-from client.runners.save import SaveScans
 from client.utils.file import size_fmt
 
 if typing.TYPE_CHECKING:
     from PySide6.QtGui import QCloseEvent
     from PySide6.QtWidgets import QWidget
+
+    from client.runners.save import SaveScans
 
 
 class UploadScans(QDialog):

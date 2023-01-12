@@ -1,13 +1,15 @@
 """
 Base settings.
 """
-from collections.abc import Callable
 from functools import wraps
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from client.utils import log
 from client.utils.toml import create_toml, load_toml
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 TAMS_DIR: Path = Path(__file__).parents[1]
 

@@ -241,6 +241,6 @@ class TestHash(unittest.TestCase):
         file_to_hash: Path = TEST_DIR / Path("text_files/copy_me.txt")
         hash_value: str = hash_in_chunks(file_to_hash)
         self.assertEqual(
-            "47d7f25678e02dd969b7699a2f0309128bc2dbc6c09daa64c135cf9af7630883511a073db91c10c4694846db8c77d63d",
+            "47d7f25678e02dd969b7699a2f0309128bc2dbc6c09daa64c135cf9af7630883511a073db91c10c4694846db8c77d63d",  # noqa
             hash_value,
         )

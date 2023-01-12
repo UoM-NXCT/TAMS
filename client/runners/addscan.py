@@ -1,11 +1,17 @@
 """
 Runner for adding scans to the local library and the database.
 """
+from __future__ import annotations
 
-from client.library import AbstractScan, get_relative_path, local_path
+from typing import TYPE_CHECKING
+
+from client.library import get_relative_path, local_path
 from client.utils.file import move_item
 
 from .generic import GenericRunner
+
+if TYPE_CHECKING:
+    from client.library import AbstractScan
 
 
 class AddScan(GenericRunner):

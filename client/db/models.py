@@ -5,12 +5,16 @@ Database class performs key database methods.
 from __future__ import annotations
 
 import logging
-from collections.abc import Callable
 from functools import wraps
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from psycopg import Connection, Cursor, connect, errors
+from psycopg import connect, errors
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from psycopg import Connection, Cursor
 
 
 class Database:

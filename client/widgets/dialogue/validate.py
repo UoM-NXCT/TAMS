@@ -2,8 +2,9 @@
 Progress bar dialogue for validating files.
 """
 
+from typing import TYPE_CHECKING
+
 from PySide6.QtCore import QThreadPool
-from PySide6.QtGui import QCloseEvent
 from PySide6.QtWidgets import (
     QDialog,
     QHBoxLayout,
@@ -12,12 +13,16 @@ from PySide6.QtWidgets import (
     QProgressBar,
     QPushButton,
     QVBoxLayout,
-    QWidget,
 )
 
-from client.runners import RunnerStatus, ValidateScans
+from client.runners import RunnerStatus
 from client.utils import log
-from client.utils.file import size_fmt
+
+if TYPE_CHECKING:
+    from PySide6.QtGui import QCloseEvent
+    from PySide6.QtWidgets import QWidget
+
+    from client.runners import ValidateScans
 
 logger = log.logger(__name__)
 

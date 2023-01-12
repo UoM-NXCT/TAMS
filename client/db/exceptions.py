@@ -3,13 +3,18 @@ This file contains custom database exceptions.
 
 It also contains a decorator that can be used to handle database exceptions with a GUI.
 """
+
+from __future__ import annotations
+
 import logging
-from collections.abc import Callable
 from functools import wraps
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from psycopg import errors
 from PySide6.QtWidgets import QMessageBox, QWidget
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 class MissingTables(Exception):

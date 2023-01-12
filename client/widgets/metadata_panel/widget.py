@@ -6,14 +6,13 @@ Contains the metadata on the current entry; displayed on the right panel.
 import logging
 from datetime import date
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from PySide6.QtCore import Qt, QUrl
 from PySide6.QtGui import QDesktopServices
 from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
-    QLayout,
     QPushButton,
     QSplitter,
     QTextEdit,
@@ -25,6 +24,9 @@ from PySide6.QtWidgets import (
 
 from client import settings
 from client.widgets.thumbnail import Thumbnail
+
+if TYPE_CHECKING:
+    from PySide6.QtWidgets import QLayout
 
 
 def get_thumbnail(prj_id: int, scan_id: int | None = None) -> Path:

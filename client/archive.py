@@ -11,11 +11,13 @@ SEARCH_DIR/
 
 One scan may have many scan reconstructions.
 
-This script looks in a given search directory and archives every scan it can find. By default, it assumes that all
-directories in the search directory correspond to a scan directory.
+This script looks in a given search directory and archives every scan it can find. By
+default, it assumes that all directories in the search directory correspond to a scan
+directory.
 
-Each scan directory should have a user form file. This contains scan information input by the user (for example, the
-scan name, project name, tomographer, et cetera). The script uses this information to copy the data to the correct places:
+Each scan directory should have a user form file. This contains scan information input
+by the user (for example, the scan name, project name, tomographer, et cetera). The
+script uses this information to copy the data to the correct places:
 
 SATELLITE/
 ├─ project_id/
@@ -88,7 +90,8 @@ if __name__ == "__main__":
                     scan_id = user_form["scan_id"]
                     print(f"User form data: {user_form}")
 
-                    # Create project directories in local storage and stat storage if they no not already exist
+                    # Create project directories in local storage and stat storage if
+                    # they do not already exist
                     paths = [
                         PERM_STORAGE_PATH / project_id,
                         SAT_STORAGE_PATH / project_id,

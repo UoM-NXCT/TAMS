@@ -1,14 +1,14 @@
 from __future__ import annotations
 
 from configparser import ConfigParser
-from pathlib import Path
 from typing import TYPE_CHECKING, Any
 from xml.etree import ElementTree
 
-if TYPE_CHECKING:
-    from xml.etree.ElementTree import Element
-
 from .abstract_instrument import AbstractScan
+
+if TYPE_CHECKING:
+    from pathlib import Path
+    from xml.etree.ElementTree import Element
 
 
 class NikonScan(AbstractScan):
