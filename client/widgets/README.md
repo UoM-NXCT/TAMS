@@ -23,4 +23,4 @@ A dialogue window is a top-level window mostly used for short-term tasks and bri
 
 Custom dialogues are located in the `/dialogue` subdirectory.
 
-Note: Qt6 uses the American spelling: dialog. I have used the British spelling (dialogue) to delineate where Qt6 code ends and new code begins.
+Note: Qt6 uses the American spelling (dialog). I have used the British spelling (dialogue) to delineate where Qt6 code ends and new code begins.
