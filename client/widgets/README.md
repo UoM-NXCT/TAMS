@@ -19,7 +19,7 @@ Tutorials:
 
 A dialogue is a type of widget.
 
-A dialogue window is a top-level window mostly used for short-term tasks and brief communications with the user. They may be modal (block input to other app windows). A dialogue is always a top-level widget, but if it has a parent, its default location is centred over the parent’s top-level widget (if it is not top-level itself). It will also share the parent’s taskbar entry.
+A dialogue window is a top-level window mostly used for short-term tasks and brief communications with the user. They may be modal (block input to other app windows). A dialogue is always a top-level widget, but if it has a parent, its default location is centred over the parent's top-level widget (if it is not top-level itself). It will also share the parent's taskbar entry.
 
 Custom dialogues are located in the `/dialogue` subdirectory.
 
