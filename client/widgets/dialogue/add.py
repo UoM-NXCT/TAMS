@@ -20,7 +20,7 @@ from PySide6.QtWidgets import (
 )
 
 from client.library import NikonScan, get_relative_path, local_path
-from client.runners.addscan import AddScan
+from client.runners.add_scan import AddScan
 from client.utils.file import create_dir
 
 
