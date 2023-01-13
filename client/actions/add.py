@@ -9,7 +9,7 @@ import typing
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QMessageBox, QStyle
 
-from client.widgets.dialogue import handle_common_exc
+from client.widgets.dialogue import AddToLibrary, handle_common_exc
 
 if typing.TYPE_CHECKING:
     from client.gui import MainWindow
@@ -28,11 +28,9 @@ class AddData(QAction):
 
         match table:
             case "scan":
-                # Get the selected scan
                 scan_id: int = self.parent().get_value_from_row(0)
-                # Get the selected project
                 prj_id: int = self.parent().get_value_from_row(1)
-                print(f"Scan ID: {scan_id}, Project ID: {prj_id}")
+                AddToLibrary(scan_id, prj_id, parent=self.parent())
 
             case _:
                 # Fallback case for when no valid table is selected

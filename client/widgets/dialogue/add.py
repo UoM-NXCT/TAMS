@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (
     QComboBox,
     QDialog,
     QFileDialog,
+    QHBoxLayout,
     QLabel,
     QMessageBox,
     QPushButton,
@@ -21,7 +22,32 @@ from PySide6.QtWidgets import (
 
 from client.library import NikonScan, get_relative_path, local_path
 from client.runners.addscan import AddScan
-from client.utils.file import create_dir
+from client.utils.file import create_dir, size_fmt
+
+
+class AddToLibraryProgress(QDialog):
+    """Progress window for adding scans to the library."""
+
+    def __init__(self, runner: AddScan, parent_dlg: QDialog) -> None:
+        """Initialize the window."""
+
+        super().__init__(parent=parent_dlg)
+
+        self.setWindowTitle("Adding data to library")
+        layout: QVBoxLayout = QVBoxLayout()
+        label: QLabel = QLabel("Adding data to library...")
+        layout.addWidget(label)
+        # TODO: Add progress bar
+        # TODO: Add stop, pause, resume buttons
+        # NOTE: Both tasks above should be very similar to what was done for the
+        #  download functionality; it should be possible to copy and paste.
+        self.setLayout(layout)
+
+        self.threadpool: QThreadPool = QThreadPool()
+        self.runner: AddScan = runner
+        self.threadpool.start(self.runner)
+
+        self.show()
 
 
 class AddToLibrary(QDialog):
@@ -168,8 +194,6 @@ class AddToLibrary(QDialog):
             case "Nikon":
                 scan = NikonScan(self.scan_loc)
                 runner = AddScan(self.prj_id, self.scan_id, scan)
-                # TODO: This should not work like this! Fix before release.
-                threadpool = QThreadPool()
-                threadpool.start(runner)
+                AddToLibraryProgress(runner, self)
             case _:
                 raise NotImplementedError(f"Scan format {fmt} not implemented.")
