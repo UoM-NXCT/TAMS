@@ -32,13 +32,12 @@ from client.library import NikonScan, get_relative_path, local_path
 class AddToLibrary(QDialog):
     """Window for adding scans to the library."""
 
-    def __init__(self, main_window: MainWindow, conn_str: str):
+    def __init__(self, scan_id: int, prj_id: int, *args, **kwargs) -> None:
         """Initialize the window."""
 
-        self.parent = main_window
-
-        super().__init__(parent=self.parent)
-        self.conn_str: str = conn_str
+        super().__init__(*args, **kwargs)
+        self.scan_id: int = scan_id
+        self.prj_id: int = prj_id
         self.scan_loc: Path | None = None
 
         # Check the selected row
@@ -164,11 +163,8 @@ class AddToLibrary(QDialog):
 
         # For a scan to be saved, we need its project ID and scan ID as a minimum.
 
-        scan_id = self.parent.selected_row()[0]
-        prj_id = self.parent.selected_row()[1]
-
         # Create directories in local library if they don't exist
-        relative_path: Path = get_relative_path(prj_id, scan_id)
+        relative_path: Path = get_relative_path(self.prj_id, self.scan_id)
         local_dir: Path = local_path(relative_path)
         create_dir(local_dir)
 
@@ -176,7 +172,7 @@ class AddToLibrary(QDialog):
         match fmt:
             case "Nikon":
                 scan = NikonScan(self.scan_loc)
-                runner = AddScan(prj_id, scan_id, scan)
+                runner = AddScan(self.prj_id, self.scan_id, scan)
                 # TODO: This should not work like this! Fix before release.
                 threadpool = QThreadPool()
                 threadpool.start(runner)
