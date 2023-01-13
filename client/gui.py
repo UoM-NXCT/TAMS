@@ -53,6 +53,7 @@ class MainWindow(QMainWindow):
         # Create actions for the File menu
         self.settings_act: QAction = actions.OpenSettings(self)
         self.update_table_act: QAction = actions.UpdateTable(self)
+        self.download_act: QAction = actions.DownloadData(self)
         self.upload_act: QAction = actions.UploadData(self)
         self.open_act: QAction = actions.OpenData(self)
         self.validate_act: QAction = actions.ValidateData(self)
@@ -127,7 +128,7 @@ class MainWindow(QMainWindow):
 
         # Add actions to the toolbar
         toolbar.addAction(self.update_table_act)
-        # toolbar.addAction(self.download_act)
+        toolbar.addAction(self.download_act)
         toolbar.addAction(self.upload_act)
         toolbar.addAction(self.add_act)
         toolbar.addAction(self.open_act)
@@ -149,7 +150,7 @@ class MainWindow(QMainWindow):
         file_menu.addAction(self.settings_act)
         file_menu.addAction(self.update_table_act)
         file_menu.addSeparator()
-        # file_menu.addAction(self.download_act)
+        file_menu.addAction(self.download_act)
         file_menu.addAction(self.upload_act)
         file_menu.addAction(self.open_act)
         file_menu.addAction(self.add_act)
