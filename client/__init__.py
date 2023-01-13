@@ -1,9 +1,20 @@
 """
 Evaluate run-time constants.
 """
+import sys
 from importlib import metadata
+from typing import TYPE_CHECKING
 
+from PySide6.QtGui import QPixmap
+from PySide6.QtWidgets import QApplication, QSplashScreen
+
+from client import settings
+from client.gui import MainWindow
 from client.utils import log
+
+if TYPE_CHECKING:
+    from PySide6.QtWidgets import QMainWindow
+
 
 # Get the version of the package
 try:
@@ -15,3 +26,16 @@ except metadata.PackageNotFoundError:
         __name__,
     )
     __version__ = "unknown"
+
+
+def main() -> None:
+    """Main function implements the GUI."""
+
+    app: QApplication = QApplication(sys.argv)
+    splash: QSplashScreen = QSplashScreen(QPixmap(settings.splash))
+    splash.show()
+    app.processEvents()
+    window: QMainWindow = MainWindow()
+    splash.finish(window)
+
+    sys.exit(app.exec())
