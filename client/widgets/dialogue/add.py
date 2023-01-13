@@ -37,8 +37,8 @@ class AddToLibrary(QDialog):
 
         # Check the selected row
         if (
-            self.parent.current_table() != "scan"
-            or not self.parent.table_view.selectionModel().selectedRows()
+            self.parent().current_table() != "scan"
+            or not self.parent().table_view.selectionModel().selectedRows()
         ):
             QMessageBox.warning(
                 self,
