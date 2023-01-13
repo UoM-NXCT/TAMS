@@ -33,8 +33,11 @@ class AddScan(GenericRunner):
         directory = local_path(get_relative_path(self.prj_id, self.scan_id))
         # TODO: For now we download everything, but this should be up to the user.
         reconstruction_data = self.scan.get_reconstructions()
-        print(reconstruction_data)
         for item in reconstruction_data:
             new_location = directory / "reconstructions"
+            move_item(self.scan.path / item, new_location, keep_original=True)
+        raw_data = self.scan.get_raw_data()
+        for item in raw_data:
+            new_location = directory / "raw"
             move_item(self.scan.path / item, new_location, keep_original=True)
         print("Done")

@@ -116,6 +116,7 @@ class SaveScans(GenericRunner):
                     file_path = os.path.join(root, file)
                     self.size_in_bytes += os.stat(file_path).st_size
         if not total_files or not self.size_in_bytes:
+            logging.warning("No files found in %s", self.source_prj_dir)
             raise FileNotFoundError(
                 errno.ENOENT, os.strerror(errno.ENOENT), self.source_prj_dir
             )

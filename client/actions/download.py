@@ -6,45 +6,56 @@ from __future__ import annotations
 
 import typing
 
-from PySide6.QtWidgets import QMessageBox
+from PySide6.QtGui import QAction
+from PySide6.QtWidgets import QMessageBox, QStyle
 
 from client.runners import SaveScans
 from client.widgets.dialogue import DownloadScans, handle_common_exc
 
 if typing.TYPE_CHECKING:
+    from PySide6.QtGui import QIcon
+
     from client.gui import MainWindow
 
 
-@handle_common_exc
-def download(main_window: MainWindow) -> DownloadScans:
-    """Download action returns a dialogue with a save scans runner."""
+class DownloadData(QAction):
+    @handle_common_exc
+    def _download(self) -> None:
+        """Download action returns a dialogue with a save scans runner.
 
-    # Get the selected table
-    table: str = main_window.current_table()
+        This method is called when the action is triggered.
+        """
 
-    match table:
-        case "scan":
-            # Get the selected scan
-            scan_id: int = main_window.get_value_from_row(0)
-            prj_id: int = main_window.get_value_from_row(1)
+        table: str = self.parent().current_table()
 
-            # Return the scan download dialogue
-            runner: SaveScans = SaveScans(prj_id, scan_id, download=True)
-            return DownloadScans(runner, parent_widget=main_window)
+        match table:
+            case "scan":
+                scan_id: int = self.parent().get_value_from_row(0)
+                prj_id: int = self.parent().get_value_from_row(1)
+                runner: SaveScans = SaveScans(prj_id, scan_id, download=True)
+                DownloadScans(runner, parent_widget=self.parent())
+                return
+            case "project":
+                prj_id = self.parent().get_value_from_row(0)
+                runner = SaveScans(prj_id, download=True)
+                DownloadScans(runner, parent_widget=self.parent())
+                return
+            case _:
+                # Fallback case for when no valid table is selected
+                QMessageBox.critical(
+                    self.parent(),
+                    "Not implemented error",
+                    f"Cannot download data from table {table}",
+                )
+                raise NotImplementedError("Table must be 'scan' or 'project'.")
 
-        case "project":
-            # Get the selected project
-            prj_id = main_window.get_value_from_row(0)
+    def __init__(self, main_window: MainWindow) -> None:
+        """Download data from the server."""
 
-            # Return the project download dialogue
-            runner = SaveScans(prj_id, download=True)
-            return DownloadScans(runner, parent_widget=main_window)
-
-        case _:
-            # Fallback case for when no valid table is selected
-            QMessageBox.critical(
-                main_window,
-                "Not implemented error",
-                f"Cannot download data from table {table}",
-            )
-            raise NotImplementedError("Table must be 'scan' or 'project'.")
+        icon: QIcon = main_window.style().standardIcon(
+            QStyle.StandardPixmap.SP_ArrowDown
+        )
+        super().__init__(icon, "Download data", main_window)
+        self.setShortcut("Ctrl+D")
+        self.setToolTip("Download selected data from the server.")
+        self.triggered.connect(self._download)
