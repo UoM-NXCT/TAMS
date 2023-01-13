@@ -5,7 +5,6 @@ This window lets users add scans to the library.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 from PySide6.QtCore import Qt, QThreadPool
 from PySide6.QtWidgets import (
@@ -20,13 +19,9 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
 )
 
+from client.library import NikonScan, get_relative_path, local_path
 from client.runners.addscan import AddScan
 from client.utils.file import create_dir
-
-if TYPE_CHECKING:
-    from client.gui import MainWindow
-
-from client.library import NikonScan, get_relative_path, local_path
 
 
 class AddToLibrary(QDialog):
