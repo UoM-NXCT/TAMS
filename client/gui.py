@@ -246,23 +246,3 @@ class MainWindow(QMainWindow):
         row: tuple[Any] = self.table_model.get_row_data(row_index)
 
         return row
-
-    def on_selection_changed(self) -> None:
-        """Update the metadata when a new row is selected."""
-
-        # Get the primary key from the first column (assume first column is the pk)
-        key: int = self.selected_row()[0]
-
-        # Each item has a different metadata format; use the current table to method
-        metadata: tuple[tuple[any], list[str]]
-        if self.current_table() == "project":
-            metadata = self.db_view.get_project_metadata(key)
-        elif self.current_table() == "scan":
-            metadata = self.db_view.get_scan_metadata(key)
-        elif self.current_table() == '"user"':
-            metadata = self.db_view.get_user_metadata(key)
-        else:
-            raise NotImplementedError(f"Unknown table {self.current_table()}")
-
-        # Update the metadata panel with the new metadata
-        self.metadata_panel.update_metadata(metadata)

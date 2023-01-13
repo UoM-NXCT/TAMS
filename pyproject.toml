@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "Tomography Archival Management System"
-version = "0.1.1"
+version = "0.1.2"
 description = "Makes storing and accessing tomographic data easy and quick."
 license = "MIT"
 authors = [
@@ -68,8 +68,6 @@ profile = "black"
 [tool.sqlfluff.core]
 dialect = "postgres"
 exclude_rules = "L016"
-
-
 
 [build-system]
 requires = ["poetry-core"]

@@ -5,7 +5,6 @@ This window lets users add scans to the library.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 from PySide6.QtCore import Qt, QThreadPool
 from PySide6.QtWidgets import (
@@ -20,52 +19,40 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
 )
 
+from client.library import NikonScan, get_relative_path, local_path
 from client.runners.addscan import AddScan
 from client.utils.file import create_dir
 
-if TYPE_CHECKING:
-    from client.gui import MainWindow
 
-from client.library import NikonScan, get_relative_path, local_path
+class AddToLibraryProgress(QDialog):
+    """Progress window for adding scans to the library."""
+
+    def __init__(self, runner: AddScan, parent_dlg: QDialog) -> None:
+        """Initialize the window."""
+
+        super().__init__(parent=parent_dlg)
+
+        self.setWindowTitle("Adding data to library")
+        layout: QVBoxLayout = QVBoxLayout()
+        label: QLabel = QLabel("Adding data to library...")
+        layout.addWidget(label)
+        # TODO: Add progress bar
+        # TODO: Add stop, pause, resume buttons
+        # NOTE: Both tasks above should be very similar to what was done for the
+        #  download functionality; it should be possible to copy and paste.
+        self.setLayout(layout)
+
+        self.threadpool: QThreadPool = QThreadPool()
+        self.runner: AddScan = runner
+        self.threadpool.start(self.runner)
+
+        self.show()
 
 
 class AddToLibrary(QDialog):
     """Window for adding scans to the library."""
 
-    def __init__(self, main_window: MainWindow, conn_str: str):
-        """Initialize the window."""
-
-        self.parent = main_window
-
-        super().__init__(parent=self.parent)
-        self.conn_str: str = conn_str
-        self.scan_loc: Path | None = None
-
-        # Check the selected row
-        if (
-            self.parent.current_table() != "scan"
-            or not self.parent.table_view.selectionModel().selectedRows()
-        ):
-            QMessageBox.warning(
-                self,
-                "No scan selected",
-                (
-                    "The 'add' action is for adding data to scans and does not, at"
-                    " present, support adding projects. To add a project, you will have"
-                    " to the scans associated to the project manually. Please select a"
-                    " scan to add to the library."
-                ),
-            )
-            self.close()
-            return
-
-        # Set up the settings window GUI.
-        self.setMinimumSize(400, 300)
-        self.setWindowTitle("Add to library")
-        self.set_up_settings_window()
-        self.show()
-
-    def set_up_settings_window(self) -> None:
+    def _set_up_settings_window(self) -> None:
         """Create and arrange widgets in the project creation window."""
 
         header_label = QLabel("Add new scan to library")
@@ -103,8 +90,40 @@ class AddToLibrary(QDialog):
         v_box.addStretch()
         self.setLayout(v_box)
 
+    def __init__(self, scan_id: int, prj_id: int, *args, **kwargs) -> None:
+        """Initialize the window."""
+
+        super().__init__(*args, **kwargs)
+        self.scan_id: int = scan_id
+        self.prj_id: int = prj_id
+        self.scan_loc: Path | None = None
+
+        # Check the selected row
+        if (
+            self.parent().current_table() != "scan"
+            or not self.parent().table_view.selectionModel().selectedRows()
+        ):
+            QMessageBox.warning(
+                self,
+                "No scan selected",
+                (
+                    "The 'add' action is for adding data to scans and does not, at"
+                    " present, support adding projects. To add a project, you will have"
+                    " to the scans associated to the project manually. Please select a"
+                    " scan to add to the library."
+                ),
+            )
+            self.close()
+            return
+
+        # Set up the settings window GUI.
+        self.setMinimumSize(400, 300)
+        self.setWindowTitle("Add to library")
+        self._set_up_settings_window()
+        self.show()
+
     def update_metadata_tree(self) -> None:
-        """Update the metadata tree with the new scan's metadata."""
+        """Update the metadata tree with the new scan metadata."""
         self.metadata_tree.clear()
         fmt: str = self.scan_fmt.currentText()
         match fmt:
@@ -164,11 +183,8 @@ class AddToLibrary(QDialog):
 
         # For a scan to be saved, we need its project ID and scan ID as a minimum.
 
-        scan_id = self.parent.selected_row()[0]
-        prj_id = self.parent.selected_row()[1]
-
         # Create directories in local library if they don't exist
-        relative_path: Path = get_relative_path(prj_id, scan_id)
+        relative_path: Path = get_relative_path(self.prj_id, self.scan_id)
         local_dir: Path = local_path(relative_path)
         create_dir(local_dir)
 
@@ -176,9 +192,7 @@ class AddToLibrary(QDialog):
         match fmt:
             case "Nikon":
                 scan = NikonScan(self.scan_loc)
-                runner = AddScan(prj_id, scan_id, scan)
-                # TODO: This should not work like this! Fix before release.
-                threadpool = QThreadPool()
-                threadpool.start(runner)
+                runner = AddScan(self.prj_id, self.scan_id, scan)
+                AddToLibraryProgress(runner, self)
             case _:
                 raise NotImplementedError(f"Scan format {fmt} not implemented.")
