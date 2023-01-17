@@ -94,3 +94,4 @@ cython_debug/
 
 # JetBrains
 .idea/
+client/settings/database.toml
