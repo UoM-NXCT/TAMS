@@ -2,6 +2,8 @@
 
 > Tomography Archival Management System
 
+![Screenshot of main window](.github/gui.png)
+
 [![ReadTheDocs](https://img.shields.io/readthedocs/tams-nxct)](https://tams-nxct.readthedocs.io/)
 
 TAMS is an open-source tomography archival and management application released by the [National X-ray Computed Tomography (NXCT)](https://nxct.ac.uk/), the UK's national lab-based X-ray computed tomography research facility.
