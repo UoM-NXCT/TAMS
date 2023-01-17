@@ -215,5 +215,3 @@ class SaveScans(GenericRunner):
                 if self.worker_status is RunnerStatus.FINISHED:
                     # Break loop if job is finished
                     break
-            else:
-                print("shit")

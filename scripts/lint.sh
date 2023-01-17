@@ -1,13 +1,13 @@
 #!/bin/bash
 
 echo "Checking with ssort..."
-python -m poetry run ssort --check .
+python -m poetry run ssort . --check
 
 echo "Checking with isort..."
-python -m poetry run isort --check-only --profile black .
+python -m poetry run isort . --check-only
 
 echo "Checking with black..."
-python -m poetry run black --check .
+python -m poetry run black . --check
 
 echo "Checking with mypy..."
 python -m poetry run mypy client/db --strict
