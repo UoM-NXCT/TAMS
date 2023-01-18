@@ -24,15 +24,21 @@ class AddData(QAction):
             match self.parent().current_table():
                 case "project":
                     prj_id: int = self.parent().get_value_from_row(0)
-                    AddToLibrary(None, prj_id, parent=self.parent())
+                    AddToLibrary(
+                        self.parent().conn_str, None, prj_id, parent=self.parent()
+                    )
                 case "scan":
                     scan_id: int = self.parent().get_value_from_row(0)
                     prj_id: int = self.parent().get_value_from_row(1)
-                    AddToLibrary(scan_id, prj_id, parent=self.parent())
+                    AddToLibrary(
+                        self.parent().conn_str, scan_id, prj_id, parent=self.parent()
+                    )
                 case _:
-                    AddToLibrary(None, None, parent=self.parent())
+                    AddToLibrary(
+                        self.parent().conn_str, None, None, parent=self.parent()
+                    )
         else:
-            AddToLibrary(None, None, parent=self.parent())
+            AddToLibrary(self.parent().conn_str, None, None, parent=self.parent())
 
     def __init__(self, main_window: MainWindow) -> None:
         """Add data to library action."""

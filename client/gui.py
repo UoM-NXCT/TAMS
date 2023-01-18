@@ -128,9 +128,9 @@ class MainWindow(QMainWindow):
 
         # Add actions to the toolbar
         toolbar.addAction(self.update_table_act)
+        toolbar.addAction(self.add_act)
         toolbar.addAction(self.download_act)
         toolbar.addAction(self.upload_act)
-        toolbar.addAction(self.add_act)
         toolbar.addAction(self.open_act)
         toolbar.addAction(self.validate_act)
         toolbar.addSeparator()

@@ -64,7 +64,7 @@ class NikonScan(AbstractScan):
 
         return {
             "voltage": voltage_kv,
-            "current": current_ua,
+            "amperage": current_ua,
             "scan_name": scan_name,
         }
 
