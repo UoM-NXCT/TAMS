@@ -7,7 +7,7 @@ from __future__ import annotations
 import typing
 
 from PySide6.QtGui import QAction
-from PySide6.QtWidgets import QMessageBox, QStyle
+from PySide6.QtWidgets import QStyle
 
 from client.widgets.dialogue import AddToLibrary, handle_common_exc
 
