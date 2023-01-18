@@ -11,7 +11,9 @@ from PySide6.QtWidgets import (
     QComboBox,
     QDialog,
     QFileDialog,
+    QFormLayout,
     QLabel,
+    QLineEdit,
     QMessageBox,
     QPushButton,
     QTreeWidget,
@@ -22,6 +24,7 @@ from PySide6.QtWidgets import (
 from client.library import NikonScan, get_relative_path, local_path
 from client.runners.add_scan import AddScan
 from client.utils.file import create_dir
+from client.utils.toml import load_toml
 
 
 class AddToLibraryProgress(QDialog):
@@ -67,6 +70,13 @@ class AddToLibrary(QDialog):
         self.scan_loc_btn = QPushButton("Edit scan location")
         self.scan_loc_btn.clicked.connect(self.select_scan_loc)
 
+        # Create project ID and scan ID fields
+        self.id_form = QFormLayout()
+        self.prj_id_line_edit = QLineEdit(str(self.prj_id))
+        self.id_form.addRow("Project ID:", self.prj_id_line_edit)
+        self.scan_id_line_edit = QLineEdit(str(self.scan_id))
+        self.id_form.addRow("Scan ID:", self.scan_id_line_edit)
+
         # Create the tree widget
         self.metadata_tree: QTreeWidget = QTreeWidget()
         self.metadata_tree.setColumnCount(1)
@@ -85,36 +95,21 @@ class AddToLibrary(QDialog):
         v_box.addWidget(self.scan_fmt)
         v_box.addWidget(self.scan_loc_label)
         v_box.addWidget(self.scan_loc_btn)
+        v_box.addLayout(self.id_form)
         v_box.addWidget(self.metadata_tree)
         v_box.addWidget(add_btn)
         v_box.addStretch()
         self.setLayout(v_box)
 
-    def __init__(self, scan_id: int, prj_id: int, *args, **kwargs) -> None:
+    def __init__(
+        self, scan_id: int | None, prj_id: int | None, *args, **kwargs
+    ) -> None:
         """Initialize the window."""
 
         super().__init__(*args, **kwargs)
         self.scan_id: int = scan_id
         self.prj_id: int = prj_id
         self.scan_loc: Path | None = None
-
-        # Check the selected row
-        if (
-            self.parent().current_table() != "scan"
-            or not self.parent().table_view.selectionModel().selectedRows()
-        ):
-            QMessageBox.warning(
-                self,
-                "No scan selected",
-                (
-                    "The 'add' action is for adding data to scans and does not, at"
-                    " present, support adding projects. To add a project, you will have"
-                    " to the scans associated to the project manually. Please select a"
-                    " scan to add to the library."
-                ),
-            )
-            self.close()
-            return
 
         # Set up the settings window GUI.
         self.setMinimumSize(400, 300)
@@ -153,6 +148,24 @@ class AddToLibrary(QDialog):
             case _:
                 raise NotImplementedError(f"Scan format {fmt} not implemented.")
 
+    def read_user_form(self) -> None:
+        """Read the user's input from the form."""
+        toml_path = self.scan_loc / "user_form.toml"
+        if toml_path.exists():
+            metadata = load_toml(toml_path)
+            try:
+                self.prj_id = metadata["scan"]["project_id"]
+                self.prj_id_line_edit.setText(str(self.prj_id))
+            except KeyError:
+                # If the project ID is not in the TOML file, do nothing.
+                pass
+            try:
+                self.scan_id = metadata["scan"]["scan_id"]
+                self.scan_id_line_edit.setText(str(self.scan_id))
+            except KeyError:
+                # If the scan ID is not in the TOML file, do nothing.
+                pass
+
     def select_scan_loc(self) -> None:
         """Select the scan location."""
         if self.scan_loc:
@@ -177,6 +190,7 @@ class AddToLibrary(QDialog):
                 "No directory set. Please set a directory first.",
             )
         self.update_metadata_tree()
+        self.read_user_form()
 
     def add_scan(self) -> None:
         """Add the scan to the library."""
