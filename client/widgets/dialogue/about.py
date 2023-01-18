@@ -49,7 +49,7 @@ class About(QDialog):
             <h4>Version {__version__}</h4>
             <p>Original author: Tom Kuson.</p>
             <p>
-                Copyright &copy; {year} National X-ray Computed Tomography et al.
+                &copy; {year} National X-ray Computed Tomography et al.
                 <br>
                 This software is open-source and released under the {licence_link}.
             </p>
