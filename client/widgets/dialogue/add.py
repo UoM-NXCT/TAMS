@@ -216,7 +216,8 @@ class AddToLibrary(QDialog):
     def add_to_database(self, fmt: str) -> None:
         """Add the scan to the database.
 
-        At present, we save: scan ID, project ID, instrument ID, scan name, voltage, and amperage.
+        At present, we save: scan ID, project ID, instrument ID, scan name, voltage, and
+         amperage.
         """
         if not self.scan_id or not self.prj_id:
             raise ValueError("Scan ID or project ID not set.")
