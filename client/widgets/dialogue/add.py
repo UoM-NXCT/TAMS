@@ -157,11 +157,13 @@ class AddToLibrary(QDialog):
                 self.prj_id = metadata["scan"]["project_id"]
                 self.prj_id_line_edit.setText(str(self.prj_id))
             except KeyError:
+                # If the project ID is not in the TOML file, do nothing.
                 pass
             try:
                 self.scan_id = metadata["scan"]["scan_id"]
                 self.scan_id_line_edit.setText(str(self.scan_id))
             except KeyError:
+                # If the scan ID is not in the TOML file, do nothing.
                 pass
 
     def select_scan_loc(self) -> None:
