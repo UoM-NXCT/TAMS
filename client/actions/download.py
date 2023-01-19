@@ -15,7 +15,7 @@ from client.widgets.dialogue import DownloadScans, handle_common_exc
 if typing.TYPE_CHECKING:
     from PySide6.QtGui import QIcon
 
-    from client.gui import MainWindow
+    from client.widgets.main_window import MainWindow
 
 
 class DownloadData(QAction):
