@@ -10,7 +10,7 @@ from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QApplication, QSplashScreen
 
 from client import settings
-from client.gui import MainWindow
+from client.widgets.main_window import MainWindow
 
 if TYPE_CHECKING:
     from PySide6.QtWidgets import QMainWindow

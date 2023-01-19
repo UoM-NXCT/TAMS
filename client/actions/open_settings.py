@@ -7,7 +7,7 @@ from PySide6.QtGui import QAction
 from client.widgets.dialogue import Settings
 
 if TYPE_CHECKING:
-    from client.gui import MainWindow
+    from client.widgets.main_window import MainWindow
 
 
 class OpenSettings(QAction):

@@ -13,7 +13,7 @@ from PySide6.QtWidgets import QHeaderView, QStyle
 from client.widgets.table import TableModel
 
 if typing.TYPE_CHECKING:
-    from client.gui import MainWindow
+    from client.widgets.main_window import MainWindow
 
 
 class UpdateTable(QAction):

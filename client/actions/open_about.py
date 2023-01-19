@@ -8,7 +8,7 @@ from PySide6.QtWidgets import QStyle
 from client.widgets.dialogue import About
 
 if TYPE_CHECKING:
-    from client.gui import MainWindow
+    from client.widgets.main_window import MainWindow
 
 
 class OpenAbout(QAction):

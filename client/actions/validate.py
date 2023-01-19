@@ -13,7 +13,7 @@ from client.runners import ValidateScans
 from client.widgets.dialogue import Validate, handle_common_exc
 
 if typing.TYPE_CHECKING:
-    from client.gui import MainWindow
+    from client.widgets.main_window import MainWindow
 
 
 class ValidateData(QAction):

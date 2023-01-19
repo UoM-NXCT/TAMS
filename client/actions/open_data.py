@@ -17,7 +17,7 @@ from client import settings
 from client.widgets.dialogue import handle_common_exc
 
 if typing.TYPE_CHECKING:
-    from client.gui import MainWindow
+    from client.widgets.main_window import MainWindow
 
 
 class OpenData(QAction):
