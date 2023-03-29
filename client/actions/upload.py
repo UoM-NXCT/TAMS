@@ -1,6 +1,4 @@
-"""
-Create file upload dialogue.
-"""
+"""Create file upload dialogue."""
 
 from __future__ import annotations
 
@@ -23,7 +21,6 @@ class UploadData(QAction):
 
         This method is called when the action is triggered.
         """
-
         table: str = self.parent().current_table()
 
         match table:
@@ -49,7 +46,6 @@ class UploadData(QAction):
 
     def __init__(self, main_window: MainWindow) -> None:
         """Upload data to the server."""
-
         icon = main_window.style().standardIcon(QStyle.StandardPixmap.SP_ArrowUp)
         super().__init__(icon, "Upload data", main_window)
         self.setShortcut("Ctrl+U")

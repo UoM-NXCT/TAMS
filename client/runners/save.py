@@ -1,6 +1,4 @@
-"""
-Runner for uploading and downloading files to the permanent or local library.
-"""
+"""Runner for uploading and downloading files to the permanent or local library."""
 import errno
 import logging
 import os
@@ -29,7 +27,6 @@ class SaveScans(GenericRunner):
         download: bool,
     ) -> None:
         """Initialize the runner."""
-
         super().__init__(func=self.job)
 
         # Store the project ID
@@ -124,7 +121,6 @@ class SaveScans(GenericRunner):
 
     def run_checks(self) -> None:
         """Check if the directories exist before saving files."""
-
         # Saving from one library to another is only possible if the libraries exist
         local_lib: Path = Path(settings.get_lib("local"))
         perm_lib: Path = Path(settings.get_lib("permanent"))
@@ -169,7 +165,6 @@ class SaveScans(GenericRunner):
     @staticmethod
     def get_scan_form_data(scan_id: int) -> dict[str, dict[str, Any]]:
         """Get the metadata for a scan."""
-
         conn_dict: dict[str, dict[str, Any]] = load_toml(settings.database)
         conn_str: str = dict_to_conn_str(conn_dict)
         db = DatabaseView(conn_str)
@@ -177,7 +172,6 @@ class SaveScans(GenericRunner):
 
     def job(self) -> None:
         """Save data from source to destination library."""
-
         # Save each scan in scan list
         for scan in self.scan_ids:
             # Target the scan directory in the source library

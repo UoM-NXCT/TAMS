@@ -1,6 +1,4 @@
-"""
-Add to library dialogue.
-"""
+"""Add to library dialogue."""
 
 from __future__ import annotations
 
@@ -19,7 +17,6 @@ class AddData(QAction):
     @handle_common_exc
     def _add_to_lib(self) -> None:
         """Download action creates an add to library dialogue."""
-
         if self.parent().table_view.selectionModel().selectedRows():
             match self.parent().current_table():
                 case "project":
@@ -42,7 +39,6 @@ class AddData(QAction):
 
     def __init__(self, main_window: MainWindow) -> None:
         """Add data to library action."""
-
         icon = main_window.style().standardIcon(
             QStyle.StandardPixmap.SP_FileDialogNewFolder
         )

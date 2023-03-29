@@ -1,6 +1,4 @@
-"""
-Create file validation dialogue.
-"""
+"""Create file validation dialogue."""
 
 from __future__ import annotations
 
@@ -23,7 +21,6 @@ class ValidateData(QAction):
 
         This method is called when the action is triggered.
         """
-
         table: str = self.parent().current_table()
 
         match table:
@@ -49,7 +46,6 @@ class ValidateData(QAction):
 
     def __init__(self, main_window: MainWindow) -> None:
         """Create a new validate action."""
-
         icon = main_window.style().standardIcon(
             QStyle.StandardPixmap.SP_FileDialogContentsView
         )

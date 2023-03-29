@@ -1,5 +1,4 @@
-"""
-This software has to handle a lot of different units. When stored in the library and
+"""This software has to handle a lot of different units. When stored in the library and
 database, we will use a set of standard units for each measurement.
 
 The base units are selected for what makes the most sense for CT data.
@@ -38,7 +37,6 @@ def to_base_unit(given_value: int | float, given_unit: str) -> tuple[int | float
     :param given_unit: unit of the value
     :return: value in base units and the base unit, as a tuple
     """
-
     if len(given_unit) > 1:
         # Each prefix is one character long
         # Note: this is not true for the SI prefix deca (da), but we don't use that

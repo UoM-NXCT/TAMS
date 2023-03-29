@@ -1,5 +1,4 @@
-"""
-Settings dialogue for the user to view and change settings.
+"""Settings dialogue for the user to view and change settings.
 
 Settings are saved as TOML files in the settings directory.
 """
@@ -40,7 +39,6 @@ class Settings(QDialog):
 
     def set_up_settings_window(self) -> None:
         """Create and arrange widgets in the settings window."""
-
         # Create tab bar and different page containers.
         tab_bar: QTabWidget = QTabWidget(self)
         self.general_settings_tab: QWidget = QWidget()
@@ -78,7 +76,6 @@ class Settings(QDialog):
 
     def general_settings(self) -> None:
         """General settings page allows to set the local and permanent library."""
-
         # Create the layout for the local library settings.
         self.local_lib_info = QLabel(self.get_local_lib_info())
         self.local_lib_info.setWordWrap(True)
@@ -130,7 +127,6 @@ class Settings(QDialog):
 
     def set_up_logging_settings(self) -> None:
         """Logging settings page allows to set the logging level."""
-
         # Create the layout for the logging settings.
         logging_settings: QWidget = QWidget()
         logging_settings_layout: QVBoxLayout = QVBoxLayout()
@@ -160,7 +156,6 @@ class Settings(QDialog):
     @staticmethod
     def get_local_lib_info() -> str:
         """Generate the text to display the local library."""
-
         info: str = f"""
         <h3>Local library</h3>
         <p>
@@ -181,7 +176,6 @@ class Settings(QDialog):
     @staticmethod
     def get_perm_lib_info() -> str:
         """Generate the text to display the local library."""
-
         info: str = f"""
         <h3>Permanent library</h3>
         <p>
@@ -201,7 +195,6 @@ class Settings(QDialog):
 
     def open_library(self, lib_path: str, lib_title: str) -> None:
         """Open the local library directory in the file explorer."""
-
         if lib_path:
             QDesktopServices.openUrl(lib_path)
         else:
@@ -213,7 +206,6 @@ class Settings(QDialog):
 
     def database_settings(self) -> None:
         """Database settings widget to allow the user to set the database connection."""
-
         if not settings.database.is_file():
             # Create a database config file if one does not already exist
             template_db_config: dict[str, dict[str, str]] = {
@@ -274,7 +266,6 @@ class Settings(QDialog):
 
     def edit_library(self, lib_title: str) -> None:
         """Open a file dialog to select the library directory."""
-
         if settings.get_lib(lib_title):
             init_dir: str = settings.get_lib(lib_title)
         else:
@@ -312,13 +303,11 @@ class Settings(QDialog):
 
     def apply(self) -> None:
         """Apply the changes to settings."""
-
         # TODO: changes to the local library should be applied not immediately;
         #  refactor under this method!
 
         def update_if_modified(line_edit: QLineEdit, key: str) -> None:
             """Update the config dict if the line edit has been modified."""
-
             if line_edit.isModified():
                 update_toml(settings.database, "postgresql", key, line_edit.text())
 
@@ -330,7 +319,6 @@ class Settings(QDialog):
 
     def test_db_connection(self) -> None:
         """Test the database connection."""
-
         try:
             if not settings.database.is_file():
                 raise FileNotFoundError

@@ -1,6 +1,4 @@
-"""
-Test utils module.
-"""
+"""Test utils module."""
 import shutil
 import unittest
 from os import remove
@@ -22,7 +20,6 @@ class TestCreateDirectory(unittest.TestCase):
 
     def test_create_dir(self) -> None:
         """Test function that creates a directory at a location if it doesn't exist."""
-
         dir_target = TEST_DIR / Path("new_dir")
         assert not dir_target.exists()
 
@@ -35,7 +32,6 @@ class TestCreateDirectory(unittest.TestCase):
 
     def test_exc(self) -> None:
         """Test exception is raised if path is not a string or Path object."""
-
         with pytest.raises(TypeError):
             create_dir(1)  # type: ignore
 
@@ -48,7 +44,6 @@ class TestMoveItem(unittest.TestCase):
 
     def test_move_item(self) -> None:
         """Test function that moves or copies an item."""
-
         # Check file exists
         file_to_be_moved = TEST_DIR / Path(r"text_files/move_me.txt")
         assert file_to_be_moved.is_file()
@@ -77,7 +72,6 @@ class TestMoveItem(unittest.TestCase):
 
     def test_move_dir(self) -> None:
         """Test function that moves or copies a directory."""
-
         # Check directory exists
         dir_to_be_moved = TEST_DIR / "text_files"
         member_of_dir_to_be_moved = dir_to_be_moved / "move_me.txt"
@@ -113,7 +107,6 @@ class TestMoveItem(unittest.TestCase):
 
     def test_copy_item(self) -> None:
         """Test function that moves or copies an item."""
-
         # Check file exists
         file_to_be_copied = TEST_DIR / Path("text_files/copy_me.txt")
         assert file_to_be_copied.is_file()
@@ -136,7 +129,6 @@ class TestMoveItem(unittest.TestCase):
 
     def test_copy_dir(self) -> None:
         """Test function that moves or copies a directory."""
-
         # Check directory exists
         dir_to_be_moved = TEST_DIR / "text_files"
         member_of_dir_to_be_moved = dir_to_be_moved / "move_me.txt"
@@ -172,7 +164,6 @@ class TestFile(unittest.TestCase):
 
     def test_find_and_move(self) -> None:
         """Test function that finds and moves files from one directory to another."""
-
         source_dir = TEST_DIR / Path(r"text_files")
         target_dir = TEST_DIR / Path(r"example_directory")
 
@@ -183,10 +174,10 @@ class TestFile(unittest.TestCase):
         copy_me_text_file_final = target_dir / Path("copy_me.txt")
         move_me_text_file_final = target_dir / Path("move_me.txt")
 
-        self.assertEqual(False, copy_me_text_file_init.is_file())
-        self.assertEqual(True, copy_me_text_file_final.is_file())
-        self.assertEqual(False, move_me_text_file_init.is_file())
-        self.assertEqual(True, move_me_text_file_final.is_file())
+        assert False is copy_me_text_file_init.is_file()
+        assert True is copy_me_text_file_final.is_file()
+        assert False is move_me_text_file_init.is_file()
+        assert True is move_me_text_file_final.is_file()
 
         # Move files back after test
         find_and_move("*.txt", target_dir, source_dir)
@@ -197,36 +188,33 @@ class TestTOML(unittest.TestCase):
 
     def test_create_toml(self) -> None:
         """Test function that creates TOML file with given data."""
-
         new_toml_path = TEST_DIR / Path("new_toml.toml")
         dict_to_be_stored = {"Scientist": {"name": "Einstein", "thesis_year": 1905}}
         create_toml(new_toml_path, dict_to_be_stored)
-        self.assertEqual(True, new_toml_path.is_file())
-        self.assertEqual("new_toml.toml", new_toml_path.name)
+        assert True is new_toml_path.is_file()
+        assert new_toml_path.name == "new_toml.toml"
         stored_dict = load_toml(new_toml_path)
-        self.assertEqual(dict_to_be_stored, stored_dict)
+        assert dict_to_be_stored == stored_dict
 
         # Delete the created TOML file after tests have been completed
         remove(new_toml_path)
 
     def test_get_dict_from_toml(self) -> None:
         """Test function that returns a dictionary from a TOML file."""
-
         path_to_toml = TEST_DIR / Path("test_toml_files/my_cat.toml")
         toml_dict = load_toml(path_to_toml)
         expected_dict = {"cat": {"name": "Dusty", "age": 7}}
-        self.assertEqual(expected_dict, toml_dict)
+        assert expected_dict == toml_dict
 
     def test_update_toml(self) -> None:
         """Test a function that updates a TOML file with given data."""
-
         path_to_toml = TEST_DIR / Path("test_toml_files/my_dog.toml")
         update_toml(path_to_toml, "dog", "age", 12)
         new_age = load_toml(path_to_toml)["dog"]["age"]
-        self.assertEqual(12, new_age)
+        assert new_age == 12
         update_toml(path_to_toml, "dog", "is_cute", True)
         cute = load_toml(path_to_toml)["dog"]["is_cute"]
-        self.assertEqual(True, cute)
+        assert True is cute
 
         # Now reset the TOML file for future testing
         with open(path_to_toml, mode="wb") as file:
@@ -237,7 +225,6 @@ class TestTOML(unittest.TestCase):
 class TestHash(unittest.TestCase):
     def test_hash_in_chunks(self):
         """Test function that hashes a file in chunks."""
-
         file_to_hash: Path = TEST_DIR / Path("text_files/copy_me.txt")
         hash_value: str = hash_in_chunks(file_to_hash)
         self.assertEqual(

@@ -14,7 +14,6 @@ if TYPE_CHECKING:
 class OpenAbout(QAction):
     def __init__(self, main_window: MainWindow) -> None:
         """Open about action."""
-
         icon = main_window.style().standardIcon(
             QStyle.StandardPixmap.SP_MessageBoxInformation
         )

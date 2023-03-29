@@ -1,6 +1,4 @@
-"""
-Create open download dialogue.
-"""
+"""Create open download dialogue."""
 
 from __future__ import annotations
 
@@ -27,7 +25,6 @@ class OpenData(QAction):
 
         Runs when the action is triggered.
         """
-
         # Get the path of the local library
         local_lib_str: str = settings.get_lib("local")
         if not local_lib_str:
@@ -70,7 +67,6 @@ class OpenData(QAction):
 
     def __init__(self, main_window: MainWindow) -> None:
         """Open data action."""
-
         icon = main_window.style().standardIcon(
             QStyle.StandardPixmap.SP_DialogOpenButton
         )

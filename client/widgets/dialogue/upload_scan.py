@@ -1,6 +1,4 @@
-"""
-Progress bar dialogue for uploading scans.
-"""
+"""Progress bar dialogue for uploading scans."""
 from __future__ import annotations
 
 import logging
@@ -37,7 +35,6 @@ class UploadScans(QDialog):
         parent_widget: QWidget | None = None,
     ) -> None:
         """Initialize the dialogue."""
-
         super().__init__(parent=parent_widget)
 
         self.setWindowTitle("Uploading data...")
@@ -95,13 +92,11 @@ class UploadScans(QDialog):
 
     def update_progress(self, value_increment: int) -> None:
         """Update the progress bar."""
-
         value: int = self.progress.value()
         self.progress.setValue(value + value_increment)
 
     def job_done(self) -> None:
         """Show a message box when the job is done."""
-
         # Show a message box
         QMessageBox.information(
             self,
@@ -116,7 +111,6 @@ class UploadScans(QDialog):
 
         Overloads QDialog.closeEvent method.
         """
-
         logging.info("Closing %s.", self.__class__.__name__)
 
         # Kill the runner on close if not killed already

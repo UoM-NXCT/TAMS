@@ -10,7 +10,6 @@ def get_relative_path(prj_id: str | int | Path, scan_id: str | int | Path) -> Pa
     :param scan_id: scan ID
     :return: relative path to scan
     """
-
     return Path(str(prj_id)) / Path(str(scan_id))
 
 

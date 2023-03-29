@@ -1,6 +1,4 @@
-"""
-Create file download dialogue.
-"""
+"""Create file download dialogue."""
 
 from __future__ import annotations
 
@@ -25,7 +23,6 @@ class DownloadData(QAction):
 
         This method is called when the action is triggered.
         """
-
         table: str = self.parent().current_table()
 
         match table:
@@ -51,7 +48,6 @@ class DownloadData(QAction):
 
     def __init__(self, main_window: MainWindow) -> None:
         """Download data from the server."""
-
         icon: QIcon = main_window.style().standardIcon(
             QStyle.StandardPixmap.SP_ArrowDown
         )

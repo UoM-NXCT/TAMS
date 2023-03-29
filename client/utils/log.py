@@ -1,6 +1,4 @@
-"""
-Custom logger.
-"""
+"""Custom logger."""
 import logging
 
 from client import settings
@@ -8,7 +6,6 @@ from client import settings
 
 def logger(name: str) -> logging.Logger:
     """Custom logger."""
-
     # Configure logging
     custom_logger: logging.Logger = logging.getLogger(name)
 

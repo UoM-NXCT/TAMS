@@ -27,7 +27,6 @@ class NikonScan(AbstractScan):
 
         :return: metadata for the scan
         """
-
         # The metadata we want to extract is in two files
 
         # First, we need to find the ctprofile XML file
@@ -70,9 +69,8 @@ class NikonScan(AbstractScan):
 
     @staticmethod
     def is_reconstruction(path: Path) -> bool:
-        """
-        For Nikon, assume all directories with an underscore are reconstructions
-        For example, "reconxx_01" is a reconstruction; "reconxx" is not
+        """For Nikon, assume all directories with an underscore are reconstructions
+        For example, "reconxx_01" is a reconstruction; "reconxx" is not.
         """
         return path.is_dir() and "_" in path.name
 
@@ -81,7 +79,6 @@ class NikonScan(AbstractScan):
 
         :return: list of reconstruction directories
         """
-
         return tuple(
             item.relative_to(self.path)
             for item in self.path.glob("*")
@@ -93,7 +90,6 @@ class NikonScan(AbstractScan):
 
         :return: raw data files and directories
         """
-
         # Assume that everything that isn't a reconstruction must be raw data
         return tuple(
             item for item in self.path.glob("*") if not self.is_reconstruction(item)

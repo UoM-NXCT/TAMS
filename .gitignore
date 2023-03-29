@@ -95,3 +95,6 @@ cython_debug/
 # JetBrains
 .idea/
 client/settings/database.toml
+
+# Ruff
+.ruff_cache/

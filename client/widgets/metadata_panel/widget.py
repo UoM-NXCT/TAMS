@@ -1,5 +1,4 @@
-"""
-Custom widget class inherits the Qt built-in QWidget.
+"""Custom widget class inherits the Qt built-in QWidget.
 
 Contains the metadata on the current entry; displayed on the right panel.
 """
@@ -31,7 +30,6 @@ if TYPE_CHECKING:
 
 def get_thumbnail(prj_id: int, scan_id: int | None = None) -> Path:
     """Return the first image in the scan directory as a thumbnail."""
-
     # Get the path to the local library directory
     local_lib: Path = Path(settings.get_lib("local"))
 
@@ -126,7 +124,6 @@ class MetadataPanel(QWidget):
 
     def open_readme(self) -> None:
         """Open the README.txt file."""
-
         logging.info("Opening README.txt")
         readme_dir: Path = self.get_readme_dir()
         readme_file: Path = readme_dir / "README.txt"
@@ -134,7 +131,6 @@ class MetadataPanel(QWidget):
 
     def update_content(self) -> None:
         """Update the metadata panel content."""
-
         # Clear the tree
         self.metadata_tree.clear()
 
@@ -151,7 +147,7 @@ class MetadataPanel(QWidget):
 
                 # Render and add the values to the tree item
                 child: QTreeWidgetItem
-                if isinstance(values, (str, int, date)):
+                if isinstance(values, str | int | date):
                     child = QTreeWidgetItem([str(values)])
                     if isinstance(values, date):
                         child.setToolTip(0, f"{values} (YYYY-MM-DD)")
@@ -176,7 +172,6 @@ class MetadataPanel(QWidget):
 
     def get_prj_id(self) -> int | None:
         """Get the project ID from the metadata."""
-
         try:
             if not self._data or not self._column_headers:
                 return None
@@ -192,7 +187,6 @@ class MetadataPanel(QWidget):
 
     def get_scan_id(self) -> int | None:
         """Get the scan ID from the metadata."""
-
         try:
             if not self._data or not self._column_headers:
                 return None
@@ -208,7 +202,6 @@ class MetadataPanel(QWidget):
 
     def update_thumbnail(self) -> None:
         """Update the thumbnail widget."""
-
         if self._data and self._column_headers:
             # Get the project ID
             prj_id: int | None = self.get_prj_id()
@@ -227,7 +220,6 @@ class MetadataPanel(QWidget):
 
     def update_readme_text_edit(self, readme_dir: Path) -> None:
         """Load the README.txt file."""
-
         readme_file: Path = readme_dir / "README.txt"
         if readme_file.exists():
             with open(readme_file, encoding="utf-8") as f:
@@ -238,7 +230,6 @@ class MetadataPanel(QWidget):
 
     def get_readme_dir(self) -> Path:
         """Get the README.txt file."""
-
         # Get the project ID
         prj_id: int | None = self.get_prj_id()
 
@@ -258,7 +249,6 @@ class MetadataPanel(QWidget):
 
     def update_readme(self) -> None:
         """Update the README.txt widget."""
-
         if self._data and self._column_headers:
             try:
                 readme_dir: Path = self.get_readme_dir()
@@ -282,7 +272,6 @@ class MetadataPanel(QWidget):
         ),
     ) -> None:
         """Update metadata variables and tell panel to update itself."""
-
         self._data, self._column_headers = metadata
         self.update_content()
         self.update_thumbnail()

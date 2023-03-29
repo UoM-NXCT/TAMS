@@ -1,5 +1,4 @@
-"""
-This window lets a user input and create a new scan, which is added to the database
+"""This window lets a user input and create a new scan, which is added to the database
 specified by the input connection string.
 """
 from __future__ import annotations
@@ -33,8 +32,7 @@ if TYPE_CHECKING:
 
 
 class CreateScan(QDialog):
-    """
-    Window that takes project information and create and commits that project to the
+    """Window that takes project information and create and commits that project to the
     database specified by the connection string.
     """
 
@@ -50,35 +48,32 @@ class CreateScan(QDialog):
 
     def set_up_scan_dlg(self) -> None:
         """Create and arrange widgets in the project creation window."""
-
         header_label: QLabel = QLabel("Create new scan")
 
         # Get project ID options
         self.new_scan_prj_id_entry: QLineEdit = QLineEdit()
-        with psycopg.connect(self.conn_str) as conn:
-            with conn.cursor() as cur:
-                cur.execute("select project_id, title from project;")
-                raw_prj_ids: list[tuple[Any, ...]] = cur.fetchall()
-                # Hack the output into a value QComboBox likes (a list of strings)
-                prj_ids: list[str] = [
-                    f"{tuple_value[0]} ({tuple_value[1]})"
-                    for tuple_value in raw_prj_ids
-                ]
+        with psycopg.connect(self.conn_str) as conn, conn.cursor() as cur:
+            cur.execute("select project_id, title from project;")
+            raw_prj_ids: list[tuple[Any, ...]] = cur.fetchall()
+            # Hack the output into a value QComboBox likes (a list of strings)
+            prj_ids: list[str] = [
+                f"{tuple_value[0]} ({tuple_value[1]})"
+                for tuple_value in raw_prj_ids
+            ]
         completer = QCompleter(prj_ids)
         completer.setFilterMode(Qt.MatchContains)
         self.new_scan_prj_id_entry.setCompleter(completer)
 
         # Get instrument ID options
         self.new_scan_instrument_id_entry = QLineEdit()
-        with psycopg.connect(self.conn_str) as conn:
-            with conn.cursor() as cur:
-                cur.execute("select instrument_id, name from instrument;")
-                raw_instrument_ids: list[tuple[Any, ...]] = cur.fetchall()
-                # Hack the output into a value the Qt ComboBox likes (a list of strings)
-                instrument_ids: list[str] = [
-                    f"{tuple_value[0]} ({tuple_value[1]})"
-                    for tuple_value in raw_instrument_ids
-                ]
+        with psycopg.connect(self.conn_str) as conn, conn.cursor() as cur:
+            cur.execute("select instrument_id, name from instrument;")
+            raw_instrument_ids: list[tuple[Any, ...]] = cur.fetchall()
+            # Hack the output into a value the Qt ComboBox likes (a list of strings)
+            instrument_ids: list[str] = [
+                f"{tuple_value[0]} ({tuple_value[1]})"
+                for tuple_value in raw_instrument_ids
+            ]
         completer = QCompleter(instrument_ids)
         completer.setFilterMode(Qt.MatchContains)
         self.new_scan_instrument_id_entry.setCompleter(completer)
@@ -104,7 +99,6 @@ class CreateScan(QDialog):
 
     def get_scan_form_data(self, scan_id: int) -> dict[str, dict[str, Any]]:
         """Get scan form data for user_form.toml."""
-
         # Get immutable data (data that should not be changed by the user)
         db_view: DatabaseView = DatabaseView(self.conn_str)
         immutable_data, immutable_column_headers = db_view.view_select_from_where(
@@ -120,7 +114,6 @@ class CreateScan(QDialog):
     @handle_common_exc
     def accept_new_scan_info(self) -> None:
         """Read input data and save to database."""
-
         # Get IDs from the combo boxes
         selected_prj_id: int = int(self.new_scan_prj_id_entry.text().split()[0])
         selected_instrument_id: int = int(

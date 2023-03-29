@@ -1,6 +1,4 @@
-"""
-File hashing algorithms.
-"""
+"""File hashing algorithms."""
 from __future__ import annotations
 
 from hashlib import sha3_384
@@ -12,7 +10,6 @@ if TYPE_CHECKING:
 
 def hash_in_chunks(file: Path | str) -> str:
     """Hash a file using SHA-384."""
-
     # Read files in 128 KB chunks to save memory
     # https://eklitzke.org/efficient-file-copying-on-linux
     buf_size: int = 131072

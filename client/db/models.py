@@ -1,6 +1,4 @@
-"""
-Database class performs key database methods.
-"""
+"""Database class performs key database methods."""
 
 from __future__ import annotations
 
@@ -33,7 +31,6 @@ class Database:
         @wraps(func)
         def wrapper(self: Database, *args: Any, **kwargs: Any) -> None:
             """Attempt to execute the sql command, and handle any exceptions."""
-
             if self.conn:
                 try:
                     func(self, *args, **kwargs)
@@ -50,7 +47,6 @@ class Database:
     @attempt_sql_command
     def exec(self, *args: Any, **kwargs: Any) -> None:
         """Attempt an SQL command."""
-
         if self.cur is not None and self.conn is not None:
             self.cur.execute(*args, **kwargs)
         else:
@@ -58,7 +54,6 @@ class Database:
 
     def __enter__(self) -> Database:
         """The runtime context of the database class (connecting to the database)."""
-
         self.conn = connect(self.conn_str)
         self.cur = self.conn.cursor()
 
@@ -74,7 +69,6 @@ class Database:
 
     def __repr__(self) -> str:
         """Return database version when class is repr() or str() is called."""
-
         if self.cur is not None:
             self.cur.execute("select version();")
             row: Any | None = self.cur.fetchone()
@@ -96,7 +90,6 @@ class DatabaseInitializer(Database):
 
     def init_db(self) -> None:
         """Create database tables."""
-
         logging.info("Creating database tables")
 
         init_instructions: Path = self.base_dir / "initialise.sql"
@@ -105,10 +98,7 @@ class DatabaseInitializer(Database):
             self.exec(sql_file.read())
 
     def populate_with_dummy_data(self) -> None:
-        """
-        Populate the tables with fake data. This should only be used in development.
-        """
-
+        """Populate the tables with fake data. This should only be used in development."""
         logging.info("Populating database with fake data")
 
         dummy_data_instructions: Path = self.base_dir / "dummy_data.sql"
@@ -116,14 +106,13 @@ class DatabaseInitializer(Database):
             self.exec(sql_file.read())
 
     def __enter__(self) -> DatabaseInitializer:
-        """The runtime context of the database initialization class"""
+        """The runtime context of the database initialization class."""
         super().__enter__()
         return self
 
 
 def init_database() -> None:
     """Initialize the database using initializer model."""
-
     # When running postgres via a container, localhost doesn't map to 127.0.0.1.
     conn_str: str = (
         "host=127.0.0.1 port=5432 dbname=tams user=postgres password=postgres"

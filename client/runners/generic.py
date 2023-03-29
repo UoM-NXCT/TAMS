@@ -1,6 +1,4 @@
-"""
-Generic worker class for running jobs in a separate thread.
-"""
+"""Generic worker class for running jobs in a separate thread."""
 from __future__ import annotations
 
 import logging
@@ -18,14 +16,14 @@ if TYPE_CHECKING:
 class RunnerKilledException(Exception):
     """Exception raised when a runner is killed."""
 
-    def __init__(self, msg: str = "Worker has been killed."):
+    def __init__(self, msg: str = "Worker has been killed.") -> None:
         super().__init__(msg)
 
 
 class RunnerFinishedException(Exception):
     """Exception raised when a runner is finished."""
 
-    def __init__(self, msg: str = "Worker has finished."):
+    def __init__(self, msg: str = "Worker has finished.") -> None:
         super().__init__(msg)
 
 
@@ -49,14 +47,13 @@ class RunnerSignals(QObject):
 
 
 class GenericRunner(QRunnable):
-    """Generic runner thread
+    """Generic runner thread.
 
     Inherits from QRunnable to handle worker thread setup, signals and wrap-up.
     """
 
-    def __init__(self, func: Callable[[], Any]):
+    def __init__(self, func: Callable[[], Any]) -> None:
         """Initialize the worker."""
-
         super().__init__()
 
         # Store constructor arguments (re-used for processing)
@@ -75,7 +72,6 @@ class GenericRunner(QRunnable):
     @Slot()
     def run(self) -> None:
         """Initialize the runner function with passed args, kwargs."""
-
         try:
             result: Any = self.fn()
         except Exception:  # pylint: disable=broad-except
@@ -90,7 +86,6 @@ class GenericRunner(QRunnable):
 
     def set_max_progress(self, max_progress: int) -> None:
         """Set the max progress of the runner."""
-
         if isinstance(max_progress, int) and (max_progress > 0):
             self._max_progress = max_progress
         else:
@@ -98,38 +93,32 @@ class GenericRunner(QRunnable):
 
     def get_max_progress(self) -> int:
         """Get the max progress of the runner."""
-
         return self._max_progress
 
     def kill(self) -> None:
         """Kill the runner."""
-
         logging.info("%s killed.", self.__class__.__name__)
         self.worker_status = RunnerStatus.KILLED
         self.signals.kill.emit()
 
     def pause(self) -> None:
         """Pause the runner."""
-
         logging.info("%s paused.", self.__class__.__name__)
         self.worker_status = RunnerStatus.PAUSED
 
     def resume(self) -> None:
         """Resume the runner."""
-
         logging.info("%s resumed.", self.__class__.__name__)
         self.worker_status = RunnerStatus.RUNNING
 
     def finish(self) -> None:
         """Finish the runner."""
-
         logging.info("%s finished.", self.__class__.__name__)
         self.worker_status = RunnerStatus.FINISHED
         self.signals.finished.emit()
 
     def set_result(self, result: Any) -> None:
         """Set the result of the runner and finish."""
-
         logging.info("%s result set: %s", self.__class__.__name__, result)
         self.result_value = result
         self.signals.result.emit(result)

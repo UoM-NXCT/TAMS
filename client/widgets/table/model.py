@@ -1,5 +1,4 @@
-"""
-Define a table model used in the GUI.
+"""Define a table model used in the GUI.
 
 The model handles providing the data for display by the view. We write a custom model,
 which is a subclass of QAbstractTableModel.
@@ -37,20 +36,19 @@ class TableModel(QAbstractTableModel):
         role: int = ...,  # Yes, an ellipsis is not an int. This is a PySide6 bug.
     ) -> Any:
         """Returns presentation information for given locations in the table."""
-
         if role == Qt.ItemDataRole.DisplayRole:
             # Get the raw value
             # .row() indexes the outer list; .column() indexes the sub-list
             value = self._data[index.row()][index.column()]
 
             # Perform per-type run_checks and render accordingly.
-            if isinstance(value, (datetime, date)):
+            if isinstance(value, datetime | date):
                 # Render time to YYY-MM-DD
                 return f"{value:%Y-%m-%d}"
             if isinstance(value, float):
                 # Render float to 2 decimal places
                 return f"{value:.2f}"
-            if isinstance(value, (str, int)):
+            if isinstance(value, str | int):
                 # If it is a string or int, just render its string representation.
                 return f"{value}"
 
@@ -60,7 +58,7 @@ class TableModel(QAbstractTableModel):
         if role == Qt.ItemDataRole.TextAlignmentRole:
             value = self._data[index.row()][index.column()]
 
-            if isinstance(value, (int, float)):
+            if isinstance(value, int | float):
                 # Align numbers to the right and vertically centre
                 return Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
 
@@ -68,7 +66,6 @@ class TableModel(QAbstractTableModel):
 
     def rowCount(self, _parent: QModelIndex | QPersistentModelIndex = ...) -> int:
         """Return the length of the outer list."""
-
         return len(self._data)
 
     def columnCount(
@@ -79,7 +76,6 @@ class TableModel(QAbstractTableModel):
 
         This only works if all the rows are of equal length!
         """
-
         return len(self._data[0])
 
     def headerData(
@@ -89,7 +85,6 @@ class TableModel(QAbstractTableModel):
         role: int = ...,  # Yes, an ellipsis is not an int. This is a PySide6 bug.
     ) -> Any:
         """Return the header data."""
-
         if role == Qt.ItemDataRole.DisplayRole:
             if orientation == Qt.Orientation.Horizontal:
                 header: str = str(self._column_headers[section])

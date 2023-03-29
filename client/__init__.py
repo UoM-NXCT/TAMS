@@ -1,6 +1,4 @@
-"""
-Evaluate run-time constants.
-"""
+"""Evaluate run-time constants."""
 from importlib import metadata
 
 from client.utils import log

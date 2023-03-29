@@ -1,6 +1,4 @@
-"""
-Progress bar dialogue for validating files.
-"""
+"""Progress bar dialogue for validating files."""
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -38,7 +36,6 @@ class Validate(QDialog):
         parent_widget: QWidget | None = None,
     ) -> None:
         """Initialize the dialogue."""
-
         super().__init__(parent=parent_widget)
 
         self.setWindowTitle("Validating data...")
@@ -94,13 +91,11 @@ class Validate(QDialog):
 
     def update_progress(self, value_increment: int) -> None:
         """Update the progress bar."""
-
         value: int = self.progress.value()
         self.progress.setValue(value + value_increment)
 
     def job_done(self) -> None:
         """Show a message box when the job is done."""
-
         match self.runner.result_value:
             case True:
                 logger.info("Validation successful.")
@@ -130,7 +125,6 @@ class Validate(QDialog):
 
         Overloads QDialog.closeEvent method.
         """
-
         logger.info("Closing %s.", self.__class__.__name__)
 
         # Kill the runner on close if not killed already

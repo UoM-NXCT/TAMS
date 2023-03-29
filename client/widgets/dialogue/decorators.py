@@ -1,6 +1,4 @@
-"""
-Decoration function utilities.
-"""
+"""Decoration function utilities."""
 
 from __future__ import annotations
 
@@ -26,7 +24,6 @@ def handle_common_exc(func: Callable[..., Any]) -> Callable[..., Any]:
     @wraps(func)
     def wrapper(*args: Any, **kwargs: Any) -> None:
         """Attempt to execute file operations, and handle any exceptions."""
-
         try:
             func(*args, **kwargs)
         except FileNotFoundError as exc:

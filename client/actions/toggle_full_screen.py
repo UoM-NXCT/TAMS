@@ -1,6 +1,4 @@
-"""
-Toggle full screen mode action.
-"""
+"""Toggle full screen mode action."""
 
 from __future__ import annotations
 
@@ -18,7 +16,6 @@ class FullScreen(QAction):
 
         This method is called when the action is triggered.
         """
-
         if self.isChecked():
             self.parent().showFullScreen()
         else:
@@ -26,7 +23,6 @@ class FullScreen(QAction):
 
     def __init__(self, main_window: MainWindow) -> None:
         """Toggle full screen mode action."""
-
         super().__init__("&Full Screen", main_window)
         self.setShortcut("F11")
         self.setCheckable(True)

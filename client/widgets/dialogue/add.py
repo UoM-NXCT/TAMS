@@ -1,6 +1,4 @@
-"""
-This window lets users add scans to the library.
-"""
+"""This window lets users add scans to the library."""
 
 from __future__ import annotations
 
@@ -36,7 +34,6 @@ class AddToLibraryProgress(QDialog):
 
     def __init__(self, runner: AddScan, parent_dlg: QDialog) -> None:
         """Initialize the window."""
-
         super().__init__(parent=parent_dlg)
 
         self.setWindowTitle("Adding data to library")
@@ -61,7 +58,6 @@ class AddToLibrary(QDialog):
 
     def _set_up_settings_window(self) -> None:
         """Create and arrange widgets in the project creation window."""
-
         header_label = QLabel("Add new scan to library")
 
         # Get scan format
@@ -115,7 +111,6 @@ class AddToLibrary(QDialog):
         self, conn_str: str, scan_id: int | None, prj_id: int | None, *args, **kwargs
     ) -> None:
         """Initialize the window."""
-
         super().__init__(*args, **kwargs)
         self.conn_str: str = conn_str
         self.scan_id: int = scan_id
@@ -139,7 +134,7 @@ class AddToLibrary(QDialog):
                 try:
                     metadata = scan.get_metadata()
                     items: list[QTreeWidgetItem] = []
-                    for index, (key, value) in enumerate(metadata.items()):
+                    for _index, (key, value) in enumerate(metadata.items()):
                         item = QTreeWidgetItem([key])
                         child = QTreeWidgetItem([str(value)])
                         item.addChild(child)
@@ -162,7 +157,6 @@ class AddToLibrary(QDialog):
 
     def read_user_form(self) -> None:
         """Read the user's input from the form."""
-
         if not self.scan_loc:
             raise ValueError("Scan location not set.")
         toml_path = self.scan_loc / "user_form.toml"
@@ -258,7 +252,6 @@ class AddToLibrary(QDialog):
 
     def add_scan(self) -> None:
         """Add the scan to the library."""
-
         # If the user selected add to database, warn them about the consequences.
         if self.add_to_db_checkbox.isChecked():
             reply = QMessageBox.question(

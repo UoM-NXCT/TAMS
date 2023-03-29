@@ -1,5 +1,4 @@
-"""
-Runner for checking that the local and permanent scans are the same.
+"""Runner for checking that the local and permanent scans are the same.
 
 This involves first doing a shallow check (for example, comparing file names) and then
 doing a deep check (comparing file contents) by comparing file hashes.
@@ -27,7 +26,6 @@ class ValidateScans(GenericRunner):
 
     def __init__(self, prj_id: int, *scan_ids: int) -> None:
         """Initialize the runner."""
-
         super().__init__(func=self.job)
 
         # Store the project ID
@@ -136,7 +134,6 @@ class ValidateScans(GenericRunner):
 
     def run_checks(self) -> None:
         """Check if directories exist before validating files."""
-
         # Check if libraries exist
         if not self.local_lib.exists():
             raise FileNotFoundError(
@@ -170,7 +167,6 @@ class ValidateScans(GenericRunner):
     @classmethod
     def has_differences(cls, comparison: dircmp[str]) -> bool:
         """Check if two directories have differences."""
-
         differences: list[str] = (
             comparison.left_only + comparison.right_only + comparison.diff_files
         )
@@ -184,7 +180,6 @@ class ValidateScans(GenericRunner):
 
     def job(self) -> None:
         """Save data to local library."""
-
         # Check local scan directories exist
         for scan_dir in self.local_scan_dirs:
             # Increment progress bar

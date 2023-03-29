@@ -1,6 +1,4 @@
-"""
-The thumbnail widget scales an image to fill a box while maintaining aspect ratio.
-"""
+"""The thumbnail widget scales an image to fill a box while maintaining aspect ratio."""
 
 
 from __future__ import annotations
@@ -52,7 +50,6 @@ class Thumbnail(QFrame):
 
         This is not an overload. It is a custom method.
         """
-
         self.original_pixmap = QPixmap(source)
         self.label.setPixmap(self.original_pixmap)
         self.setToolTip(str(source.absolute()))
@@ -69,7 +66,6 @@ class Thumbnail(QFrame):
 
         Overloads parent resizeEvent method.
         """
-
         rect: QRect = self.geometry()
 
         size: QSize = QSize(rect.width(), rect.height())

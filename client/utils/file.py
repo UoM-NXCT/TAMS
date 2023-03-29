@@ -1,6 +1,4 @@
-"""
-Common file operation methods.
-"""
+"""Common file operation methods."""
 
 import logging
 import os
@@ -13,7 +11,6 @@ def create_dir(path: Path | str) -> None:
 
     :param path: target directory
     """
-
     # If directory exists, do nothing
     if isinstance(path, Path):
         if path.exists():
@@ -36,7 +33,6 @@ def move_item(item: Path, dest_dir: Path, keep_original: bool = True) -> None:
     :param dest_dir: destination location
     :param keep_original: determines if move or copy
     """
-
     # Create destination directory if it does not exist
     create_dir(dest_dir)
 
@@ -81,7 +77,6 @@ def find_and_move(
     :param search_dir: directory that is searched
     :param destinations: list of destinations
     """
-
     num_of_items = len(tuple(search_dir.glob(glob_arg)))
     if num_of_items:
         for dest in destinations:
@@ -104,7 +99,6 @@ def find_and_move(
 
 def size_fmt(num_of_bytes: int | float, dec_places: int = 2) -> str:
     """Function that formats a size in bytes to a human-readable format."""
-
     if num_of_bytes < 0:
         raise ValueError("Number of bytes must be positive.")
 

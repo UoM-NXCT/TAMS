@@ -1,5 +1,4 @@
-"""
-This file contains custom database exceptions.
+"""This file contains custom database exceptions.
 
 It also contains a decorator that can be used to handle database exceptions with a GUI.
 """
@@ -26,7 +25,6 @@ class MissingTables(Exception):
 
     def __str__(self) -> str:
         """Return a string representation of the exception."""
-
         return f"Database is missing the following tables: {self._missing_tables}"
 
 
@@ -35,11 +33,9 @@ def exc_gui(func: Callable[..., Any]) -> Callable[..., Any]:
 
     @wraps(func)
     def wrapper(*args: Any, **kwargs: Any) -> Any:
-        """
-        Attempt to execute the database interaction function, and handle any exceptions
+        """Attempt to execute the database interaction function, and handle any exceptions
         by displaying them in a dialogue.
         """
-
         try:
             # Run the function
             func(*args, **kwargs)

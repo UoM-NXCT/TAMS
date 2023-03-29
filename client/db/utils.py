@@ -8,7 +8,6 @@ def dict_to_conn_str(config_dict: dict[str, dict[str, Any]]) -> str:
     This is to turn the dictionary retrieved from the config TOML file to a string that
     the Pyscopg package can use to connect to the database.
     """
-
     config: dict[str, Any] = config_dict["postgresql"]
     host: str = config["host"]
     dbname: str = config["database"]

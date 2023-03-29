@@ -1,6 +1,4 @@
-"""
-Update the table in the main window.
-"""
+"""Update the table in the main window."""
 
 from __future__ import annotations
 
@@ -22,7 +20,6 @@ class UpdateTable(QAction):
 
         This method is called when the selection in the table changes.
         """
-
         # Get the primary key from the first column (assume first column is the pk)
         key: int = self.parent().selected_row()[0]
 
@@ -45,7 +42,6 @@ class UpdateTable(QAction):
 
         This method is called when the action is triggered.
         """
-
         # Get table data
         sel_val, from_val, where_val = self.parent().current_table_query
         if self.parent().db_view:
@@ -114,7 +110,6 @@ class UpdateTable(QAction):
 
     def __init__(self, main_window: MainWindow) -> None:
         """Update table action."""
-
         icon = main_window.style().standardIcon(QStyle.StandardPixmap.SP_BrowserReload)
         super().__init__(icon, "Reload table", main_window)
         self.setShortcut("Ctrl+R")
@@ -123,7 +118,6 @@ class UpdateTable(QAction):
 
     def with_users(self) -> None:
         """Update the table widget to display users."""
-
         self.parent().current_table_query = (
             "user_id, first_name, last_name, email_address",
             '"user"',
@@ -133,7 +127,6 @@ class UpdateTable(QAction):
 
     def with_scans(self) -> None:
         """Update the table widget to display scans."""
-
         self.parent().current_table_query = (
             "scan_id, project_id, instrument_id",
             "scan",
@@ -143,7 +136,6 @@ class UpdateTable(QAction):
 
     def with_projects(self) -> None:
         """Update table to display projects."""
-
         self.parent().current_table_query = (
             "project_id, title, start_date, end_date",
             "project",

@@ -1,6 +1,4 @@
-"""
-Common TOML file operation methods.
-"""
+"""Common TOML file operation methods."""
 from __future__ import annotations
 
 import tomllib
@@ -13,12 +11,11 @@ import tomli_w
 
 
 def create_toml(path: Path | str, data: dict[str, Any]) -> None:
-    """Create a new TOML file with given data
+    """Create a new TOML file with given data.
 
     :param path: path to new TOML file
     :param data: data to be stored in TOML file as a dictionary
     """
-
     with open(path, mode="wb") as f:
         tomli_w.dump(data, f)
 
@@ -31,7 +28,6 @@ def update_toml(path: Path | str, section: str, key: str, value: object) -> None
     :param key: the key corresponding to the target value
     :param value: the value to be added or updated
     """
-
     with open(path, mode="rb") as f:
         # Load the TOML file as a dictionary
         data: dict[str, Any] = tomllib.load(f)
@@ -52,7 +48,6 @@ def load_toml(path: Path) -> dict[str, Any]:
 
     :param path: target TOML file
     """
-
     with open(path, mode="rb") as f:
         data: dict[str, Any] = tomllib.load(f)
         return data

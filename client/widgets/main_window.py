@@ -1,6 +1,4 @@
-"""
-Main window for the GUI.
-"""
+"""Main window for the GUI."""
 
 from __future__ import annotations
 
@@ -49,7 +47,6 @@ class MainWindow(QMainWindow):
 
         Must be called only during initialization (__init__).
         """
-
         # Create actions for the File menu
         self.settings_act: QAction = actions.OpenSettings(self)
         self.update_table_act: QAction = actions.UpdateTable(self)
@@ -72,7 +69,6 @@ class MainWindow(QMainWindow):
 
         This method should only be called during initialization (__init__).
         """
-
         # Create status bar
         self.setStatusBar(QStatusBar())
 
@@ -121,7 +117,6 @@ class MainWindow(QMainWindow):
 
         This method should only be called during initialization (__init__).
         """
-
         toolbar: QToolBar = QToolBar("Main Toolbar")
         toolbar.setIconSize(QSize(16, 16))
         self.addToolBar(toolbar)
@@ -141,7 +136,6 @@ class MainWindow(QMainWindow):
 
         This method should only be called during initialization (__init__).
         """
-
         # Due to macOS guidelines, the menu bar will not appear in the GUI
         self.menuBar().setNativeMenuBar(True)
 
@@ -216,7 +210,6 @@ class MainWindow(QMainWindow):
 
         :param column: the column number of the value.
         """
-
         # Rows can be sorted, so the Nth table item may not be the Nth item in data
         # Hence, we have to translate the visible index to the source index
         proxy_index: QModelIndex = self.table_view.currentIndex()
@@ -231,12 +224,10 @@ class MainWindow(QMainWindow):
 
     def current_table(self) -> str:
         """Get the current table displayed."""
-
         return self.current_table_query[1]
 
     def selected_row(self) -> tuple[Any, ...]:
         """Get the selected row in the table view."""
-
         # Rows can be sorted, so the Nth table item may not be the Nth item in data
         # Hence, we have to translate the visible index to the source index
         proxy_index: QModelIndex = self.table_view.currentIndex()

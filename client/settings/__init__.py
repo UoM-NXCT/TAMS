@@ -1,6 +1,4 @@
-"""
-Base settings.
-"""
+"""Base settings."""
 from __future__ import annotations
 
 from functools import wraps
@@ -39,7 +37,6 @@ def access_settings(func: Callable[..., Any]) -> Callable[..., Any]:
     @wraps(func)
     def wrapper(*args: Any, **kwargs: Any) -> Any:
         """Attempt to execute the sql command, and handle any exceptions."""
-
         try:
             return func(*args, **kwargs)
         except FileNotFoundError:
@@ -54,12 +51,10 @@ def access_settings(func: Callable[..., Any]) -> Callable[..., Any]:
 @access_settings
 def get_lib(lib_title: str) -> str:
     """Get the current library to present to the user."""
-
     return str(load_toml(general)["storage"][f"{lib_title}_library"])
 
 
 @access_settings
 def get_perm_dir_name() -> str:
     """Get the name of the permanent storage directory."""
-
     return str(load_toml(general)["structure"]["perm_dir_name"])

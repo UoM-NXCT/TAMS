@@ -1,6 +1,4 @@
-"""
-About dialogue for the application.
-"""
+"""About dialogue for the application."""
 from datetime import date
 
 from PySide6.QtWidgets import QDialog, QMessageBox
@@ -13,7 +11,6 @@ class About(QDialog):
 
     def __init__(self, *args, **kwargs) -> None:
         """Initialize the dialogue."""
-
         super().__init__(*args, **kwargs)
 
         title: str = "About this software"
@@ -24,7 +21,6 @@ class About(QDialog):
     @staticmethod
     def get_msg() -> str:
         """Get the message to display in the dialogue."""
-
         # Copyright information
         current_year: int = date.today().year
         if current_year > 2022:

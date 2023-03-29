@@ -1,6 +1,4 @@
-"""
-Runner for adding scans to the local library and the database.
-"""
+"""Runner for adding scans to the local library and the database."""
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -15,9 +13,8 @@ if TYPE_CHECKING:
 
 
 class AddScan(GenericRunner):
-    def __init__(self, prj_id: int, scan_id: int, scan: AbstractScan):
+    def __init__(self, prj_id: int, scan_id: int, scan: AbstractScan) -> None:
         """Initialize the runner."""
-
         super().__init__(func=self.job)
 
         # Store the project ID
@@ -31,7 +28,6 @@ class AddScan(GenericRunner):
 
     def job(self) -> None:
         """Add the scan to the local library."""
-
         directory = local_path(get_relative_path(self.prj_id, self.scan_id))
         # TODO: For now we download everything, but this should be up to the user.
         recon_data = self.scan.get_reconstructions()

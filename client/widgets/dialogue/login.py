@@ -1,5 +1,4 @@
-"""
-Login dialogue to be used to connect to the database on the application startup.
+"""Login dialogue to be used to connect to the database on the application startup.
 
 Will allow user to save login credentials to a file for future use.
 """
@@ -29,7 +28,6 @@ class Login(QDialog):
 
     def __init__(self) -> None:
         """Initialize the login dialogue."""
-
         super().__init__(parent=None)
 
         # Set title
@@ -118,7 +116,6 @@ class Login(QDialog):
 
     def login(self) -> None:
         """Attempt to log in using the input settings."""
-
         # Get the text from the line edit widgets in the form layout
         host_edit: QLineEdit = self.form_layout.itemAt(1).widget()
         host: str = host_edit.text()
@@ -172,6 +169,5 @@ class Login(QDialog):
 
     def cancel(self) -> None:
         """Close the dialogue and exit the application."""
-
         self.close()
         raise SystemExit

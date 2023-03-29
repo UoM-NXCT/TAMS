@@ -16,8 +16,7 @@ class GuiBaseTest(TestCase):
 
     def gui_loaded(self) -> None:
         """Test the GUI is shown."""
-
-        self.assertTrue(self.gui.show)
+        assert self.gui.show
 
     def test_common(self):
         self.gui_loaded()

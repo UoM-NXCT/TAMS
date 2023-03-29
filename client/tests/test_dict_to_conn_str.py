@@ -19,6 +19,5 @@ class TestDictToConnStr(unittest.TestCase):
 
     def test_dict_to_conn_str(self) -> None:
         """Test function that converts a dict to a connection string."""
-
         generated_conn_str: str = dict_to_conn_str(self.config_dict)
-        self.assertEqual(generated_conn_str, self.expected_conn_str)
+        assert generated_conn_str == self.expected_conn_str

@@ -1,5 +1,4 @@
-"""
-This window lets a user input and create a new project, which is added to the database
+"""This window lets a user input and create a new project, which is added to the database
 specified by the input connection string.
 """
 from __future__ import annotations
@@ -30,14 +29,12 @@ if TYPE_CHECKING:
 
 
 class CreatePrj(QDialog):
-    """
-    Window that takes project information and create and commits that project to the
+    """Window that takes project information and create and commits that project to the
     database specified by the connection string.
     """
 
-    def __init__(self, parent_widget: QWidget, conn_str: str):
+    def __init__(self, parent_widget: QWidget, conn_str: str) -> None:
         """Initialize the project creation dialogue."""
-
         super().__init__(parent=parent_widget)
         self.conn_str: str = conn_str
         # Set up the settings window GUI.
@@ -48,7 +45,6 @@ class CreatePrj(QDialog):
 
     def set_up_settings_window(self) -> None:
         """Create and arrange widgets in the project creation window."""
-
         header_label = QLabel("Create new project")
         self.new_prj_title_entry = QLineEdit()
         self.new_prj_summary_entry = QLineEdit()
@@ -79,7 +75,6 @@ class CreatePrj(QDialog):
     @exc_gui
     def accept_prj_info(self) -> None:
         """Read input data and save to database."""
-
         # Get the input data
         new_prj_title: str = self.new_prj_title_entry.text()
         new_prj_summary: str = self.new_prj_summary_entry.text()
