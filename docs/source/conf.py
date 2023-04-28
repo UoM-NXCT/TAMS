@@ -1,15 +1,14 @@
-"""
-Configuration file for the Sphinx documentation builder.
+"""Configuration file for the Sphinx documentation builder.
 
 https://www.sphinx-doc.org/en/master/usage/configuration.html
 """
-import sphinx_rtd_theme  # noqa
+import sphinx_rtd_theme  # noqa: F401
 
 # Project information
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "TAMS"
-copyright = "2022, NXCT et al"
+project_copyright = "2023, NXCT et al"
 author = "NXCT et al"
 
 # General configuration

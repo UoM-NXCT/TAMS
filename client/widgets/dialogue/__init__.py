@@ -1,3 +1,4 @@
+"""Widgets for dialogue windows."""
 from .about import About
 from .add import AddToLibrary
 from .create_prj import CreatePrj

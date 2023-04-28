@@ -30,7 +30,7 @@ class Validate(QDialog):
     """Progress dialogue."""
 
     def __init__(
-        self,
+        self: Validate,
         runner: ValidateScans,
         hide: bool = False,
         parent_widget: QWidget | None = None,
@@ -89,12 +89,12 @@ class Validate(QDialog):
         if not hide:
             self.show()
 
-    def update_progress(self, value_increment: int) -> None:
+    def update_progress(self: Validate, value_increment: int) -> None:
         """Update the progress bar."""
         value: int = self.progress.value()
         self.progress.setValue(value + value_increment)
 
-    def job_done(self) -> None:
+    def job_done(self: Validate) -> None:
         """Show a message box when the job is done."""
         match self.runner.result_value:
             case True:
@@ -120,7 +120,7 @@ class Validate(QDialog):
 
         self.close()
 
-    def closeEvent(self, arg__1: QCloseEvent) -> None:
+    def closeEvent(self: Validate, arg__1: QCloseEvent) -> None:
         """Kill runner when the dialogue is closed.
 
         Overloads QDialog.closeEvent method.

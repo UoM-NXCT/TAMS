@@ -1,4 +1,4 @@
-"""This window lets users add scans to the library."""
+"""Window that lets users add scans to the library."""
 
 from __future__ import annotations
 
@@ -32,7 +32,9 @@ from client.utils.toml import load_toml
 class AddToLibraryProgress(QDialog):
     """Progress window for adding scans to the library."""
 
-    def __init__(self, runner: AddScan, parent_dlg: QDialog) -> None:
+    def __init__(
+        self: AddToLibraryProgress, runner: AddScan, parent_dlg: QDialog
+    ) -> None:
         """Initialize the window."""
         super().__init__(parent=parent_dlg)
 
@@ -56,7 +58,7 @@ class AddToLibraryProgress(QDialog):
 class AddToLibrary(QDialog):
     """Window for adding scans to the library."""
 
-    def _set_up_settings_window(self) -> None:
+    def _set_up_settings_window(self: AddToLibrary) -> None:
         """Create and arrange widgets in the project creation window."""
         header_label = QLabel("Add new scan to library")
 
@@ -108,7 +110,12 @@ class AddToLibrary(QDialog):
         self.setLayout(v_box)
 
     def __init__(
-        self, conn_str: str, scan_id: int | None, prj_id: int | None, *args, **kwargs
+        self: AddToLibrary,
+        conn_str: str,
+        scan_id: int | None,
+        prj_id: int | None,
+        *args: tuple[Any],
+        **kwargs: dict[str, Any],
     ) -> None:
         """Initialize the window."""
         super().__init__(*args, **kwargs)
@@ -124,7 +131,7 @@ class AddToLibrary(QDialog):
         self._set_up_settings_window()
         self.show()
 
-    def update_metadata_tree(self) -> None:
+    def update_metadata_tree(self: AddToLibrary) -> None:
         """Update the metadata tree with the new scan metadata."""
         self.metadata_tree.clear()
         fmt: str = self.scan_fmt.currentText()
@@ -153,12 +160,14 @@ class AddToLibrary(QDialog):
                     )
 
             case _:
-                raise NotImplementedError(f"Scan format {fmt} not implemented.")
+                msg = f"Scan format {fmt} not implemented."
+                raise NotImplementedError(msg)
 
-    def read_user_form(self) -> None:
+    def read_user_form(self: AddToLibrary) -> None:
         """Read the user's input from the form."""
         if not self.scan_loc:
-            raise ValueError("Scan location not set.")
+            msg = "Scan location not set."
+            raise ValueError(msg)
         toml_path = self.scan_loc / "user_form.toml"
         if toml_path.exists():
             metadata = load_toml(toml_path)
@@ -181,7 +190,7 @@ class AddToLibrary(QDialog):
                 # If the instrument ID is not in the TOML file, do nothing.
                 pass
 
-    def select_scan_loc(self) -> None:
+    def select_scan_loc(self: AddToLibrary) -> None:
         """Select the scan location."""
         if self.scan_loc:
             init_dir: Path = self.scan_loc
@@ -207,14 +216,15 @@ class AddToLibrary(QDialog):
         self.update_metadata_tree()
         self.read_user_form()
 
-    def add_to_database(self, fmt: str) -> None:
+    def add_to_database(self: AddToLibrary, fmt: str) -> None:
         """Add the scan to the database.
 
         At present, we save: scan ID, project ID, instrument ID, scan name, voltage, and
          amperage.
         """
         if not self.scan_id or not self.prj_id:
-            raise ValueError("Scan ID or project ID not set.")
+            msg = "Scan ID or project ID not set."
+            raise ValueError(msg)
         scan_metadata: dict[str, Any] = {}
         match fmt:
             case "Nikon":
@@ -222,35 +232,34 @@ class AddToLibrary(QDialog):
                 scan_metadata = scan.get_metadata()
 
         # Update scan metadata with user input.
-        with psycopg.connect(self.conn_str) as conn:
-            # Create project and scan if it does not exist already.
-            with conn.cursor() as cur:
+        # Create project and scan if it does not exist already.
+        with psycopg.connect(self.conn_str) as conn, conn.cursor() as cur:
+            cur.execute(
+                (
+                    "insert into project (project_id) values (%s) on conflict on"
+                    " constraint project_pk do nothing;"
+                ),
+                (self.prj_id,),
+            )
+            cur.execute(
+                (
+                    "insert into scan (scan_id, project_id, instrument_id) values"
+                    " (%s, %s, %s) on conflict on constraint scan_pk do nothing;"
+                ),
+                (self.scan_id, self.prj_id, self.instrument_id),
+            )
+            # Update scan metadata.
+            for col, value in scan_metadata.items():
+                # Perform pyscopg gymnastics for safe(r) SQL queries.
+                # See https://www.psycopg.org/psycopg3/docs/api/sql.html
                 cur.execute(
-                    (
-                        "insert into project (project_id) values (%s) on conflict on"
-                        " constraint project_pk do nothing;"
+                    sql.SQL("update scan set {col} = %s where scan_id = %s").format(
+                        col=sql.Identifier(col)
                     ),
-                    (self.prj_id,),
+                    (value, self.scan_id),
                 )
-                cur.execute(
-                    (
-                        "insert into scan (scan_id, project_id, instrument_id) values"
-                        " (%s, %s, %s) on conflict on constraint scan_pk do nothing;"
-                    ),
-                    (self.scan_id, self.prj_id, self.instrument_id),
-                )
-                # Update scan metadata.
-                for col, value in scan_metadata.items():
-                    # Perform pyscopg gymnastics for safe(r) SQL queries.
-                    # See https://www.psycopg.org/psycopg3/docs/api/sql.html
-                    cur.execute(
-                        sql.SQL("update scan set {col} = %s where scan_id = %s").format(
-                            col=sql.Identifier(col)
-                        ),
-                        (value, self.scan_id),
-                    )
 
-    def add_scan(self) -> None:
+    def add_scan(self: AddToLibrary) -> None:
         """Add the scan to the library."""
         # If the user selected add to database, warn them about the consequences.
         if self.add_to_db_checkbox.isChecked():
@@ -285,4 +294,5 @@ class AddToLibrary(QDialog):
                 runner = AddScan(self.prj_id, self.scan_id, scan)
                 AddToLibraryProgress(runner, self)
             case _:
-                raise NotImplementedError(f"Scan format {fmt} not implemented.")
+                msg = f"Scan format {fmt} not implemented."
+                raise NotImplementedError(msg)

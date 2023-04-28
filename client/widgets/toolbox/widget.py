@@ -1,12 +1,14 @@
 """Custom toolbox class that inherits the Qt built-in QToolBox widget."""
 
+from __future__ import annotations
+
 from PySide6.QtWidgets import QPushButton, QToolBox, QVBoxLayout, QWidget
 
 
 class ToolBox(QToolBox):
     """Custom toolbox class inherits from the Qt QToolBox built-in class."""
 
-    def __init__(self) -> None:
+    def __init__(self: ToolBox) -> None:
         """Initialize the custom toolbox class."""
         super().__init__()
 

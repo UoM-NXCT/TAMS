@@ -25,14 +25,14 @@ All scripts are intended to be run from the root of the project.
 
 Give execute permission to the script, if it needs it:
 
-```bash
+```sh
 chmod +x scripts/install.sh
 ```
 
 Run the script:
 
-```bash
-./scripts/install.sh
+```sh
+source /scripts/install.sh
 ```
 
 ### Microsoft Windows

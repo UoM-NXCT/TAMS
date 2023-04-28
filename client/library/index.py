@@ -1,3 +1,4 @@
+"""Library index."""
 from pathlib import Path
 
 from client import settings

@@ -1,3 +1,4 @@
+"""Library functions."""
 from .abstract_instrument import AbstractScan
 from .index import get_relative_path, local_path
 from .nikon import NikonScan

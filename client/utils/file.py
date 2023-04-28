@@ -19,7 +19,8 @@ def create_dir(path: Path | str) -> None:
         if os.path.exists(path):
             return
     else:
-        raise TypeError("Path must be a string or a Path object.")
+        msg = "Path must be a string or a Path object."
+        raise TypeError(msg)
 
     # Create directory
     os.makedirs(path, exist_ok=True)
@@ -27,7 +28,7 @@ def create_dir(path: Path | str) -> None:
 
 
 def move_item(item: Path, dest_dir: Path, keep_original: bool = True) -> None:
-    """Function that copies or moves item to a given location.
+    """Copy or move item to a given location.
 
     :param item: target item (file or directory)
     :param dest_dir: destination location
@@ -37,30 +38,24 @@ def move_item(item: Path, dest_dir: Path, keep_original: bool = True) -> None:
     create_dir(dest_dir)
 
     item_dest: Path = dest_dir / item.name
-
-    print(item_dest)
-
     try:
-        # Check file or directory is a file or directory, respectively
         if item.is_file():
-            print("File")
+            logging.info("Copying file %s to %s", item, item_dest)
             shutil.copy(item, item_dest)
-        elif item.is_dir():
-            print("Copying directory")
-            shutil.copytree(item, item_dest)
         else:
-            raise RuntimeError("Item is not a file or directory.")
-
-        # Delete original if not keeping original
+            logging.info("Copying directory %s to %s", item, item_dest)
+            shutil.copytree(item, item_dest)
+    except FileExistsError:
+        logging.info("File already exists at %s, skipping", item_dest)
+    except FileNotFoundError:
+        logging.warning("File not found at %s", item)
+        raise
+    else:
         if not keep_original:
             if item.is_file():
                 os.remove(item)
-            elif item.is_dir():
+            else:
                 shutil.rmtree(item)
-
-    except FileExistsError:
-        # Just move on if the file already exists
-        logging.info("File already exists at %s, skipping", item_dest)
 
 
 def find_and_move(
@@ -69,8 +64,7 @@ def find_and_move(
     *destinations: Path,
     copy: bool = False,
 ) -> None:
-    """Function that finds files using .glob method in given directory and moves them to
-    another directory.
+    """Find files in given directory and moves them to another directory.
 
     :param copy: doesn't delete original if true
     :param glob_arg: argument passed to .glob method
@@ -98,12 +92,14 @@ def find_and_move(
 
 
 def size_fmt(num_of_bytes: int | float, dec_places: int = 2) -> str:
-    """Function that formats a size in bytes to a human-readable format."""
+    """Format a size in bytes to a human-readable format."""
     if num_of_bytes < 0:
-        raise ValueError("Number of bytes must be positive.")
-
+        msg = f"Number of bytes must be positive, not {num_of_bytes}."
+        raise ValueError(msg)
+    divisor = 1024
     for unit in ("B", "KB", "MB", "TB", "PB"):
-        if num_of_bytes < 1024 or unit == "PB":
+        if num_of_bytes < divisor or unit == "PB":
             return f"{num_of_bytes:.{dec_places}f} {unit}"
-        num_of_bytes /= 1024
-    raise RuntimeError("Size format failed. Number of bytes too large?")
+        num_of_bytes /= divisor
+    msg = "Number of bytes must be less than 1024 PB."
+    raise RuntimeError(msg)

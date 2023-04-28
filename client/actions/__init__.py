@@ -1,3 +1,5 @@
+"""Actions for the client."""
+
 from .add import AddData
 from .download import DownloadData
 from .open_about import OpenAbout

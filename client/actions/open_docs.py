@@ -12,13 +12,14 @@ if typing.TYPE_CHECKING:
 
 
 class OpenDocs(QAction):
-    @staticmethod
-    def _open_docs() -> None:
-        """Open documentation in the browser."""
-        url: QUrl = QUrl("https://tams-nxct.readthedocs.io/")
-        QDesktopServices.openUrl(url)
+    """Open documentation in browser action."""
 
-    def __init__(self, main_window: MainWindow) -> None:
+    @staticmethod
+    def _open_docs(url: str = "https://tams-nxct.readthedocs.io/") -> None:
+        """Open documentation in the browser."""
+        QDesktopServices.openUrl(QUrl(url))
+
+    def __init__(self: OpenDocs, main_window: MainWindow) -> None:
         """Open documentation in browser action."""
         super().__init__("&Open documentation", main_window)
         self.setShortcut("F1")

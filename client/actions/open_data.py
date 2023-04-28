@@ -19,53 +19,48 @@ if typing.TYPE_CHECKING:
 
 
 class OpenData(QAction):
+    """Open data in local library."""
+
     @handle_common_exc
-    def _open_data(self) -> None:
+    def _open_data(self: OpenData) -> None:
         """Open directory in local library.
 
         Runs when the action is triggered.
         """
-        # Get the path of the local library
-        local_lib_str: str = settings.get_lib("local")
+        local_lib_str = settings.get_lib("local")
         if not local_lib_str:
-            raise RuntimeError("Local library path not set")
+            msg = "Local library path not set. Please set it in the settings."
+            raise RuntimeError(msg)
         local_lib: Path = Path(local_lib_str)
 
         # Get the selected table
-        table: str = self.parent().current_table()
-
+        table = self.parent().current_table()
         match table:
             case "scan":
                 # Get the selected scan
-                scan_id: int = self.parent().get_value_from_row(0)
-                prj_id: int = self.parent().get_value_from_row(1)
-                scan_path: Path = local_lib / str(prj_id) / str(scan_id)
+                scan_id = self.parent().get_value_from_row(0)
+                prj_id = self.parent().get_value_from_row(1)
+                scan_path = local_lib / str(prj_id) / str(scan_id)
                 if not scan_path.exists():
                     raise FileNotFoundError(
                         errno.ENOENT, os.strerror(errno.ENOENT), scan_path
                     )
                 QDesktopServices.openUrl(QUrl.fromLocalFile(str(scan_path)))
-
             case "project":
                 # Get the selected project
                 prj_id = self.parent().get_value_from_row(0)
-                prj_path: Path = local_lib / str(prj_id)
+                prj_path = local_lib / str(prj_id)
                 if not prj_path.exists():
                     raise FileNotFoundError(
                         errno.ENOENT, os.strerror(errno.ENOENT), prj_path
                     )
                 QDesktopServices.openUrl(QUrl.fromLocalFile(str(prj_path)))
-
             case _:
-                # Fallback case for when no valid table is selected
-                QMessageBox.critical(
-                    self.parent(),
-                    "Not implemented error",
-                    f"Cannot download data from table {table}",
-                )
-                raise RuntimeError("Table must be 'scan' or 'project'.")
+                msg = f"Cannot download data from table {table}."
+                QMessageBox.critical(self.parent(), "Not implemented error", msg)
+                raise RuntimeError(msg)
 
-    def __init__(self, main_window: MainWindow) -> None:
+    def __init__(self: OpenData, main_window: MainWindow) -> None:
         """Open data action."""
         icon = main_window.style().standardIcon(
             QStyle.StandardPixmap.SP_DialogOpenButton

@@ -11,17 +11,16 @@ if typing.TYPE_CHECKING:
 
 
 class FullScreen(QAction):
-    def _toggle_full_screen(self) -> None:
-        """Toggle full screen mode.
+    """Toggle full screen mode action."""
 
-        This method is called when the action is triggered.
-        """
+    def _toggle_full_screen(self: FullScreen) -> None:
+        """Toggle full screen mode."""
         if self.isChecked():
             self.parent().showFullScreen()
         else:
             self.parent().showNormal()
 
-    def __init__(self, main_window: MainWindow) -> None:
+    def __init__(self: FullScreen, main_window: MainWindow) -> None:
         """Toggle full screen mode action."""
         super().__init__("&Full Screen", main_window)
         self.setShortcut("F11")

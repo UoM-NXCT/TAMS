@@ -5,6 +5,8 @@ doing a deep check (comparing file contents) by comparing file hashes.
 
 Note: file validation is very slow, so it uses os instead of pathlib, which is faster.
 """
+from __future__ import annotations
+
 import errno
 import glob
 import logging
@@ -24,21 +26,21 @@ from .generic import GenericRunner, RunnerKilledException, RunnerStatus
 class ValidateScans(GenericRunner):
     """Runner that validates data in the local library."""
 
-    def __init__(self, prj_id: int, *scan_ids: int) -> None:
+    def __init__(self: ValidateScans, prj_id: int, *scan_ids: int) -> None:
         """Initialize the runner."""
         super().__init__(func=self.job)
 
         # Store the project ID
-        self.prj_id: int = prj_id
+        self.prj_id = prj_id
 
         # Store the permanent storage directory name
-        self.perm_dir_name: str = settings.get_perm_dir_name()
+        self.perm_dir_name = settings.get_perm_dir_name()
 
-        self.perm_lib: Path = Path(settings.get_lib("permanent"))
-        self.local_lib: Path = Path(settings.get_lib("local"))
+        self.perm_lib = Path(settings.get_lib("permanent"))
+        self.local_lib = Path(settings.get_lib("local"))
 
-        self.perm_prj_dir: str = os.path.join(self.perm_lib, str(self.prj_id))
-        self.local_prj_dir: str = os.path.join(self.local_lib, str(self.prj_id))
+        self.perm_prj_dir = os.path.join(self.perm_lib, str(self.prj_id))
+        self.local_prj_dir = os.path.join(self.local_lib, str(self.prj_id))
 
         # Check library and project directories exist
         self.run_checks()
@@ -112,11 +114,12 @@ class ValidateScans(GenericRunner):
             QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel,
         )
         if response == QMessageBox.StandardButton.Cancel:
-            raise InterruptedError("User cancelled validation.")
+            msg = "User cancelled validation."
+            raise InterruptedError(errno.EINTR, os.strerror(errno.EINTR), msg)
         dlg.close()
 
-        total_files: int = 0
-        self.size_in_bytes: int = 0
+        total_files = 0
+        self.size_in_bytes = 0
         for scan_id in self.scan_ids:
             perm_scan_dir = os.path.join(self.perm_prj_dir, str(scan_id))
             # Note: the os.walk method is much faster than Path.rglob
@@ -132,7 +135,7 @@ class ValidateScans(GenericRunner):
             )
         self.set_max_progress(total_files - 1)
 
-    def run_checks(self) -> None:
+    def run_checks(self: ValidateScans) -> None:
         """Check if directories exist before validating files."""
         # Check if libraries exist
         if not self.local_lib.exists():
@@ -165,7 +168,7 @@ class ValidateScans(GenericRunner):
             )
 
     @classmethod
-    def has_differences(cls, comparison: dircmp[str]) -> bool:
+    def has_differences(cls: ValidateScans, comparison: dircmp[str]) -> bool:
         """Check if two directories have differences."""
         differences: list[str] = (
             comparison.left_only + comparison.right_only + comparison.diff_files
@@ -178,7 +181,7 @@ class ValidateScans(GenericRunner):
                 return True
         return False
 
-    def job(self) -> None:
+    def job(self: ValidateScans) -> None:
         """Save data to local library."""
         # Check local scan directories exist
         for scan_dir in self.local_scan_dirs:

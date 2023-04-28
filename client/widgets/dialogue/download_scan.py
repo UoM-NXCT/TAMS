@@ -29,7 +29,7 @@ class DownloadScans(QDialog):
     """Progress dialogue."""
 
     def __init__(
-        self,
+        self: DownloadScans,
         runner: SaveScans,
         hide: bool = False,
         parent_widget: QWidget | None = None,
@@ -40,8 +40,8 @@ class DownloadScans(QDialog):
         self.setWindowTitle("Downloading data...")
 
         # Create the layout
-        layout: QVBoxLayout = QVBoxLayout()
-        bar_layout: QHBoxLayout = QHBoxLayout()
+        layout = QVBoxLayout()
+        bar_layout = QHBoxLayout()
 
         # Create label
         label = QLabel(
@@ -51,9 +51,9 @@ class DownloadScans(QDialog):
         layout.addWidget(label)
 
         # Create buttons
-        btn_stop: QPushButton = QPushButton("Stop")
-        btn_pause: QPushButton = QPushButton("Pause")
-        btn_resume: QPushButton = QPushButton("Resume")
+        btn_stop = QPushButton("Stop")
+        btn_pause = QPushButton("Pause")
+        btn_resume = QPushButton("Resume")
 
         # Add buttons to layout
         bar_layout.addWidget(btn_stop)
@@ -91,12 +91,12 @@ class DownloadScans(QDialog):
         if not hide:
             self.show()
 
-    def update_progress(self, value_increment: int) -> None:
+    def update_progress(self: DownloadScans, value_increment: int) -> None:
         """Update the progress bar."""
         value: int = self.progress.value()
         self.progress.setValue(value + value_increment)
 
-    def job_done(self) -> None:
+    def job_done(self: DownloadScans) -> None:
         """Show a message box when the job is done."""
         # Show a message box
         QMessageBox.information(
@@ -107,7 +107,7 @@ class DownloadScans(QDialog):
 
         self.close()
 
-    def closeEvent(self, arg__1: QCloseEvent) -> None:
+    def closeEvent(self: DownloadScans, arg__1: QCloseEvent) -> None:
         """Kill runner when the dialogue is closed.
 
         Overloads QDialog.closeEvent method.

@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from functools import wraps
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, ParamSpec, TypeVar
 
 from client.utils import log
 from client.utils.toml import create_toml, load_toml
@@ -30,12 +30,16 @@ default_general_settings: dict[str, Any] = {
     },
 }
 
+# Type variables for the access_settings decorator
+P = ParamSpec("P")
+R = TypeVar("R")
 
-def access_settings(func: Callable[..., Any]) -> Callable[..., Any]:
-    """Decorator to access settings."""
+
+def access_settings(func: Callable[P, R]) -> Callable[P, R]:
+    """Decorate functions that access settings files."""
 
     @wraps(func)
-    def wrapper(*args: Any, **kwargs: Any) -> Any:
+    def wrapper(*args: tuple[Any, ...], **kwargs: dict[str, Any]) -> R:
         """Attempt to execute the sql command, and handle any exceptions."""
         try:
             return func(*args, **kwargs)

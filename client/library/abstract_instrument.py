@@ -13,28 +13,28 @@ class AbstractScan:
     This class defines the interface that all scans must implement.
     """
 
-    def __init__(self, path: Path) -> None:
+    def __init__(self: AbstractScan, path: Path) -> None:
         """Initialize the instrument.
 
-        :param path: path to the scan
+        :param path: path to the scan directory
         """
         self.path = path
 
-    def get_reconstructions(self) -> tuple[Path, ...]:
+    def get_reconstructions(self: AbstractScan) -> tuple[Path, ...]:
         """Get the reconstruction files.
 
         :return: list of reconstruction files
         """
         raise NotImplementedError
 
-    def get_metadata(self) -> dict[str, Any] | None:
+    def get_metadata(self: AbstractScan) -> dict[str, Any] | None:
         """Get the metadata for the scan.
 
         :return: metadata for the scan
         """
         raise NotImplementedError
 
-    def get_raw_data(self) -> tuple[Path, ...]:
+    def get_raw_data(self: AbstractScan) -> tuple[Path, ...]:
         """Get the raw data files.
 
         :return: list of raw data files

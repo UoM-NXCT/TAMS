@@ -3,7 +3,10 @@
 Settings are saved as TOML files in the settings directory.
 """
 
+from __future__ import annotations
+
 import logging
+from typing import Any
 
 import psycopg
 from PySide6.QtCore import QFile, QUrl
@@ -30,17 +33,18 @@ from client.utils.toml import create_toml, load_toml, update_toml
 class Settings(QDialog):
     """Database settings dialogue allows to set the application settings."""
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self: Settings, *args: tuple[Any], **kwargs: dict[str, Any]) -> None:
+        """Initialize the settings dialogue."""
         super().__init__(*args, **kwargs)
         self.setMinimumSize(400, 300)
         self.setWindowTitle("Settings")
         self.set_up_settings_window()
         self.show()
 
-    def set_up_settings_window(self) -> None:
+    def set_up_settings_window(self: Settings) -> None:
         """Create and arrange widgets in the settings window."""
         # Create tab bar and different page containers.
-        tab_bar: QTabWidget = QTabWidget(self)
+        tab_bar = QTabWidget(self)
         self.general_settings_tab: QWidget = QWidget()
         self.database_settings_tab: QWidget = QWidget()
         self.logging_settings_tab: QWidget = QWidget()
@@ -74,22 +78,22 @@ class Settings(QDialog):
         settings_v_box.addWidget(btn_box)
         self.setLayout(settings_v_box)
 
-    def general_settings(self) -> None:
+    def general_settings(self: Settings) -> None:
         """General settings page allows to set the local and permanent library."""
         # Create the layout for the local library settings.
         self.local_lib_info = QLabel(self.get_local_lib_info())
         self.local_lib_info.setWordWrap(True)
 
-        local_lib_buttons: QWidget = QWidget()
-        local_lib_buttons_layout: QHBoxLayout = QHBoxLayout()
+        local_lib_buttons = QWidget()
+        local_lib_buttons_layout = QHBoxLayout()
 
-        open_local_lib_btn: QPushButton = QPushButton("Open local library")
+        open_local_lib_btn = QPushButton("Open local library")
         open_local_lib_btn.clicked.connect(
             lambda: self.open_library(settings.get_lib("local"), "local")
         )
         local_lib_buttons_layout.addWidget(open_local_lib_btn)
 
-        edit_local_libary: QPushButton = QPushButton("Edit local library")
+        edit_local_libary = QPushButton("Edit local library")
         edit_local_libary.clicked.connect(lambda: self.edit_library("local"))
         local_lib_buttons_layout.addWidget(edit_local_libary)
 
@@ -125,8 +129,8 @@ class Settings(QDialog):
         # Set layout for general settings tab
         self.general_settings_tab.setLayout(tab_v_box)
 
-    def set_up_logging_settings(self) -> None:
-        """Logging settings page allows to set the logging level."""
+    def set_up_logging_settings(self: Settings) -> None:
+        """Set up logging settings page allows to open and clear the log file."""
         # Create the layout for the logging settings.
         logging_settings: QWidget = QWidget()
         logging_settings_layout: QVBoxLayout = QVBoxLayout()
@@ -193,7 +197,7 @@ class Settings(QDialog):
         """
         return info
 
-    def open_library(self, lib_path: str, lib_title: str) -> None:
+    def open_library(self: Settings, lib_path: str, lib_title: str) -> None:
         """Open the local library directory in the file explorer."""
         if lib_path:
             QDesktopServices.openUrl(lib_path)
@@ -204,7 +208,7 @@ class Settings(QDialog):
                 f"No {lib_title} library set. Please set a {lib_title} library first.",
             )
 
-    def database_settings(self) -> None:
+    def database_settings(self: Settings) -> None:
         """Database settings widget to allow the user to set the database connection."""
         if not settings.database.is_file():
             # Create a database config file if one does not already exist
@@ -264,13 +268,9 @@ class Settings(QDialog):
         # Set layout for general settings tab
         self.database_settings_tab.setLayout(tab_v_box)
 
-    def edit_library(self, lib_title: str) -> None:
+    def edit_library(self: Settings, lib_title: str) -> None:
         """Open a file dialog to select the library directory."""
-        if settings.get_lib(lib_title):
-            init_dir: str = settings.get_lib(lib_title)
-        else:
-            # Use current directory if no library is set
-            init_dir = ""
+        init_dir = settings.get_lib(lib_title) or ""
 
         lib = QFileDialog.getExistingDirectory(
             self,
@@ -301,7 +301,7 @@ class Settings(QDialog):
         else:
             logging.critical("Invalid library title: %s", lib_title)
 
-    def apply(self) -> None:
+    def apply(self: Settings) -> None:
         """Apply the changes to settings."""
         # TODO: changes to the local library should be applied not immediately;
         #  refactor under this method!
@@ -317,11 +317,9 @@ class Settings(QDialog):
         update_if_modified(self.user_edit, "user")
         update_if_modified(self.pwd_edit, "password")
 
-    def test_db_connection(self) -> None:
+    def test_db_connection(self: Settings) -> None:
         """Test the database connection."""
         try:
-            if not settings.database.is_file():
-                raise FileNotFoundError
             database_config_dict = load_toml(settings.database)
             database_config = dict_to_conn_str(database_config_dict)
             with Database(database_config) as database:

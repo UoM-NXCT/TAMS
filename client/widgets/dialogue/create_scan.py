@@ -1,6 +1,4 @@
-"""This window lets a user input and create a new scan, which is added to the database
-specified by the input connection string.
-"""
+"""Create a new scan."""
 from __future__ import annotations
 
 from pathlib import Path
@@ -32,11 +30,10 @@ if TYPE_CHECKING:
 
 
 class CreateScan(QDialog):
-    """Window that takes project information and create and commits that project to the
-    database specified by the connection string.
-    """
+    """Create a new scan."""
 
-    def __init__(self, parent_widget: QWidget, conn_str: str) -> None:
+    def __init__(self: CreateScan, parent_widget: QWidget, conn_str: str) -> None:
+        """Initialize the project creation window."""
         super().__init__(parent=parent_widget)
         self.conn_str: str = conn_str
 
@@ -46,19 +43,18 @@ class CreateScan(QDialog):
         self.set_up_scan_dlg()
         self.show()
 
-    def set_up_scan_dlg(self) -> None:
+    def set_up_scan_dlg(self: CreateScan) -> None:
         """Create and arrange widgets in the project creation window."""
         header_label: QLabel = QLabel("Create new scan")
 
         # Get project ID options
-        self.new_scan_prj_id_entry: QLineEdit = QLineEdit()
+        self.new_scan_prj_id_entry = QLineEdit()
         with psycopg.connect(self.conn_str) as conn, conn.cursor() as cur:
             cur.execute("select project_id, title from project;")
-            raw_prj_ids: list[tuple[Any, ...]] = cur.fetchall()
+            raw_prj_ids = cur.fetchall()
             # Hack the output into a value QComboBox likes (a list of strings)
-            prj_ids: list[str] = [
-                f"{tuple_value[0]} ({tuple_value[1]})"
-                for tuple_value in raw_prj_ids
+            prj_ids = [
+                f"{tuple_value[0]} ({tuple_value[1]})" for tuple_value in raw_prj_ids
             ]
         completer = QCompleter(prj_ids)
         completer.setFilterMode(Qt.MatchContains)
@@ -97,7 +93,7 @@ class CreateScan(QDialog):
         create_prj_v_box.addStretch()
         self.setLayout(create_prj_v_box)
 
-    def get_scan_form_data(self, scan_id: int) -> dict[str, dict[str, Any]]:
+    def get_scan_form_data(self: CreateScan, scan_id: int) -> dict[str, dict[str, Any]]:
         """Get scan form data for user_form.toml."""
         # Get immutable data (data that should not be changed by the user)
         db_view: DatabaseView = DatabaseView(self.conn_str)
@@ -107,30 +103,30 @@ class CreateScan(QDialog):
             f"scan_id={scan_id}",
         )
         data: dict[str, dict[str, Any]] = {
-            "hardcoded": dict(zip(immutable_column_headers, immutable_data[0])),
+            "hardcoded": dict(
+                zip(immutable_column_headers, immutable_data[0], strict=True)
+            ),
         }
         return data
 
     @handle_common_exc
-    def accept_new_scan_info(self) -> None:
+    def accept_new_scan_info(self: CreateScan) -> None:
         """Read input data and save to database."""
         # Get IDs from the combo boxes
-        selected_prj_id: int = int(self.new_scan_prj_id_entry.text().split()[0])
-        selected_instrument_id: int = int(
+        selected_prj_id = int(self.new_scan_prj_id_entry.text().split()[0])
+        selected_instrument_id = int(
             self.new_scan_instrument_id_entry.text().split()[0]
         )
 
-        db_view: DatabaseView = DatabaseView(self.conn_str)
+        db_view = DatabaseView(self.conn_str)
 
         # Check the project and instrument IDs are valid
         if not db_view.prj_exists(selected_prj_id):
-            raise RuntimeError(
-                "Tried to create a scan with a project ID that does not exist."
-            )
+            msg = "Tried to create a scan with a project ID that does not exist."
+            raise RuntimeError(msg)
         if not db_view.instrument_exists(selected_instrument_id):
-            raise RuntimeError(
-                "Tried to create a scan with an instrument ID that does not exist."
-            )
+            msg = "Tried to create a scan with an instrument ID that does not exist."
+            raise RuntimeError(msg)
 
         with psycopg.connect(self.conn_str) as conn:
             with conn.cursor() as cur:

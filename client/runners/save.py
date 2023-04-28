@@ -1,4 +1,6 @@
 """Runner for uploading and downloading files to the permanent or local library."""
+from __future__ import annotations
+
 import errno
 import logging
 import os
@@ -21,7 +23,7 @@ class SaveScans(GenericRunner):
     """Runner that downloads data to the local library."""
 
     def __init__(
-        self,
+        self: SaveScans,
         prj_id: int,
         *scan_ids: int,
         download: bool,
@@ -94,7 +96,8 @@ class SaveScans(GenericRunner):
             QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel,
         )
         if response == QMessageBox.StandardButton.Cancel:
-            raise ValueError("User cancelled indexing files.")
+            msg = "User cancelled indexing files."
+            raise ValueError(msg)
         dlg.close()
 
         logging.info(
@@ -119,7 +122,7 @@ class SaveScans(GenericRunner):
             )
         self.set_max_progress(total_files - 1)  # Count from 0
 
-    def run_checks(self) -> None:
+    def run_checks(self: SaveScans) -> None:
         """Check if the directories exist before saving files."""
         # Saving from one library to another is only possible if the libraries exist
         local_lib: Path = Path(settings.get_lib("local"))
@@ -170,7 +173,7 @@ class SaveScans(GenericRunner):
         db = DatabaseView(conn_str)
         return db.get_scan_form_data(scan_id)
 
-    def job(self) -> None:
+    def job(self: SaveScans) -> None:
         """Save data from source to destination library."""
         # Save each scan in scan list
         for scan in self.scan_ids:

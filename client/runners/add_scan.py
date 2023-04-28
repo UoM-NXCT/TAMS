@@ -13,20 +13,16 @@ if TYPE_CHECKING:
 
 
 class AddScan(GenericRunner):
-    def __init__(self, prj_id: int, scan_id: int, scan: AbstractScan) -> None:
+    """Runner for adding scans to the local library and the database."""
+
+    def __init__(self: AddScan, prj_id: int, scan_id: int, scan: AbstractScan) -> None:
         """Initialize the runner."""
         super().__init__(func=self.job)
+        self.prj_id = prj_id
+        self.scan_id = scan_id
+        self.scan = scan
 
-        # Store the project ID
-        self.prj_id: int = prj_id
-
-        # Store the scan ID
-        self.scan_id: int = scan_id
-
-        # Store the scan
-        self.scan: AbstractScan = scan
-
-    def job(self) -> None:
+    def job(self: AddScan) -> None:
         """Add the scan to the local library."""
         directory = local_path(get_relative_path(self.prj_id, self.scan_id))
         # TODO: For now we download everything, but this should be up to the user.

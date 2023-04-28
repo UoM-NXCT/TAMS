@@ -2,6 +2,8 @@
 
 Contains the metadata on the current entry; displayed on the right panel.
 """
+from __future__ import annotations
+
 import logging
 from datetime import date
 from pathlib import Path
@@ -64,7 +66,8 @@ def get_thumbnail(prj_id: int, scan_id: int | None = None) -> Path:
 class MetadataPanel(QWidget):
     """Display metadata on current selection."""
 
-    def __init__(self) -> None:
+    def __init__(self: MetadataPanel) -> None:
+        """Initialize the metadata panel."""
         super().__init__()
 
         # Start with empty data
@@ -122,14 +125,13 @@ class MetadataPanel(QWidget):
         # Set the initial content
         self.update_metadata()
 
-    def open_readme(self) -> None:
+    def open_readme(self: MetadataPanel) -> None:
         """Open the README.txt file."""
         logging.info("Opening README.txt")
-        readme_dir: Path = self.get_readme_dir()
-        readme_file: Path = readme_dir / "README.txt"
+        readme_file = self.get_readme_dir() / "README.txt"
         QDesktopServices.openUrl(QUrl.fromLocalFile(readme_file))
 
-    def update_content(self) -> None:
+    def update_content(self: MetadataPanel) -> None:
         """Update the metadata panel content."""
         # Clear the tree
         self.metadata_tree.clear()
@@ -170,7 +172,7 @@ class MetadataPanel(QWidget):
             # Expand the tree to show all items by default
             self.metadata_tree.expandAll()
 
-    def get_prj_id(self) -> int | None:
+    def get_prj_id(self: MetadataPanel) -> int | None:
         """Get the project ID from the metadata."""
         try:
             if not self._data or not self._column_headers:
@@ -181,11 +183,12 @@ class MetadataPanel(QWidget):
                 # If the project ID is a string, it is of the form "project_id (title)"
                 # Get the first word and convert it to an integer to get the project ID
                 prj_id = int(prj_id.split()[0])
-            return prj_id
         except (ValueError, TypeError):
             return None
+        else:
+            return prj_id
 
-    def get_scan_id(self) -> int | None:
+    def get_scan_id(self: MetadataPanel) -> int | None:
         """Get the scan ID from the metadata."""
         try:
             if not self._data or not self._column_headers:
@@ -196,11 +199,12 @@ class MetadataPanel(QWidget):
                 # If the scan ID is a string, it is of the form "scan_id (title)"
                 # Get the first word and convert it to an integer to get the scan ID
                 scan_id = int(scan_id.split()[0])
-            return scan_id
         except ValueError:
             return None
+        else:
+            return scan_id
 
-    def update_thumbnail(self) -> None:
+    def update_thumbnail(self: MetadataPanel) -> None:
         """Update the thumbnail widget."""
         if self._data and self._column_headers:
             # Get the project ID
@@ -218,7 +222,7 @@ class MetadataPanel(QWidget):
                 self.thumbnail_widget.load(settings.placeholder_image)
                 self.thumbnail_widget.hide()
 
-    def update_readme_text_edit(self, readme_dir: Path) -> None:
+    def update_readme_text_edit(self: MetadataPanel, readme_dir: Path) -> None:
         """Load the README.txt file."""
         readme_file: Path = readme_dir / "README.txt"
         if readme_file.exists():
@@ -226,18 +230,16 @@ class MetadataPanel(QWidget):
                 readme: str = f.read()
             self.readme_txt_edit.setText(readme)
         else:
-            raise FileNotFoundError(f"README.txt not found in {readme_dir}")
+            msg = f"README.txt not found in {readme_dir}"
+            raise FileNotFoundError(msg)
 
-    def get_readme_dir(self) -> Path:
+    def get_readme_dir(self: MetadataPanel) -> Path:
         """Get the README.txt file."""
-        # Get the project ID
-        prj_id: int | None = self.get_prj_id()
-
-        # Get the scan ID
-        scan_id: int | None = self.get_scan_id()
+        prj_id = self.get_prj_id()
+        scan_id = self.get_scan_id()
 
         # Store local library path
-        local_lib: Path = Path(settings.get_lib("local"))
+        local_lib = Path(settings.get_lib("local"))
 
         if prj_id and scan_id:
             # If scan ID, then get the README.txt file from the scan directory
@@ -245,9 +247,10 @@ class MetadataPanel(QWidget):
         if prj_id and not scan_id:
             # If no scan ID, then get the README.txt file from the project directory
             return local_lib / str(prj_id) / "tams_meta"
-        raise ValueError("Project ID not found.")
+        msg = "Project ID not found during README.txt update."
+        raise ValueError(msg)
 
-    def update_readme(self) -> None:
+    def update_readme(self: MetadataPanel) -> None:
         """Update the README.txt widget."""
         if self._data and self._column_headers:
             try:
@@ -264,7 +267,7 @@ class MetadataPanel(QWidget):
             self.readme_widget.hide()
 
     def update_metadata(
-        self,
+        self: MetadataPanel,
         metadata: tuple[tuple[Any], list[str]]
         | tuple[None, None] = (
             None,

@@ -3,8 +3,8 @@
 echo "Formatting with ssort..."
 python -m poetry run ssort .
 
-echo "Formatting with isort..."
-python -m poetry run isort .
+echo "Formatting with ruff..."
+python -m poetry run ruff check . --fix
 
 echo "Formatting with black..."
 python -m poetry run black .

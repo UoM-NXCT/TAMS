@@ -1,6 +1,4 @@
-"""This window lets a user input and create a new project, which is added to the database
-specified by the input connection string.
-"""
+"""Create a new project dialogue."""
 from __future__ import annotations
 
 import logging
@@ -29,11 +27,9 @@ if TYPE_CHECKING:
 
 
 class CreatePrj(QDialog):
-    """Window that takes project information and create and commits that project to the
-    database specified by the connection string.
-    """
+    """Create a new project."""
 
-    def __init__(self, parent_widget: QWidget, conn_str: str) -> None:
+    def __init__(self: CreatePrj, parent_widget: QWidget, conn_str: str) -> None:
         """Initialize the project creation dialogue."""
         super().__init__(parent=parent_widget)
         self.conn_str: str = conn_str
@@ -43,7 +39,7 @@ class CreatePrj(QDialog):
         self.set_up_settings_window()
         self.show()
 
-    def set_up_settings_window(self) -> None:
+    def set_up_settings_window(self: CreatePrj) -> None:
         """Create and arrange widgets in the project creation window."""
         header_label = QLabel("Create new project")
         self.new_prj_title_entry = QLineEdit()
@@ -73,7 +69,7 @@ class CreatePrj(QDialog):
         self.setLayout(create_prj_v_box)
 
     @exc_gui
-    def accept_prj_info(self) -> None:
+    def accept_prj_info(self: CreatePrj) -> None:
         """Read input data and save to database."""
         # Get the input data
         new_prj_title: str = self.new_prj_title_entry.text()
@@ -89,17 +85,19 @@ class CreatePrj(QDialog):
                 "Project end date is before its start date. Please check inputs.",
                 QMessageBox.StandardButton.Ok,
             )
-            raise ValueError("Project end date is before its start date.")
+            msg = "Project end date is before its start date."
+            raise ValueError(msg)
 
         # Check the project title is not empty
-        if new_prj_title == "":
+        if not new_prj_title:
             QMessageBox.warning(
                 self,
                 "Title warning",
                 "Project has no title. Please check inputs.",
                 QMessageBox.StandardButton.Ok,
             )
-            raise ValueError("Project title cannot be empty.")
+            msg = "Project has no title."
+            raise ValueError(msg)
 
         with psycopg.connect(self.conn_str) as conn:
             with conn.cursor() as cur:
@@ -123,7 +121,8 @@ class CreatePrj(QDialog):
                 if row:
                     new_prj_id: int = row[0]
                 else:
-                    raise TypeError("Query returned no rows.")
+                    msg = "Query returned no rows."
+                    raise TypeError(msg)
 
                 # Check to see if project exists in local library
                 local_lib: Path = Path(settings.get_lib("local"))

@@ -32,6 +32,5 @@ jobs:
         run: |
           poetry run flake8 . --count --show-source --statistics
           poetry run black . --check
-          poetry run isort . --check-only
           poetry run ssort . --check
           poetry run sqlfluff lint .

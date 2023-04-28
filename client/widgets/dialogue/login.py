@@ -2,6 +2,8 @@
 
 Will allow user to save login credentials to a file for future use.
 """
+from __future__ import annotations
+
 import logging
 
 from psycopg import errors
@@ -26,7 +28,7 @@ from client.utils import toml
 class Login(QDialog):
     """Login dialogue."""
 
-    def __init__(self) -> None:
+    def __init__(self: Login) -> None:
         """Initialize the login dialogue."""
         super().__init__(parent=None)
 
@@ -46,18 +48,18 @@ class Login(QDialog):
         }
 
         try:
-            # Load saved settings
             saved_settings = toml.load_toml(settings.database)
+        except FileNotFoundError:
+            logging.warning("No settings file found. Creating new settings file.")
+            saved_settings = self.empty_settings
+            toml.create_toml(settings.database, saved_settings)
+        else:
             is_empty = tuple(
                 not bool(value) for value in saved_settings["postgresql"].values()
             )
             if all(is_empty):
-                raise ValueError
-        except (FileNotFoundError, ValueError):
-            # If no settings file exists, create an empty dictionary and save it
-            logging.warning("No settings file found. Creating new settings file.")
-            saved_settings = self.empty_settings
-            toml.create_toml(settings.database, saved_settings)
+                msg = "Settings file is empty. Has the settings file been corrupted?"
+                raise ValueError(msg)
 
         # Create the connection string from the saved settings
         # TODO: connect to the database automatically, if auto-login is enabled
@@ -114,17 +116,17 @@ class Login(QDialog):
         # Set layout
         self.setLayout(layout)
 
-    def login(self) -> None:
+    def login(self: Login) -> None:
         """Attempt to log in using the input settings."""
         # Get the text from the line edit widgets in the form layout
-        host_edit: QLineEdit = self.form_layout.itemAt(1).widget()
-        host: str = host_edit.text()
-        port_edit: QLineEdit = self.form_layout.itemAt(3).widget()
-        port: str = port_edit.text()
-        user_edit: QLineEdit = self.form_layout.itemAt(5).widget()
-        user: str = user_edit.text()
-        pwd_edit: QLineEdit = self.form_layout.itemAt(7).widget()
-        pwd: str = pwd_edit.text()
+        host_edit = self.form_layout.itemAt(1).widget()
+        host = host_edit.text()
+        port_edit = self.form_layout.itemAt(3).widget()
+        port = port_edit.text()
+        user_edit = self.form_layout.itemAt(5).widget()
+        user = user_edit.text()
+        pwd_edit = self.form_layout.itemAt(7).widget()
+        pwd = pwd_edit.text()
 
         # Store the inputs in a dictionary
         data: dict[str, dict[str, str]] = {
@@ -167,7 +169,7 @@ class Login(QDialog):
         # Close the dialogue
         self.close()
 
-    def cancel(self) -> None:
+    def cancel(self: Login) -> None:
         """Close the dialogue and exit the application."""
         self.close()
         raise SystemExit

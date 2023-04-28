@@ -15,14 +15,14 @@ if TYPE_CHECKING:
 
 
 def handle_common_exc(func: Callable[..., Any]) -> Callable[..., Any]:
-    """Decorates methods to display exceptions graphically.
+    """Decorate methods to display exceptions graphically.
 
     Many exceptions are common to many methods, and can be handles simply by displaying
     a message box. This decorator handles those exceptions to avoid repetition.
     """
 
     @wraps(func)
-    def wrapper(*args: Any, **kwargs: Any) -> None:
+    def wrapper(*args: tuple[Any], **kwargs: dict[str, Any]) -> None:
         """Attempt to execute file operations, and handle any exceptions."""
         try:
             func(*args, **kwargs)

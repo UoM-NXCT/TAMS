@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QPalette, QPixmap, QResizeEvent
@@ -18,15 +18,16 @@ if TYPE_CHECKING:
 class Thumbnail(QFrame):
     """A widget that scales an image to fill a box while maintaining aspect ratio."""
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self: Thumbnail, *args: tuple, **kwargs: dict[str, Any]) -> None:
+        """Initialize the thumbnail widget."""
         super().__init__(*args, **kwargs)
 
         # Use a layout to prevent the image from being stretched
-        layout: QVBoxLayout = QVBoxLayout()
+        layout = QVBoxLayout()
         self.setLayout(layout)
 
         # Create a label to display the image
-        self.label: QLabel = QLabel()
+        self.label = QLabel()
 
         # Center the image in the label
         self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -35,7 +36,7 @@ class Thumbnail(QFrame):
         layout.addWidget(self.label)
 
         # Set the letterbox/pillarbox colour to black
-        pal: QPalette = self.palette()
+        pal = self.palette()
         pal.setColor(QPalette.ColorRole.Window, Qt.GlobalColor.black)
         self.setAutoFillBackground(True)
         self.setPalette(pal)
@@ -45,7 +46,7 @@ class Thumbnail(QFrame):
 
         self.original_pixmap: QPixmap = QPixmap()
 
-    def load(self, source: Path) -> None:
+    def load(self: Thumbnail, source: Path) -> None:
         """Load an image from a file and display it in the thumbnail.
 
         This is not an overload. It is a custom method.
@@ -61,7 +62,7 @@ class Thumbnail(QFrame):
         _arbitrary_event: QResizeEvent = QResizeEvent(self.size(), self.size())
         self.resizeEvent(_arbitrary_event)
 
-    def resizeEvent(self, _event: QResizeEvent) -> None:
+    def resizeEvent(self: Thumbnail, _event: QResizeEvent) -> None:
         """Resize handler to update the dimensions of the displayed image.
 
         Overloads parent resizeEvent method.
@@ -77,7 +78,7 @@ class Thumbnail(QFrame):
             )
 
             # Don't waste time generating a new pixmap if it didn't alter its bounds
-            pixmap_size: QSize = self.label.pixmap().size()
+            pixmap_size = self.label.pixmap().size()
             if (pixmap_size.width() == size.width()) and (
                 pixmap_size.height() <= size.height()
             ):

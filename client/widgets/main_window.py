@@ -27,12 +27,7 @@ from client.widgets.table import TableView
 from client.widgets.toolbox import ToolBox
 
 if TYPE_CHECKING:
-    from PySide6.QtCore import QModelIndex, QSortFilterProxyModel
-    from PySide6.QtGui import QAction
-    from PySide6.QtWidgets import QTableView, QToolBox
-
     from client.widgets.dialogue import DownloadScans
-    from client.widgets.table import TableModel
 
 TAMS_ROOT = Path(__file__).parents[1]
 
@@ -42,29 +37,29 @@ logger = log.logger(__name__)
 class MainWindow(QMainWindow):
     """The main Qt window for the database application."""
 
-    def _create_actions(self) -> None:
+    def _create_actions(self: MainWindow) -> None:
         """Create the application actions.
 
         Must be called only during initialization (__init__).
         """
         # Create actions for the File menu
-        self.settings_act: QAction = actions.OpenSettings(self)
-        self.update_table_act: QAction = actions.UpdateTable(self)
-        self.download_act: QAction = actions.DownloadData(self)
-        self.upload_act: QAction = actions.UploadData(self)
-        self.open_act: QAction = actions.OpenData(self)
-        self.validate_act: QAction = actions.ValidateData(self)
-        self.add_act: QAction = actions.AddData(self)
-        self.quit_act: QAction = actions.Quit(self)
+        self.settings_act = actions.OpenSettings(self)
+        self.update_table_act = actions.UpdateTable(self)
+        self.download_act = actions.DownloadData(self)
+        self.upload_act = actions.UploadData(self)
+        self.open_act = actions.OpenData(self)
+        self.validate_act = actions.ValidateData(self)
+        self.add_act = actions.AddData(self)
+        self.quit_act = actions.Quit(self)
 
         # Create actions for the View menu
-        self.full_screen_act: QAction = actions.FullScreen(self)
+        self.full_screen_act = actions.FullScreen(self)
 
         # Create actions for the Help menu
-        self.doc_act: QAction = actions.OpenDocs(self)
-        self.about_act: QAction = actions.OpenAbout(self)
+        self.doc_act = actions.OpenDocs(self)
+        self.about_act = actions.OpenAbout(self)
 
-    def _set_up_main_window(self) -> None:
+    def _set_up_main_window(self: MainWindow) -> None:
         """Create and arrange widgets in the main window.
 
         This method should only be called during initialization (__init__).
@@ -73,15 +68,15 @@ class MainWindow(QMainWindow):
         self.setStatusBar(QStatusBar())
 
         # Create metadata panel
-        self.metadata_panel: QWidget = MetadataPanel()
+        self.metadata_panel = MetadataPanel()
 
         # Create table
-        table_widget: QWidget = QWidget()
-        self.table_layout: QVBoxLayout = QVBoxLayout()
-        self.table_view: QTableView = TableView()
+        table_widget = QWidget()
+        self.table_layout = QVBoxLayout()
+        self.table_view = TableView()
         self.table_view.setSelectionBehavior(TableView.SelectionBehavior.SelectRows)
         self.table_view.doubleClicked.connect(self.open_act.trigger)
-        self.search: QLineEdit = QLineEdit()
+        self.search = QLineEdit()
         self.search.setPlaceholderText("Search the table...")
         self.table_layout.addWidget(self.search)
         self.table_layout.addWidget(self.table_view)
@@ -89,7 +84,6 @@ class MainWindow(QMainWindow):
 
         # Create toolbox
         # TODO: Refactor to make this consistent with how we handle actions elsewhere!
-        self.toolbox: QToolBox = ToolBox()
         self.toolbox.prj_btn.clicked.connect(self.update_table_act.with_projects)
         self.toolbox.create_prj_btn.clicked.connect(
             lambda: CreatePrj(self, self.conn_str)
@@ -101,27 +95,25 @@ class MainWindow(QMainWindow):
         self.toolbox.users_btn.clicked.connect(self.update_table_act.with_users)
 
         # Create layout
-        layout: QGridLayout = QGridLayout()
-        splitter: QSplitter = QSplitter(Qt.Horizontal)
+        layout = QGridLayout()
+        splitter = QSplitter(Qt.Orientation.Horizontal)
         splitter.addWidget(self.toolbox)
         splitter.addWidget(table_widget)
         splitter.addWidget(self.metadata_panel)
         splitter.setSizes([216, 432, 216])  # 1:4 ratio
         layout.addWidget(splitter, 0, 0)
-        widget: QWidget = QWidget()
+        widget = QWidget()
         widget.setLayout(layout)
         self.setCentralWidget(widget)
 
-    def _create_tool_bar(self) -> None:
+    def _create_tool_bar(self: MainWindow) -> None:
         """Create the application toolbar.
 
         This method should only be called during initialization (__init__).
         """
-        toolbar: QToolBar = QToolBar("Main Toolbar")
+        toolbar = QToolBar("Main Toolbar")
         toolbar.setIconSize(QSize(16, 16))
         self.addToolBar(toolbar)
-
-        # Add actions to the toolbar
         toolbar.addAction(self.update_table_act)
         toolbar.addAction(self.add_act)
         toolbar.addAction(self.download_act)
@@ -131,14 +123,13 @@ class MainWindow(QMainWindow):
         toolbar.addSeparator()
         toolbar.addAction(self.about_act)
 
-    def _create_window(self):
+    def _create_window(self: MainWindow) -> None:
         """Create the application menu bar.
 
         This method should only be called during initialization (__init__).
         """
         # Due to macOS guidelines, the menu bar will not appear in the GUI
         self.menuBar().setNativeMenuBar(True)
-
         # Create the File menu
         file_menu = self.menuBar().addMenu("File")
         file_menu.addAction(self.settings_act)
@@ -151,32 +142,31 @@ class MainWindow(QMainWindow):
         file_menu.addAction(self.validate_act)
         file_menu.addSeparator()
         file_menu.addAction(self.quit_act)
-
         # Create the View menu
         view_menu = self.menuBar().addMenu("View")
         appearance_submenu = view_menu.addMenu("Appearance")
         appearance_submenu.addAction(self.full_screen_act)
-
         # Create the Help menu
         help_menu = self.menuBar().addMenu("Help")
         help_menu.addAction(self.doc_act)
         help_menu.addAction(self.about_act)
 
-    def __init__(self) -> None:
+    def __init__(self: MainWindow) -> None:
+        """Initialize the main window."""
         super().__init__()
 
         # Create empty variables for use later.
-        self.db_view: DatabaseView | None = None
-        self.conn_str: str | None = None
-        self.table_model: TableModel | None = None
-        self.proxy_model: QSortFilterProxyModel | None = None
-        self.current_table_query: tuple = (
+        self.db_view = None
+        self.conn_str = ""
+        self.table_model = None
+        self.proxy_model = None
+        self.current_table_query = (
             None,
             None,
             None,
         )  # (cols, table, filter)
-        self.toolbox: ToolBox | None = None
-        self.current_metadata: tuple | None = None
+        self.toolbox = ToolBox()
+        self.current_metadata = None
 
         # Define empty widgets for use later
         self.settings_dlg: QWidget
@@ -205,36 +195,33 @@ class MainWindow(QMainWindow):
 
         self.update_table_act.trigger()
 
-    def get_value_from_row(self, column: int) -> int:
-        """Get the primary key of the selected row in the table view.
+    def get_value_from_row(self: MainWindow, column: int) -> Any:  # noqa: ANN401
+        """Get the value of a column in the selected row in the table view."""
+        row = self.selected_row()
+        return row[column]
 
-        :param column: the column number of the value.
-        """
-        # Rows can be sorted, so the Nth table item may not be the Nth item in data
-        # Hence, we have to translate the visible index to the source index
-        proxy_index: QModelIndex = self.table_view.currentIndex()
-        source_index: QModelIndex = self.proxy_model.mapToSource(proxy_index)
-
-        # We care about the row, so get the row from the current index
-        row_index: int = source_index.row()
-        row: tuple[Any] = self.table_model.get_row_data(row_index)
-        row_value = row[column]
-
-        return row_value
-
-    def current_table(self) -> str:
+    def current_table(self: MainWindow) -> str | None:
         """Get the current table displayed."""
         return self.current_table_query[1]
 
-    def selected_row(self) -> tuple[Any, ...]:
+    def selected_row(self: MainWindow) -> tuple[Any, ...]:
         """Get the selected row in the table view."""
-        # Rows can be sorted, so the Nth table item may not be the Nth item in data
-        # Hence, we have to translate the visible index to the source index
-        proxy_index: QModelIndex = self.table_view.currentIndex()
-        source_index: QModelIndex = self.proxy_model.mapToSource(proxy_index)
-
-        # We care about the row, so get the row from the current index
-        row_index: int = source_index.row()
-        row: tuple[Any] = self.table_model.get_row_data(row_index)
-
-        return row
+        try:
+            # Rows can be sorted, so the Nth table item may not be the Nth data item.
+            # Hence, we have to translate the visible index to the source index!
+            # TODO: Find a way to handle PySide6 behaviour without mypy complaining.
+            proxy_index = self.table_view.currentIndex()
+            src_index = self.proxy_model.mapToSource(  # type: ignore[attr-defined]
+                proxy_index
+            )
+            row_index = src_index.row()
+            row = self.table_model.get_row_data(row_index)  # type: ignore[attr-defined]
+        except AttributeError as exc:
+            msg = "No row selected. Please select a row and try again."
+            raise ValueError(msg) from exc
+        else:
+            if isinstance(row, tuple):
+                return row
+            # This shouldn't happen, but it is theoretically possible.
+            msg = "Non-tuple returned without raising AttributeError. Please report!"
+            raise RuntimeError(msg)

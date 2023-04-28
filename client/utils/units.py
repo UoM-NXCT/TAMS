@@ -1,4 +1,6 @@
-"""This software has to handle a lot of different units. When stored in the library and
+"""Unit conversion functions.
+
+This software has to handle a lot of different units. When stored in the library and
 database, we will use a set of standard units for each measurement.
 
 The base units are selected for what makes the most sense for CT data.
@@ -50,7 +52,8 @@ def to_base_unit(given_value: int | float, given_unit: str) -> tuple[int | float
         given_prefix_exponent = 0
         si_unit = given_unit
     else:
-        raise ValueError("No unit given")
+        msg = "No unit given"
+        raise ValueError(msg)
 
     # Get the target prefix for the SI unit
     target_prefix: str = base_units[si_unit]

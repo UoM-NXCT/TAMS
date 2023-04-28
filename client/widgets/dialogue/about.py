@@ -1,5 +1,8 @@
 """About dialogue for the application."""
-from datetime import date
+from __future__ import annotations
+
+from datetime import UTC, datetime
+from typing import Any
 
 from PySide6.QtWidgets import QDialog, QMessageBox
 
@@ -9,7 +12,7 @@ from client import __version__
 class About(QDialog):
     """About dialogue."""
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self: About, *args: tuple[Any], **kwargs: dict[str, Any]) -> None:
         """Initialize the dialogue."""
         super().__init__(*args, **kwargs)
 
@@ -22,11 +25,12 @@ class About(QDialog):
     def get_msg() -> str:
         """Get the message to display in the dialogue."""
         # Copyright information
-        current_year: int = date.today().year
-        if current_year > 2022:
-            year: str = f"2022 &ndash; {current_year}"
+        current_year = datetime.now(tz=UTC).year
+        foundation_year = 2022
+        if current_year > foundation_year:
+            year: str = f"{foundation_year} &ndash; {current_year}"
         else:
-            year = "2022"
+            year = f"{foundation_year}"
 
         # Licence information
         licence_href: str = "https://github.com/UoM-NXCT/TAMS/blob/main/LICENCE"

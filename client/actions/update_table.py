@@ -15,29 +15,32 @@ if typing.TYPE_CHECKING:
 
 
 class UpdateTable(QAction):
-    def _on_selection_change(self):
+    """Update the table in the main window."""
+
+    def _on_selection_change(self: UpdateTable) -> None:
         """Update the metadata when a new row is selected.
 
         This method is called when the selection in the table changes.
         """
         # Get the primary key from the first column (assume first column is the pk)
-        key: int = self.parent().selected_row()[0]
+        key = self.parent().selected_row()[0]
 
         # Each item has a different metadata format; use the current table to method
-        metadata: tuple[tuple[any], list[str]]
-        if self.parent().current_table() == "project":
+        table = self.parent().current_table()
+        if table == "project":
             metadata = self.parent().db_view.get_project_metadata(key)
-        elif self.parent().current_table() == "scan":
+        elif table == "scan":
             metadata = self.parent().db_view.get_scan_metadata(key)
-        elif self.parent().current_table() == '"user"':
+        elif table == '"user"':
             metadata = self.parent().db_view.get_user_metadata(key)
         else:
-            raise NotImplementedError(f"Unknown table {self.parent().current_table()}")
+            msg = f"Cannot get metadata for table {table}."
+            raise NotImplementedError(msg)
 
         # Update the metadata panel with the new metadata
         self.parent().metadata_panel.update_metadata(metadata)
 
-    def _update_table(self) -> None:
+    def _update_table(self: UpdateTable) -> None:
         """Update table model using SQL command.
 
         This method is called when the action is triggered.
@@ -108,7 +111,7 @@ class UpdateTable(QAction):
         # Update metadata panel
         self.parent().metadata_panel.update_metadata()
 
-    def __init__(self, main_window: MainWindow) -> None:
+    def __init__(self: UpdateTable, main_window: MainWindow) -> None:
         """Update table action."""
         icon = main_window.style().standardIcon(QStyle.StandardPixmap.SP_BrowserReload)
         super().__init__(icon, "Reload table", main_window)
@@ -116,7 +119,7 @@ class UpdateTable(QAction):
         self.setToolTip("Reload the table currently being displayed.")
         self.triggered.connect(self._update_table)  # Runs on self.trigger()
 
-    def with_users(self) -> None:
+    def with_users(self: UpdateTable) -> None:
         """Update the table widget to display users."""
         self.parent().current_table_query = (
             "user_id, first_name, last_name, email_address",
@@ -125,7 +128,7 @@ class UpdateTable(QAction):
         )
         self.trigger()
 
-    def with_scans(self) -> None:
+    def with_scans(self: UpdateTable) -> None:
         """Update the table widget to display scans."""
         self.parent().current_table_query = (
             "scan_id, project_id, instrument_id",
@@ -134,7 +137,7 @@ class UpdateTable(QAction):
         )
         self.trigger()
 
-    def with_projects(self) -> None:
+    def with_projects(self: UpdateTable) -> None:
         """Update table to display projects."""
         self.parent().current_table_query = (
             "project_id, title, start_date, end_date",

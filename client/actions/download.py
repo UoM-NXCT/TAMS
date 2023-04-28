@@ -11,19 +11,19 @@ from client.runners import SaveScans
 from client.widgets.dialogue import DownloadScans, handle_common_exc
 
 if typing.TYPE_CHECKING:
-    from PySide6.QtGui import QIcon
-
     from client.widgets.main_window import MainWindow
 
 
 class DownloadData(QAction):
+    """Download action."""
+
     @handle_common_exc
-    def _download(self) -> None:
+    def _download(self: DownloadData) -> None:
         """Download action returns a dialogue with a save scans runner.
 
         This method is called when the action is triggered.
         """
-        table: str = self.parent().current_table()
+        table = self.parent().current_table()
 
         match table:
             case "scan":
@@ -31,26 +31,18 @@ class DownloadData(QAction):
                 prj_id: int = self.parent().get_value_from_row(1)
                 runner: SaveScans = SaveScans(prj_id, scan_id, download=True)
                 DownloadScans(runner, parent_widget=self.parent())
-                return
             case "project":
                 prj_id = self.parent().get_value_from_row(0)
                 runner = SaveScans(prj_id, download=True)
                 DownloadScans(runner, parent_widget=self.parent())
-                return
             case _:
-                # Fallback case for when no valid table is selected
-                QMessageBox.critical(
-                    self.parent(),
-                    "Not implemented error",
-                    f"Cannot download data from table {table}",
-                )
-                raise NotImplementedError("Table must be 'scan' or 'project'.")
+                msg = f"Cannot download data from table {table}."
+                QMessageBox.critical(self.parent(), "Not implemented error", msg)
+                raise NotImplementedError(msg)
 
-    def __init__(self, main_window: MainWindow) -> None:
+    def __init__(self: DownloadData, main_window: MainWindow) -> None:
         """Download data from the server."""
-        icon: QIcon = main_window.style().standardIcon(
-            QStyle.StandardPixmap.SP_ArrowDown
-        )
+        icon = main_window.style().standardIcon(QStyle.StandardPixmap.SP_ArrowDown)
         super().__init__(icon, "Download data", main_window)
         self.setShortcut("Ctrl+D")
         self.setToolTip("Download selected data from the server.")

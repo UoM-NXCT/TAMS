@@ -15,36 +15,31 @@ if typing.TYPE_CHECKING:
 
 
 class UploadData(QAction):
+    """Upload action."""
+
     @handle_common_exc
-    def _upload(self) -> None:
+    def _upload(self: UploadData) -> None:
         """Download action returns a dialogue with a save scans runner.
 
         This method is called when the action is triggered.
         """
-        table: str = self.parent().current_table()
-
+        table = self.parent().current_table()
         match table:
             case "scan":
-                scan_id: int = self.parent().get_value_from_row(0)
-                prj_id: int = self.parent().get_value_from_row(1)
-                runner: SaveScans = SaveScans(prj_id, scan_id, download=False)
+                scan_id = self.parent().get_value_from_row(0)
+                prj_id = self.parent().get_value_from_row(1)
+                runner = SaveScans(prj_id, scan_id, download=False)
                 UploadScans(runner, parent_widget=self.parent())
-                return
             case "project":
                 prj_id = self.parent().get_value_from_row(0)
                 runner = SaveScans(prj_id, download=False)
                 UploadScans(runner, parent_widget=self.parent())
-                return
             case _:
-                # Fallback case for when no valid table is selected
-                QMessageBox.critical(
-                    self.parent(),
-                    "Not implemented error",
-                    f"Cannot upload data from table {table}",
-                )
-                raise NotImplementedError("Table must be 'scan' or 'project'.")
+                msg = f"Cannot upload data from table {table}."
+                QMessageBox.critical(self.parent(), "Not implemented error", msg)
+                raise NotImplementedError(msg)
 
-    def __init__(self, main_window: MainWindow) -> None:
+    def __init__(self: UploadData, main_window: MainWindow) -> None:
         """Upload data to the server."""
         icon = main_window.style().standardIcon(QStyle.StandardPixmap.SP_ArrowUp)
         super().__init__(icon, "Upload data", main_window)

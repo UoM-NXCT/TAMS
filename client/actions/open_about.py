@@ -1,3 +1,4 @@
+"""Open about dialogue action."""
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -12,7 +13,9 @@ if TYPE_CHECKING:
 
 
 class OpenAbout(QAction):
-    def __init__(self, main_window: MainWindow) -> None:
+    """Open about dialogue action."""
+
+    def __init__(self: OpenAbout, main_window: MainWindow) -> None:
         """Open about action."""
         icon = main_window.style().standardIcon(
             QStyle.StandardPixmap.SP_MessageBoxInformation

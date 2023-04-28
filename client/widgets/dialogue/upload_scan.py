@@ -29,7 +29,7 @@ class UploadScans(QDialog):
     """Progress dialogue."""
 
     def __init__(
-        self,
+        self: UploadScans,
         runner: SaveScans,
         hide: bool = False,
         parent_widget: QWidget | None = None,
@@ -69,7 +69,7 @@ class UploadScans(QDialog):
         self.setLayout(layout)
 
         # Thread runner
-        self.threadpool: QThreadPool = QThreadPool()
+        self.threadpool = QThreadPool()
 
         # Create a runner
         self.runner: SaveScans = runner
@@ -90,12 +90,12 @@ class UploadScans(QDialog):
         if not hide:
             self.show()
 
-    def update_progress(self, value_increment: int) -> None:
+    def update_progress(self: UploadScans, value_increment: int) -> None:
         """Update the progress bar."""
-        value: int = self.progress.value()
+        value = self.progress.value()
         self.progress.setValue(value + value_increment)
 
-    def job_done(self) -> None:
+    def job_done(self: UploadScans) -> None:
         """Show a message box when the job is done."""
         # Show a message box
         QMessageBox.information(
@@ -106,7 +106,7 @@ class UploadScans(QDialog):
 
         self.close()
 
-    def closeEvent(self, arg__1: QCloseEvent) -> None:
+    def closeEvent(self: UploadScans, arg__1: QCloseEvent) -> None:
         """Kill runner when the dialogue is closed.
 
         Overloads QDialog.closeEvent method.

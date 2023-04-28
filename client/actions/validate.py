@@ -15,36 +15,31 @@ if typing.TYPE_CHECKING:
 
 
 class ValidateData(QAction):
+    """Validate action."""
+
     @handle_common_exc
-    def _validate(self) -> None:
+    def _validate(self: Validate) -> None:
         """Validate action creates a dialogue with a validation runner.
 
         This method is called when the action is triggered.
         """
-        table: str = self.parent().current_table()
-
+        table = self.parent().current_table()
         match table:
             case "scan":
-                scan_id: int = self.parent().get_value_from_row(0)
-                prj_id: int = self.parent().get_value_from_row(1)
-                runner: ValidateScans = ValidateScans(prj_id, scan_id)
+                scan_id = self.parent().get_value_from_row(0)
+                prj_id = self.parent().get_value_from_row(1)
+                runner = ValidateScans(prj_id, scan_id)
                 Validate(runner, parent_widget=self.parent())
-                return
             case "project":
                 prj_id = self.parent().get_value_from_row(0)
                 runner = ValidateScans(prj_id)
                 Validate(runner, parent_widget=self.parent())
-                return
             case _:
-                # Fallback case for when no valid table is selected
-                QMessageBox.critical(
-                    self.parent(),
-                    "Not implemented error",
-                    f"Cannot download data from table {table}",
-                )
-                raise NotImplementedError("Table must be 'scan' or 'project'.")
+                msg = f"Cannot download data from table {table}."
+                QMessageBox.critical(self.parent(), "Not implemented error", msg)
+                raise NotImplementedError(msg)
 
-    def __init__(self, main_window: MainWindow) -> None:
+    def __init__(self: Validate, main_window: MainWindow) -> None:
         """Create a new validate action."""
         icon = main_window.style().standardIcon(
             QStyle.StandardPixmap.SP_FileDialogContentsView
