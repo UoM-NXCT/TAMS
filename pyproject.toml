@@ -31,7 +31,7 @@ ssort = "*"
 pyinstaller = "^5.9.0"
 pyupgrade = "^3.3.0"
 flake8 = "^6.0.0"
-flake8-type-checking = "^2.3.0"
+flake8-type-checking = "^2.4.1"
 
 [tool.poetry.group.docs.dependencies]
 sphinx = "^6.1.3"
